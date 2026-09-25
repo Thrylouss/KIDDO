@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -11,9 +13,6 @@ class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
 
-    /**
-     * Roles available in the system.
-     */
     const ROLE_ADMIN   = 'admin';
     const ROLE_TEACHER = 'teacher';
     const ROLE_PARENT  = 'parent';
@@ -24,7 +23,7 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
-        'kindergarten_id',
+        'organization_id',
         'is_active',
     ];
 
@@ -41,6 +40,25 @@ class User extends Authenticatable
             'is_active'         => 'boolean',
         ];
     }
+
+    // ── Relationships ──────────────────────────────────────────────
+
+    public function organization(): BelongsTo
+    {
+        return $this->belongsTo(Organization::class);
+    }
+
+    public function teacherProfile(): HasOne
+    {
+        return $this->hasOne(TeacherProfile::class);
+    }
+
+    public function parentProfile(): HasOne
+    {
+        return $this->hasOne(ParentProfile::class);
+    }
+
+    // ── Helpers ────────────────────────────────────────────────────
 
     public function isAdmin(): bool
     {

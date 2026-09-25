@@ -20,7 +20,7 @@ class UserFactory extends Factory
             'email_verified_at' => now(),
             'password'          => Hash::make('password'),
             'role'              => User::ROLE_PARENT,
-            'kindergarten_id'   => null,
+            'organization_id'   => null,
             'is_active'         => true,
             'remember_token'    => Str::random(10),
         ];
