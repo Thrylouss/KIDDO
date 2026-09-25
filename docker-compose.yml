@@ -1,22 +1,4 @@
 services:
-  # ─── PostgreSQL ───────────────────────────────────────────────
-  postgres:
-    image: postgres:16-alpine
-    restart: unless-stopped
-    environment:
-      POSTGRES_DB: ${DB_DATABASE:-kiddo}
-      POSTGRES_USER: ${DB_USERNAME:-kiddo}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-secret}
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-kiddo}"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
   # ─── PHP-FPM (Laravel API) ────────────────────────────────────
   php:
     build:
@@ -28,9 +10,8 @@ services:
       - ./docker/php/opcache.ini:/usr/local/etc/php/conf.d/opcache.ini
     environment:
       - APP_ENV=${APP_ENV:-local}
-    depends_on:
-      postgres:
-        condition: service_healthy
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
   # ─── Nginx ────────────────────────────────────────────────────
   nginx:
@@ -44,35 +25,17 @@ services:
     depends_on:
       - php
 
-  # ─── Next.js Frontend ─────────────────────────────────────────
+  # ─── Next.js Frontend (dev) ───────────────────────────────────
   frontend:
     image: node:22-alpine
     restart: unless-stopped
     working_dir: /app
     volumes:
       - ./frontend:/app
+      - /app/node_modules
     ports:
       - "3000:3000"
     command: sh -c "npm install && npm run dev"
     environment:
       - NODE_ENV=development
       - NEXT_PUBLIC_API_URL=http://localhost:8000/api
-    depends_on:
-      - nginx
-
-  # ─── pgAdmin (dev only) ───────────────────────────────────────
-  pgadmin:
-    image: dpage/pgadmin4:latest
-    restart: unless-stopped
-    environment:
-      PGADMIN_DEFAULT_EMAIL: admin@kiddo.uz
-      PGADMIN_DEFAULT_PASSWORD: admin
-    ports:
-      - "5050:80"
-    depends_on:
-      - postgres
-    profiles:
-      - tools
-
-volumes:
-  postgres_data:

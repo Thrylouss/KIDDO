@@ -10,14 +10,39 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        // Super admin for initial setup
+        // Test uchun admin foydalanuvchi
         User::firstOrCreate(
-            ['email' => 'admin@kiddo.uz'],
+            ['phone' => '+998901234567'],
             [
-                'name'     => 'Super Admin',
-                'password' => Hash::make('password'),
-                'role'     => User::ROLE_ADMIN,
-                'is_active' => true,
+                'name'       => 'Admin Foydalanuvchi',
+                'email'      => 'admin@kiddo.uz',
+                'password'   => Hash::make('password123'),
+                'role'       => User::ROLE_ADMIN,
+                'is_active'  => true,
+            ]
+        );
+
+        // Test uchun tarbiyachi
+        User::firstOrCreate(
+            ['phone' => '+998901234568'],
+            [
+                'name'       => 'Test Tarbiyachi',
+                'email'      => 'teacher@kiddo.uz',
+                'password'   => Hash::make('password123'),
+                'role'       => User::ROLE_TEACHER,
+                'is_active'  => true,
+            ]
+        );
+
+        // Test uchun ota-ona
+        User::firstOrCreate(
+            ['phone' => '+998901234569'],
+            [
+                'name'       => 'Test Ota-ona',
+                'email'      => 'parent@kiddo.uz',
+                'password'   => Hash::make('password123'),
+                'role'       => User::ROLE_PARENT,
+                'is_active'  => true,
             ]
         );
     }
