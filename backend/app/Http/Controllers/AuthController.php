@@ -28,6 +28,8 @@ class AuthController extends Controller
             ]);
         }
 
+        $user->update(['last_login_at' => now()]);
+
         // Revoke previous tokens on new login (one session per user for MVP)
         $user->tokens()->delete();
 
@@ -61,13 +63,13 @@ class AuthController extends Controller
     private function userResource(User $user): array
     {
         return [
-            'id'               => $user->id,
-            'name'             => $user->name,
-            'phone'            => $user->phone,
-            'email'            => $user->email,
-            'role'             => $user->role,
-            'kindergarten_id'  => $user->kindergarten_id,
-            'is_active'        => $user->is_active,
+            'id'              => $user->id,
+            'name'            => $user->name,
+            'phone'           => $user->phone,
+            'email'           => $user->email,
+            'role'            => $user->role,
+            'organization_id' => $user->organization_id,
+            'is_active'       => $user->is_active,
         ];
     }
 }

@@ -1,21 +1,46 @@
+import { getToken } from "./auth";
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/api";
 
 type RequestOptions = Omit<RequestInit, "body"> & {
   body?: unknown;
 };
 
-async function request<T>(
-  path: string,
-  options: RequestOptions = {}
-): Promise<T> {
+function getImpersonatedOrg(): string | null {
+  if (typeof window === "undefined") return null;
+  return sessionStorage.getItem("impersonated_org_id");
+}
+
+export const impersonation = {
+  start(orgId: number, orgName: string) {
+    sessionStorage.setItem("impersonated_org_id", String(orgId));
+    sessionStorage.setItem("impersonated_org_name", orgName);
+  },
+  end() {
+    sessionStorage.removeItem("impersonated_org_id");
+    sessionStorage.removeItem("impersonated_org_name");
+  },
+  active(): boolean {
+    return typeof window !== "undefined" && !!sessionStorage.getItem("impersonated_org_id");
+  },
+  orgName(): string {
+    return (typeof window !== "undefined" && sessionStorage.getItem("impersonated_org_name")) || "";
+  },
+};
+
+async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
   const { body, headers, ...rest } = options;
+
+  const token = getToken();
+  const orgId = getImpersonatedOrg();
 
   const res = await fetch(`${API_URL}${path}`, {
     ...rest,
-    credentials: "include",
     headers: {
       "Content-Type": "application/json",
       Accept: "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...(orgId ? { "X-Impersonated-Org": orgId } : {}),
       ...headers,
     },
     body: body !== undefined ? JSON.stringify(body) : undefined,

@@ -39,3 +39,9 @@ backend/.phpunit.cache
 
 # OS
 .DS_Store
+
+# Claude Code local settings
+.claude/
+
+# Laravel runtime storage
+backend/storage/*

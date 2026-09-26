@@ -88,6 +88,71 @@ class AuthTest extends TestCase
                  ->assertJsonValidationErrors(['phone']);
     }
 
+    public function test_super_admin_can_login_with_correct_credentials(): void
+    {
+        User::factory()->create([
+            'phone'     => '+998901234567',
+            'password'  => Hash::make('superadmin123'),
+            'role'      => User::ROLE_SUPER_ADMIN,
+            'is_active' => true,
+        ]);
+
+        $response = $this->postJson('/api/v1/login', [
+            'phone'    => '+998901234567',
+            'password' => 'superadmin123',
+        ]);
+
+        $response->assertOk()
+                 ->assertJsonStructure(['token', 'user'])
+                 ->assertJsonPath('user.phone', '+998901234567')
+                 ->assertJsonPath('user.role', 'super_admin');
+    }
+
+    public function test_super_admin_login_fails_with_wrong_password(): void
+    {
+        User::factory()->create([
+            'phone'     => '+998901234567',
+            'password'  => Hash::make('superadmin123'),
+            'role'      => User::ROLE_SUPER_ADMIN,
+            'is_active' => true,
+        ]);
+
+        $response = $this->postJson('/api/v1/login', [
+            'phone'    => '+998901234567',
+            'password' => 'wrongpassword',
+        ]);
+
+        $response->assertStatus(422)
+                 ->assertJsonValidationErrors(['phone']);
+    }
+
+    public function test_super_admin_token_contains_role_ability(): void
+    {
+        $sa = User::factory()->create([
+            'phone'     => '+998901234567',
+            'password'  => Hash::make('superadmin123'),
+            'role'      => User::ROLE_SUPER_ADMIN,
+            'is_active' => true,
+        ]);
+
+        $response = $this->postJson('/api/v1/login', [
+            'phone'    => '+998901234567',
+            'password' => 'superadmin123',
+        ]);
+
+        $response->assertOk();
+
+        // Token returned — can access super-admin route
+        $token = $response->json('token');
+        $this->assertNotEmpty($token);
+
+        // Verify /me works with the returned token
+        $this->withToken($token)
+             ->getJson('/api/v1/me')
+             ->assertOk()
+             ->assertJsonPath('user.role', 'super_admin');
+    }
+
     // ──────────────────────────────────────────────────────────────
     // Me (joriy foydalanuvchi)
     // ──────────────────────────────────────────────────────────────

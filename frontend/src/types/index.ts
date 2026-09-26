@@ -1,4 +1,83 @@
-export type Role = "admin" | "teacher" | "parent";
+export type Role = "super_admin" | "admin" | "teacher" | "parent";
+
+export interface Plan {
+  id: number;
+  name: string;
+  slug: string;
+  description: string | null;
+  price_monthly: string;       // was "price: string" before
+  price_yearly: string | null;
+  currency: string;
+  trial_days: number;
+  max_children: number | null;
+  max_teachers: number | null;
+  max_groups: number | null;
+  features: string[];
+  is_active: boolean;
+  sort_order: number;
+  subscriptions_count?: number;
+}
+
+export interface Subscription {
+  id: number;
+  status: "active" | "trial" | "past_due" | "expired" | "cancelled";  // past_due replaces pending_payment
+  ends_at: string | null;        // was expires_at
+  trial_ends_at: string | null;  // NEW
+  days_remaining: number;
+  plan: { id: number; name: string; price_monthly?: string } | null;
+}
+
+export interface FullSubscription extends Subscription {
+  organization_id: number;
+  organization: { id: number; name: string } | null;
+  plan_id: number;
+  starts_at: string | null;
+  auto_renew: boolean;
+  cancelled_at: string | null;
+  cancelled_reason: string | null;
+  is_expiring_soon: boolean;
+  created_at: string;
+}
+
+export interface OrganizationSummary {
+  id: number;
+  name: string;
+  phone: string | null;
+  address: string | null;
+  is_active: boolean;
+  created_at: string;
+  admin: { id: number; name: string; phone: string | null } | null;
+  subscription: Subscription | null;
+}
+
+export interface OrganizationDetail extends OrganizationSummary {
+  admins: Pick<User, "id" | "name" | "phone" | "email" | "is_active">[];
+  groups_count: number;
+  children_count: number;
+  teacher_profiles_count: number;
+  parent_profiles_count: number;
+}
+
+export interface PlatformSummary {
+  jami_bogchalar: number;
+  faol_bogchalar: number;
+  muddati_yaqin: number;
+  tolov_kutilmoqda: number;
+  oxirgi_bogchalar: OrganizationSummary[];
+  obuna_holati: {
+    active: number;
+    trial: number;
+    past_due: number;     // was pending_payment
+    expired: number;
+    cancelled: number;
+  };
+  billing?: {
+    mrr: number;
+    arr: number;
+    monthly_revenue: number;
+    pending_revenue: number;
+  };
+}
 
 export interface User {
   id: number;
@@ -6,18 +85,177 @@ export interface User {
   phone: string | null;
   email: string | null;
   role: Role;
-  kindergarten_id: number | null;
+  organization_id: number | null;
   is_active: boolean;
   created_at: string;
 }
 
-export interface Kindergarten {
+export interface Organization {
   id: number;
   name: string;
   address: string | null;
   phone: string | null;
   is_active: boolean;
   created_at: string;
+}
+
+export interface Group {
+  id: number;
+  organization_id: number;
+  name: string;
+  age_category: string | null;
+  capacity: number | null;
+  is_active: boolean;
+  children_count?: number;
+  teacher_profiles_count?: number;
+}
+
+export interface Child {
+  id: number;
+  organization_id: number;
+  group_id: number | null;
+  first_name: string;
+  last_name: string;
+  birth_date: string;
+  gender: "erkak" | "ayol";
+  is_active: boolean;
+  group?: Pick<Group, "id" | "name"> | null;
+}
+
+export interface TeacherProfile {
+  id: number;
+  user_id: number;
+  organization_id: number;
+  first_name: string;
+  last_name: string;
+  phone: string;
+  position: string;
+  is_active: boolean;
+  groups?: Pick<Group, "id" | "name">[];
+}
+
+export interface ParentProfile {
+  id: number;
+  user_id: number | null;
+  organization_id: number;
+  first_name: string;
+  last_name: string;
+  phone: string;
+  children?: Pick<Child, "id" | "first_name" | "last_name">[];
+}
+
+export interface DashboardSummary {
+  bolalar_soni: number;
+  guruhlar_soni: number;
+  tarbiyachilar_soni: number;
+  ota_onalar_soni: number;
+}
+
+export interface OrgPayment {
+  id: number;
+  amount: string;
+  currency: string;
+  status: "pending" | "paid" | "failed" | "refunded";
+  payment_method: string | null;  // was provider
+  invoice_number: string | null;  // NEW
+  transaction_id: string | null;
+  paid_at: string | null;
+  notes: string | null;
+  created_at: string;
+  plan_name: string | null;
+}
+
+export interface OrgActivity {
+  id: number;
+  action: string;
+  description: string;
+  created_at: string;
+  user: { id: number; name: string } | null;
+}
+
+export interface Invoice {                     // NEW
+  id: number;
+  organization_id: number;
+  subscription_id: number | null;
+  invoice_number: string;
+  amount: string;
+  currency: string;
+  status: "draft" | "pending" | "paid" | "overdue" | "cancelled";
+  due_at: string | null;
+  paid_at: string | null;
+  created_at: string;
+}
+
+export interface UserSummary {
+  id: number;
+  name: string;
+  phone: string | null;
+  email: string | null;
+  role: Role;
+  is_active: boolean;
+  last_login_at: string | null;
+  created_at: string;
+  organization: { id: number; name: string; phone?: string | null } | null;
+}
+
+export interface UserDetail extends UserSummary {
+  recent_activity: {
+    id: number;
+    action: string;
+    description: string;
+    ip_address: string | null;
+    created_at: string;
+  }[];
+}
+
+export interface SubscriptionMetrics {
+  active: number;
+  trial: number;
+  past_due: number;
+  expired: number;
+  cancelled: number;
+  mrr: number;
+}
+
+export interface SubscriptionDetail extends FullSubscription {
+  organization_detail: { id: number; name: string; phone: string | null; address: string | null } | null;
+  plan_detail: {
+    id: number;
+    name: string;
+    description: string | null;
+    price_monthly: string;
+    price_yearly: string | null;
+    currency: string;
+    trial_days: number;
+    max_children: number | null;
+    max_teachers: number | null;
+    max_groups: number | null;
+    features: string[];
+  } | null;
+  payment_summary: {
+    total_paid: number;
+    total_pending: number;
+    latest_payment_at: string | null;
+  };
+  recent_invoices: {
+    id: number;
+    invoice_number: string;
+    amount: string;
+    currency: string;
+    status: string;
+    due_at: string | null;
+    paid_at: string | null;
+    created_at: string;
+  }[];
+  recent_payments: {
+    id: number;
+    amount: string;
+    currency: string;
+    status: string;
+    payment_method: string | null;
+    paid_at: string | null;
+    created_at: string;
+  }[];
 }
 
 export interface ApiResponse<T> {
@@ -33,4 +271,124 @@ export interface PaginatedResponse<T> {
     per_page: number;
     total: number;
   };
+}
+
+export interface PaymentSummary {
+  total_revenue: number;
+  monthly_revenue: number;
+  pending_revenue: number;
+  failed_count: number;
+}
+
+export interface PaymentSummaryFull {
+  gross_revenue: number;
+  net_revenue: number;
+  total_revenue: number;
+  refunded_amount: number;
+  today_revenue: number;
+  monthly_revenue: number;
+  pending_revenue: number;
+  paid_count: number;
+  pending_count: number;
+  failed_count: number;
+  refunded_count: number;
+  total_count: number;
+}
+
+export interface PaymentRecord {
+  id: number;
+  organization: { id: number; name: string } | null;
+  subscription_id: number | null;
+  invoice_id: number | null;
+  invoice_number: string | null;
+  amount: string;
+  currency: string;
+  status: "paid" | "pending" | "failed" | "refunded";
+  payment_method: string | null;
+  transaction_id: string | null;
+  paid_at: string | null;
+  due_at: string | null;
+  plan_name: string | null;
+  notes: string | null;
+  created_at: string;
+}
+
+export interface PaymentDetailRecord extends PaymentRecord {
+  organization: { id: number; name: string; phone: string | null } | null;
+  subscription: {
+    id: number;
+    status: string;
+    ends_at: string | null;
+    plan: { id: number; name: string; price_monthly: string; currency: string } | null;
+  } | null;
+  invoice: {
+    id: number;
+    invoice_number: string;
+    status: string;
+    due_at: string | null;
+    paid_at: string | null;
+  } | null;
+}
+
+export interface InvoiceRecord {
+  id: number;
+  invoice_number: string;
+  organization: { id: number; name: string } | null;
+  subscription_id: number | null;
+  amount: string;
+  currency: string;
+  status: "draft" | "pending" | "paid" | "overdue" | "cancelled";
+  due_at: string | null;
+  paid_at: string | null;
+  notes: string | null;
+  created_at: string;
+}
+
+export interface InvoiceDetailRecord extends InvoiceRecord {
+  subscription: {
+    id: number;
+    status: string;
+    ends_at: string | null;
+    plan_id: number;
+  } | null;
+  payments: {
+    id: number;
+    amount: string;
+    currency: string;
+    status: string;
+    payment_method: string | null;
+    paid_at: string | null;
+    created_at: string;
+  }[];
+}
+
+export interface InvoiceSummary {
+  total: number;
+  draft: number;
+  pending: number;
+  paid: number;
+  overdue: number;
+  cancelled: number;
+  total_pending_amount: number;
+  total_paid_amount: number;
+  total_overdue_amount: number;
+}
+
+export interface Notification {
+  id: number;
+  title: string;
+  message: string;
+  type: "info" | "warning" | "alert" | "payment";
+  is_read: boolean;
+  created_at: string;
+}
+
+export interface ActivityLogEntry {
+  id: number;
+  action: string;
+  description: string;
+  ip_address: string | null;
+  created_at: string;
+  user: { id: number; name: string } | null;
+  organization: { id: number; name: string } | null;
 }
