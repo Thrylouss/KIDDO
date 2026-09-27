@@ -13,6 +13,7 @@ use App\Http\Controllers\SuperAdmin\NotificationController;
 use App\Http\Controllers\SuperAdmin\OrganizationController as SuperOrgController;
 use App\Http\Controllers\SuperAdmin\PaymentController;
 use App\Http\Controllers\SuperAdmin\PlanController;
+use App\Http\Controllers\SuperAdmin\ReportController;
 use App\Http\Controllers\SuperAdmin\SubscriptionController;
 use App\Http\Controllers\SuperAdmin\UserController as SuperUserController;
 use Illuminate\Support\Facades\Route;
@@ -121,6 +122,15 @@ Route::prefix('v1')->group(function () {
 
             // Revenue chart
             Route::get('/dashboard/revenue',                 [SuperDashboard::class, 'revenue']);
+
+            // Reports
+            Route::prefix('reports')->group(function () {
+                Route::get('/overview',      [ReportController::class, 'overview']);
+                Route::get('/revenue',       [ReportController::class, 'revenue']);
+                Route::get('/subscriptions', [ReportController::class, 'subscriptions']);
+                Route::get('/organizations', [ReportController::class, 'organizations']);
+                Route::get('/users',         [ReportController::class, 'users']);
+            });
         });
 
         // ── Teacher ────────────────────────────────────────────────

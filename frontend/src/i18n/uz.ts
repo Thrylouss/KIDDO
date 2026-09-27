@@ -398,6 +398,67 @@ const uz = {
     invoice_overdue_soni:     "Muddati o'tgan",
     invoice_bekor_sababi:     "Bekor qilish sababi",
     invoice_jami:             "Jami invoicelar",
+
+    // Reports
+    hisobotlar:               "Hisobotlar",
+    hisobotlar_tavsif:        "Platforma bo'yicha tahliliy ma'lumotlar",
+    umumiy:                   "Umumiy",
+    daromad_hisoboti:         "Daromad",
+    obuna_hisoboti:           "Obunalar",
+    tashkilot_hisoboti:       "Tashkilotlar",
+    foydalanuvchi_hisoboti:   "Foydalanuvchilar",
+
+    // Overview report
+    nofaol_bogchalar:         "Nofaol bog'chalar",
+    yangi_bogchalar:          "Yangi bog'chalar",
+    yangi_obunalar:           "Yangi obunalar",
+    gross_tushum_hisobot:     "Yalpi tushum (jami)",
+    net_tushum_hisobot:       "Sof tushum",
+    qaytarilgan_tushum:       "Qaytarilgan",
+    davr_tushum:              "Davr tushumlari",
+    davr_kutilmoqda:          "Davr kutilmoqda",
+    ort_tushum_bogcha:        "O'rtacha tushum/bog'cha",
+    jami_invoice:             "Jami invoicelar",
+    tolangan_invoice:         "To'langan invoicelar",
+    kutilayotgan_invoice:     "Kutilayotgan invoicelar",
+    tolangan_summa_inv:       "To'langan summa (invoice)",
+    kutilayotgan_summa_inv:   "Kutilayotgan summa (invoice)",
+
+    // Subscription report
+    bekor_davr:               "Bekor qilingan (davrda)",
+    tugagan_davr:             "Tugagan (davrda)",
+    yaqin_tugaydi:            "30 kun ichida tugaydi",
+    tarif_taqsimoti:          "Tarif taqsimoti",
+    holat_taqsimoti:          "Holat taqsimoti",
+    yillik_tushum:            "Yillik takrorlanuvchi (ARR)",
+
+    // Revenue report
+    daromad_dinamikasi:       "Daromad dinamikasi",
+    tolov_soni:               "To'lov soni",
+    tarif_boyicha:            "Tarif bo'yicha daromad",
+    tolov_usuli_taqsimot:     "To'lov usuli taqsimoti",
+    hech_daromad_yoq:         "Bu davrda daromad yo'q",
+
+    // Org report
+    nofaol_tashkilotlar:      "Nofaol tashkilotlar",
+    tollanmagan_invoice_bor:  "To'lanmagan invoice bor",
+    tugagan_obuna_bor:        "Tugagan obunasi bor",
+    tashkilot_osishi:         "Tashkilotlar o'sishi (12 oy)",
+    hech_tashkilot_yoq:       "Tashkilot topilmadi",
+
+    // User report
+    nofaol_foydalanuvchilar:  "Nofaol foydalanuvchilar",
+    yangi_foydalanuvchilar:   "Yangi foydalanuvchilar",
+    rol_boyicha:              "Rol bo'yicha taqsimot",
+    tashkilot_boyicha:        "Tashkilot bo'yicha (top 10)",
+    hech_foydalanuvchi_yoq:   "Foydalanuvchi topilmadi",
+
+    // Filters
+    davr_tanlash:             "Davr tanlash",
+    shu_yil:                  "Shu yil",
+    boshlanish_sanasi_f:      "Boshlanish",
+    tugash_sanasi_f:          "Tugash",
+    filtrlash_btn:            "Filtrlash",
   },
 
   foydalanuvchilar: {

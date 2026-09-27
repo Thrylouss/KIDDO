@@ -383,6 +383,117 @@ export interface Notification {
   created_at: string;
 }
 
+// ── Report types ───────────────────────────────────────────────────
+
+export interface ReportPeriod {
+  from: string;
+  to: string;
+}
+
+export interface ReportOverview {
+  period: ReportPeriod;
+  organizations: {
+    total: number;
+    active: number;
+    inactive: number;
+    new: number;
+  };
+  subscriptions: {
+    active: number;
+    trial: number;
+    past_due: number;
+    expired: number;
+    cancelled: number;
+    new: number;
+    mrr: number;
+    arr: number;
+  };
+  revenue: {
+    total_paid: number;
+    total_pending: number;
+    total_refunded: number;
+    gross_revenue: number;
+    period_paid: number;
+    period_pending: number;
+    avg_revenue_per_org: number;
+  };
+  invoices: {
+    total: number;
+    draft: number;
+    pending: number;
+    paid: number;
+    overdue: number;
+    cancelled: number;
+    paid_amount: number;
+    pending_amount: number;
+  };
+}
+
+export interface RevenueSeriesItem {
+  period: string;
+  label: string;
+  total: number;
+  count: number;
+}
+
+export interface ReportRevenue {
+  period: ReportPeriod;
+  group_by: "day" | "month";
+  series: RevenueSeriesItem[];
+  total: number;
+  by_plan: { plan_name: string; total: number }[];
+  by_method: { method: string; count: number; total: number }[];
+}
+
+export interface ReportSubscriptions {
+  period: ReportPeriod;
+  status_distribution: {
+    active: number;
+    trial: number;
+    past_due: number;
+    expired: number;
+    cancelled: number;
+  };
+  plan_distribution: { plan_id: number; plan_name: string; count: number }[];
+  new_in_period: number;
+  cancelled_in_period: number;
+  expired_in_period: number;
+  expiring_soon: number;
+  mrr: number;
+  arr: number;
+}
+
+export interface ReportOrganizations {
+  period: ReportPeriod;
+  counts: {
+    total: number;
+    active: number;
+    inactive: number;
+    new_in_period: number;
+    with_unpaid_invoices: number;
+    with_expired_subs: number;
+  };
+  plan_distribution: { plan_id: number; plan_name: string; count: number }[];
+  growth_series: { period: string; label: string; count: number }[];
+}
+
+export interface ReportUsers {
+  period: ReportPeriod;
+  counts: {
+    total: number;
+    active: number;
+    inactive: number;
+    new_in_period: number;
+  };
+  by_role: {
+    super_admin: number;
+    admin: number;
+    teacher: number;
+    parent: number;
+  };
+  by_organization: { organization_id: number; organization_name: string; count: number }[];
+}
+
 export interface ActivityLogEntry {
   id: number;
   action: string;
