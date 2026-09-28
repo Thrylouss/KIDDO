@@ -36,9 +36,18 @@ class AuthController extends Controller
         $token = $user->createToken('kiddo-app', [$user->role])->plainTextToken;
 
         return response()->json([
-            'token' => $token,
-            'user'  => $this->userResource($user),
-        ]);
+            'user' => $this->userResource($user),
+        ])->cookie(
+            'kiddo_token',
+            $token,
+            60 * 24 * 7,                              // 7 days in minutes
+            '/',
+            null,
+            config('app.env') === 'production',        // Secure flag only in production
+            true,                                       // httpOnly
+            false,                                      // raw
+            'Strict'                                    // SameSite
+        );
     }
 
     public function logout(Request $request): JsonResponse
@@ -50,7 +59,8 @@ class AuthController extends Controller
             $token->delete();
         }
 
-        return response()->json(['message' => 'Tizimdan muvaffaqiyatli chiqdingiz.']);
+        return response()->json(['message' => 'Tizimdan muvaffaqiyatli chiqdingiz.'])
+            ->withoutCookie('kiddo_token');
     }
 
     public function me(Request $request): JsonResponse

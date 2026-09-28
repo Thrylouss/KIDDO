@@ -4,12 +4,20 @@ namespace Tests\Feature;
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
 
 class AuthTest extends TestCase
 {
     use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        // Flush cache so rate limiter buckets don't bleed between tests
+        Cache::flush();
+    }
 
     // ──────────────────────────────────────────────────────────────
     // Login
@@ -30,9 +38,12 @@ class AuthTest extends TestCase
         ]);
 
         $response->assertOk()
-                 ->assertJsonStructure(['token', 'user'])
+                 ->assertJsonStructure(['user'])
+                 ->assertCookie('kiddo_token')
                  ->assertJsonPath('user.phone', '+998901111111')
                  ->assertJsonPath('user.role', 'admin');
+
+        $this->assertArrayNotHasKey('token', $response->json());
     }
 
     public function test_noto_gri_parol_bilan_kirish_rad_etiladi(): void
@@ -103,7 +114,8 @@ class AuthTest extends TestCase
         ]);
 
         $response->assertOk()
-                 ->assertJsonStructure(['token', 'user'])
+                 ->assertJsonStructure(['user'])
+                 ->assertCookie('kiddo_token')
                  ->assertJsonPath('user.phone', '+998901234567')
                  ->assertJsonPath('user.role', 'super_admin');
     }
@@ -135,18 +147,20 @@ class AuthTest extends TestCase
             'is_active' => true,
         ]);
 
-        $response = $this->postJson('/api/v1/login', [
+        $loginResponse = $this->postJson('/api/v1/login', [
             'phone'    => '+998901234567',
             'password' => 'superadmin123',
         ]);
 
-        $response->assertOk();
+        $loginResponse->assertOk()->assertCookie('kiddo_token');
 
-        // Token returned — can access super-admin route
-        $token = $response->json('token');
+        // Token is delivered via cookie — extract raw value to verify route access
+        $tokenCookie = $loginResponse->getCookie('kiddo_token', false);
+        $this->assertNotNull($tokenCookie);
+        $token = $tokenCookie->getValue();
         $this->assertNotEmpty($token);
 
-        // Verify /me works with the returned token
+        // Verify /me works with the token
         $this->withToken($token)
              ->getJson('/api/v1/me')
              ->assertOk()
@@ -186,7 +200,8 @@ class AuthTest extends TestCase
         $response = $this->actingAs($user, 'sanctum')->postJson('/api/v1/logout');
 
         $response->assertOk()
-                 ->assertJsonFragment(['message' => 'Tizimdan muvaffaqiyatli chiqdingiz.']);
+                 ->assertJsonFragment(['message' => 'Tizimdan muvaffaqiyatli chiqdingiz.'])
+                 ->assertCookieExpired('kiddo_token');
     }
 
     // ──────────────────────────────────────────────────────────────
@@ -237,5 +252,37 @@ class AuthTest extends TestCase
 
         $response->assertOk();
         $this->assertArrayNotHasKey('password', $response->json('user'));
+    }
+
+    // ──────────────────────────────────────────────────────────────
+    // Rate limiting
+    // ──────────────────────────────────────────────────────────────
+
+    public function test_login_throttle_blocks_after_five_attempts(): void
+    {
+        for ($i = 0; $i < 5; $i++) {
+            $this->postJson('/api/v1/login', [
+                'phone'    => '+998909999991',
+                'password' => 'wrongpassword',
+            ]);
+        }
+
+        $response = $this->postJson('/api/v1/login', [
+            'phone'    => '+998909999991',
+            'password' => 'wrongpassword',
+        ]);
+
+        $response->assertStatus(429);
+    }
+
+    public function test_login_throttle_allows_five_attempts(): void
+    {
+        for ($i = 0; $i < 5; $i++) {
+            $response = $this->postJson('/api/v1/login', [
+                'phone'    => '+998909999992',
+                'password' => 'wrongpassword',
+            ]);
+            $response->assertStatus(422);
+        }
     }
 }

@@ -2,7 +2,6 @@
 
 import React, { createContext, useCallback, useContext, useEffect, useState } from "react";
 import { api } from "@/lib/api";
-import { clearToken, getToken, setToken } from "@/lib/auth";
 import type { User } from "@/types";
 
 interface AuthState {
@@ -19,15 +18,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   const fetchMe = useCallback(async () => {
-    if (!getToken()) {
-      setLoading(false);
-      return;
-    }
     try {
       const res = await api.get<{ user: User }>("/v1/me");
       setUser(res.user);
     } catch {
-      clearToken();
       setUser(null);
     } finally {
       setLoading(false);
@@ -39,8 +33,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [fetchMe]);
 
   const login = useCallback(async (phone: string, password: string): Promise<User> => {
-    const res = await api.post<{ token: string; user: User }>("/v1/login", { phone, password });
-    setToken(res.token);
+    const res = await api.post<{ user: User }>("/v1/login", { phone, password });
     setUser(res.user);
     return res.user;
   }, []);
@@ -49,7 +42,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       await api.post("/v1/logout");
     } finally {
-      clearToken();
       setUser(null);
     }
   }, []);

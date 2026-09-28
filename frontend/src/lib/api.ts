@@ -1,5 +1,3 @@
-import { getToken } from "./auth";
-
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/api";
 
 type RequestOptions = Omit<RequestInit, "body"> & {
@@ -31,15 +29,14 @@ export const impersonation = {
 async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
   const { body, headers, ...rest } = options;
 
-  const token = getToken();
   const orgId = getImpersonatedOrg();
 
   const res = await fetch(`${API_URL}${path}`, {
     ...rest,
+    credentials: "include",
     headers: {
       "Content-Type": "application/json",
       Accept: "application/json",
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...(orgId ? { "X-Impersonated-Org": orgId } : {}),
       ...headers,
     },

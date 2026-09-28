@@ -1,14 +1,5 @@
-const TOKEN_KEY = "kiddo_token";
-
-export function getToken(): string | null {
-  if (typeof window === "undefined") return null;
-  return localStorage.getItem(TOKEN_KEY);
-}
-
-export function setToken(token: string): void {
-  localStorage.setItem(TOKEN_KEY, token);
-}
-
-export function clearToken(): void {
-  localStorage.removeItem(TOKEN_KEY);
-}
+// Authentication token is managed as an httpOnly cookie set by the backend.
+// These stubs exist so imports compile; they perform no storage operations.
+export function getToken(): string | null { return null; }
+export function setToken(_token: string): void {}
+export function clearToken(): void {}
