@@ -494,6 +494,67 @@ export interface ReportUsers {
   by_organization: { organization_id: number; organization_name: string; count: number }[];
 }
 
+export interface DashboardSummaryEnhanced {
+  period: ReportPeriod;
+  jami_bogchalar: number;
+  faol_bogchalar: number;
+  nofaol_bogchalar: number;
+  yangi_bogchalar: number;
+  muddati_yaqin: number;
+  tolov_kutilmoqda: number;
+  jami_foydalanuvchilar: number;
+  oxirgi_bogchalar: {
+    id: number;
+    name: string;
+    phone: string | null;
+    is_active: boolean;
+    created_at: string;
+    subscription: { status: string; ends_at: string | null; plan: string | null } | null;
+  }[];
+  obuna_holati: {
+    active: number;
+    trial: number;
+    past_due: number;
+    expired: number;
+    cancelled: number;
+  };
+  billing: {
+    mrr: number;
+    arr: number;
+    monthly_revenue: number;
+    pending_revenue: number;
+    period_paid: number;
+    prev_period_paid: number;
+    total_paid: number;
+    total_refunded: number;
+  };
+}
+
+export interface DashboardRecent {
+  payments: {
+    id: number;
+    organization: { id: number; name: string } | null;
+    amount: string;
+    currency: string;
+    status: string;
+    payment_method: string | null;
+    paid_at: string | null;
+    created_at: string;
+  }[];
+  invoices: {
+    id: number;
+    invoice_number: string;
+    organization: { id: number; name: string } | null;
+    amount: string;
+    currency: string;
+    status: string;
+    due_at: string | null;
+    paid_at: string | null;
+    created_at: string;
+  }[];
+  activity: ActivityLogEntry[];
+}
+
 export interface ActivityLogEntry {
   id: number;
   action: string;

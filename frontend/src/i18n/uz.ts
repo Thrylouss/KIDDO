@@ -453,6 +453,28 @@ const uz = {
     tashkilot_boyicha:        "Tashkilot bo'yicha (top 10)",
     hech_foydalanuvchi_yoq:   "Foydalanuvchi topilmadi",
 
+    // Dashboard enhanced
+    jami_foydalanuvchilar_kpi: "Jami foydalanuvchilar",
+    yangi_bogchalar_davr:     "Yangi bog'chalar (davrda)",
+    davr_tushum_kpi:          "Davr tushumi",
+    oldingi_davr:             "oldingi davr",
+    osish:                    "o'sish",
+    kamayish:                 "kamayish",
+    oxirgi_tolovlar:          "So'nggi to'lovlar",
+    oxirgi_invoicelar:        "So'nggi hisob-fakturalar",
+    oxirgi_faoliyat_logi:     "So'nggi faoliyat",
+    tez_amallar:              "Tezkor harakatlar",
+    barchasini_korish:        "Barchasini ko'rish",
+    tashkilotlar_bolimi:      "Tashkilotlar",
+    moliya_bolimi:            "Moliya",
+    bogcha_qoshish_btn:       "Bog'cha qo'shish",
+    bogchalarni_boshqarish:   "Bog'chalarni boshqarish",
+    obunalarni_boshqarish:    "Obunalarni boshqarish",
+    tolovlarni_boshqarish:    "To'lovlarni boshqarish",
+    invoicelarni_boshqarish:  "Hisob-fakturalarni boshqarish",
+    foydalanuvchilarni_boshqarish: "Foydalanuvchilarni boshqarish",
+    hisobotlarni_korish:      "Hisobotlarni ko'rish",
+
     // Filters
     davr_tanlash:             "Davr tanlash",
     shu_yil:                  "Shu yil",

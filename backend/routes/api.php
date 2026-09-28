@@ -120,7 +120,8 @@ Route::prefix('v1')->group(function () {
             Route::patch('/users/{id}/deactivate',           [SuperUserController::class, 'deactivate']);
             Route::post('/users/{id}/reset-password',        [SuperUserController::class, 'resetPassword']);
 
-            // Revenue chart
+            // Dashboard extra endpoints (must come before wildcard)
+            Route::get('/dashboard/recent',                  [SuperDashboard::class, 'recent']);
             Route::get('/dashboard/revenue',                 [SuperDashboard::class, 'revenue']);
 
             // Reports
