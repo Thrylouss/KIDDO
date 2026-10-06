@@ -217,6 +217,10 @@ class OrganizationController extends SuperAdminController
         $org = Organization::findOrFail($id);
         $org->update(['is_active' => false]);
 
+        // Revoke all active Sanctum tokens for every user in this org so that
+        // deactivation takes effect immediately — no stale sessions survive.
+        $org->users()->each(fn (User $user) => $user->tokens()->delete());
+
         ActivityLog::record(
             'organization.deactivated',
             "Bog'cha faolsizlantirildi: {$org->name}",
@@ -268,7 +272,7 @@ class OrganizationController extends SuperAdminController
         Organization::findOrFail($id);
 
         $data = $request->validate([
-            'password' => 'required|string|min:6',
+            'password' => 'required|string|min:8',
         ]);
 
         $admin = User::where('organization_id', $id)
@@ -277,6 +281,10 @@ class OrganizationController extends SuperAdminController
             ->firstOrFail();
 
         $admin->update(['password' => Hash::make($data['password'])]);
+
+        // Revoke tokens so any stolen session is terminated immediately — the
+        // whole point of an emergency password reset is to kick out an attacker.
+        $admin->tokens()->delete();
 
         ActivityLog::record(
             'admin.password_reset',

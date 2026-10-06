@@ -65,6 +65,44 @@ class Organization extends Model
         return $this->hasMany(User::class);
     }
 
+    // ── Plan limit enforcement ─────────────────────────────────────
+
+    /**
+     * Returns true when the org has an active/trial subscription whose plan
+     * caps the given resource and the current count meets or exceeds that cap.
+     *
+     * Expired, cancelled, or past_due subscriptions are intentionally skipped —
+     * billing lapses should not lock out users during the MVP grace period.
+     *
+     * $limitField must be one of: 'max_children', 'max_teachers', 'max_groups'
+     */
+    public function hasReachedPlanLimit(string $limitField): bool
+    {
+        $sub = $this->subscriptions()
+            ->whereIn('status', [Subscription::STATUS_ACTIVE, Subscription::STATUS_TRIAL])
+            ->with('plan')
+            ->latest()
+            ->first();
+
+        if (! $sub || ! $sub->plan) {
+            return false;
+        }
+
+        $limit = $sub->plan->$limitField ?? null;
+        if ($limit === null) {
+            return false;
+        }
+
+        $count = match ($limitField) {
+            'max_children' => $this->children()->count(),
+            'max_teachers' => $this->teacherProfiles()->count(),
+            'max_groups'   => $this->groups()->count(),
+            default        => 0,
+        };
+
+        return $count >= $limit;
+    }
+
     // ── Scopes ─────────────────────────────────────────────────────
 
     public function scopeActive($query)

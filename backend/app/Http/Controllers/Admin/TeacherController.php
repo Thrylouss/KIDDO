@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Models\Organization;
 use App\Models\TeacherProfile;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
@@ -30,9 +31,15 @@ class TeacherController extends AdminController
             'first_name' => ['required', 'string', 'max:100'],
             'last_name'  => ['required', 'string', 'max:100'],
             'phone'      => ['required', 'string', 'max:20', 'unique:users,phone'],
-            'password'   => ['required', 'string', 'min:6'],
+            'password'   => ['required', 'string', 'min:8'],
             'position'   => ['nullable', 'string', 'max:100'],
         ]);
+
+        if (Organization::findOrFail($orgId)->hasReachedPlanLimit('max_teachers')) {
+            return response()->json([
+                'message' => "Reja limiti: tarbiyachilar soni chegarasiga yetildi.",
+            ], 422);
+        }
 
         $teacher = DB::transaction(function () use ($data, $orgId) {
             $user = User::create([

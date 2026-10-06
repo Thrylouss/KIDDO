@@ -608,4 +608,95 @@ class BillingTest extends TestCase
             ->getJson('/api/v1/super-admin/payments')
             ->assertForbidden();
     }
+
+    // ── H2. Trial billing correctness ─────────────────────────────
+
+    public function test_trial_subscription_creates_no_invoice(): void
+    {
+        $org  = $this->makeOrg();
+        $plan = $this->makePlan(['price_monthly' => 299000]);
+
+        $service = app(SubscriptionService::class);
+        $sub     = $service->createSubscription($org, $plan, [
+            'status' => Subscription::STATUS_TRIAL,
+        ]);
+
+        $this->assertEquals(Subscription::STATUS_TRIAL, $sub->status);
+        $this->assertDatabaseMissing('invoices', ['organization_id' => $org->id]);
+    }
+
+    public function test_trial_subscription_creates_no_payment(): void
+    {
+        $org  = $this->makeOrg();
+        $plan = $this->makePlan(['price_monthly' => 299000]);
+
+        $service = app(SubscriptionService::class);
+        $service->createSubscription($org, $plan, [
+            'status' => Subscription::STATUS_TRIAL,
+        ]);
+
+        $this->assertDatabaseMissing('payments', ['organization_id' => $org->id]);
+    }
+
+    public function test_active_subscription_still_creates_invoice(): void
+    {
+        $org  = $this->makeOrg();
+        $plan = $this->makePlan(['price_monthly' => 599000]);
+
+        $service = app(SubscriptionService::class);
+        $sub     = $service->createSubscription($org, $plan, [
+            'status'         => Subscription::STATUS_ACTIVE,
+            'ends_at'        => now()->addDays(30)->toDateString(),
+            'payment_status' => 'pending',
+        ]);
+
+        $this->assertDatabaseHas('invoices', [
+            'organization_id' => $org->id,
+            'subscription_id' => $sub->id,
+            'amount'          => 599000,
+            'status'          => 'pending',
+        ]);
+        $this->assertDatabaseMissing('payments', ['subscription_id' => $sub->id]);
+    }
+
+    public function test_active_subscription_with_paid_status_creates_invoice_and_payment(): void
+    {
+        $org  = $this->makeOrg();
+        $plan = $this->makePlan(['price_monthly' => 599000]);
+
+        $service = app(SubscriptionService::class);
+        $sub     = $service->createSubscription($org, $plan, [
+            'status'         => Subscription::STATUS_ACTIVE,
+            'ends_at'        => now()->addDays(30)->toDateString(),
+            'payment_status' => 'paid',
+        ]);
+
+        $this->assertDatabaseHas('invoices', [
+            'organization_id' => $org->id,
+            'subscription_id' => $sub->id,
+            'amount'          => 599000,
+            'status'          => 'paid',
+        ]);
+        $this->assertDatabaseHas('payments', [
+            'organization_id' => $org->id,
+            'subscription_id' => $sub->id,
+            'amount'          => 599000,
+            'status'          => 'paid',
+        ]);
+    }
+
+    public function test_default_subscription_via_service_is_trial_with_no_invoice(): void
+    {
+        $org  = $this->makeOrg();
+        $plan = $this->makePlan(['price_monthly' => 399000]);
+
+        // Default status when no 'status' option is passed is STATUS_TRIAL
+        $service = app(SubscriptionService::class);
+        $sub     = $service->createSubscription($org, $plan);
+
+        $this->assertEquals(Subscription::STATUS_TRIAL, $sub->status);
+        $this->assertNotNull($sub->trial_ends_at);
+        $this->assertDatabaseMissing('invoices', ['organization_id' => $org->id]);
+        $this->assertDatabaseMissing('payments', ['organization_id' => $org->id]);
+    }
 }

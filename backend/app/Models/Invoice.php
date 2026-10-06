@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\DB;
 
 class Invoice extends Model
 {
@@ -36,9 +37,16 @@ class Invoice extends Model
         parent::boot();
         static::creating(function ($invoice) {
             if (empty($invoice->invoice_number)) {
-                $year  = now()->year;
-                $count = static::whereYear('created_at', $year)->count() + 1;
-                $invoice->invoice_number = sprintf('KIDDO-%d-%06d', $year, $count);
+                $year   = now()->year;
+                $result = DB::select(
+                    'INSERT INTO invoice_counters (year, last_number) VALUES (?, 1)
+                     ON CONFLICT (year) DO UPDATE
+                     SET last_number = invoice_counters.last_number + 1
+                     RETURNING last_number',
+                    [$year]
+                );
+                $seq = $result[0]->last_number;
+                $invoice->invoice_number = sprintf('KIDDO-%d-%06d', $year, $seq);
             }
         });
     }

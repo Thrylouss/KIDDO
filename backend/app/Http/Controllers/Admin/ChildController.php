@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Models\Child;
 use App\Models\Group;
+use App\Models\Organization;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -32,6 +33,12 @@ class ChildController extends AdminController
             'gender'     => ['required', Rule::in(['erkak', 'ayol'])],
             'group_id'   => ['nullable', 'integer'],
         ]);
+
+        if (Organization::findOrFail($orgId)->hasReachedPlanLimit('max_children')) {
+            return response()->json([
+                'message' => "Reja limiti: bolalar soni chegarasiga yetildi.",
+            ], 422);
+        }
 
         if (!empty($data['group_id'])) {
             $exists = Group::forOrganization($orgId)->where('id', $data['group_id'])->exists();

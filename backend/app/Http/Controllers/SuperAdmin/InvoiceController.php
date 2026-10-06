@@ -38,7 +38,7 @@ class InvoiceController extends SuperAdminController
             $query->whereDate('created_at', '<=', $dateTo);
         }
 
-        $paginated = $query->paginate((int) $request->query('per_page', 20));
+        $paginated = $query->paginate(min((int) $request->query('per_page', 20), 100));
 
         $response = [
             'data' => $paginated->map(fn($i) => $this->formatInvoice($i))->values(),

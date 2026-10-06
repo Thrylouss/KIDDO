@@ -58,30 +58,33 @@ class SubscriptionService
 
             $sub = Subscription::create($subData);
 
-            $paymentStatus = $options['payment_status'] ?? 'pending';
+            // Trial subscriptions are free — no invoice or payment record.
+            if ($status !== Subscription::STATUS_TRIAL) {
+                $paymentStatus = $options['payment_status'] ?? 'pending';
 
-            $invoice = Invoice::create([
-                'organization_id' => $org->id,
-                'subscription_id' => $sub->id,
-                'amount'          => $plan->price_monthly,
-                'currency'        => $plan->currency ?? 'UZS',
-                'status'          => $paymentStatus === 'paid' ? 'paid' : 'pending',
-                'notes'           => $options['notes'] ?? null,
-                'paid_at'         => $paymentStatus === 'paid' ? now() : null,
-            ]);
-
-            if ($paymentStatus === 'paid') {
-                Payment::create([
+                $invoice = Invoice::create([
                     'organization_id' => $org->id,
                     'subscription_id' => $sub->id,
-                    'invoice_id'      => $invoice->id,
                     'amount'          => $plan->price_monthly,
                     'currency'        => $plan->currency ?? 'UZS',
-                    'status'          => 'paid',
-                    'payment_method'  => 'manual',
-                    'paid_at'         => now(),
+                    'status'          => $paymentStatus === 'paid' ? 'paid' : 'pending',
                     'notes'           => $options['notes'] ?? null,
+                    'paid_at'         => $paymentStatus === 'paid' ? now() : null,
                 ]);
+
+                if ($paymentStatus === 'paid') {
+                    Payment::create([
+                        'organization_id' => $org->id,
+                        'subscription_id' => $sub->id,
+                        'invoice_id'      => $invoice->id,
+                        'amount'          => $plan->price_monthly,
+                        'currency'        => $plan->currency ?? 'UZS',
+                        'status'          => 'paid',
+                        'payment_method'  => 'manual',
+                        'paid_at'         => now(),
+                        'notes'           => $options['notes'] ?? null,
+                    ]);
+                }
             }
 
             ActivityLog::record(

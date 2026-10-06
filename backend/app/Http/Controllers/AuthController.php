@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ActivityLog;
+use App\Models\Organization;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -28,7 +30,29 @@ class AuthController extends Controller
             ]);
         }
 
+        // Reject login for users belonging to a deactivated organization.
+        // Generic error prevents org-status enumeration by attackers.
+        if ($user->organization_id !== null) {
+            $orgActive = Organization::where('id', $user->organization_id)
+                                     ->where('is_active', true)
+                                     ->exists();
+            if (! $orgActive) {
+                throw ValidationException::withMessages([
+                    'phone' => ['Telefon raqami yoki parol noto\'g\'ri.'],
+                ]);
+            }
+        }
+
         $user->update(['last_login_at' => now()]);
+
+        ActivityLog::record(
+            'user.login',
+            "Foydalanuvchi tizimga kirdi: {$user->name}",
+            $user->id,
+            $user->organization_id,
+            ['role' => $user->role],
+            $request->ip()
+        );
 
         // Revoke previous tokens on new login (one session per user for MVP)
         $user->tokens()->delete();
@@ -52,12 +76,22 @@ class AuthController extends Controller
 
     public function logout(Request $request): JsonResponse
     {
-        $token = $request->user()->currentAccessToken();
+        $user  = $request->user();
+        $token = $user->currentAccessToken();
 
         // currentAccessToken() returns a transient object in tests (no DB token)
         if ($token && method_exists($token, 'delete')) {
             $token->delete();
         }
+
+        ActivityLog::record(
+            'user.logout',
+            "Foydalanuvchi tizimdan chiqdi: {$user->name}",
+            $user->id,
+            $user->organization_id,
+            [],
+            $request->ip()
+        );
 
         return response()->json(['message' => 'Tizimdan muvaffaqiyatli chiqdingiz.'])
             ->withoutCookie('kiddo_token');

@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\SuperAdmin;
 
+use App\Models\Invoice;
 use App\Models\Organization;
 use App\Models\Payment;
 use App\Models\User;
@@ -426,5 +427,212 @@ class PaymentManagementTest extends TestCase
             'action'          => 'payment.refunded',
             'organization_id' => $org->id,
         ]);
+    }
+
+    // ── H1: Refund ↔ Invoice consistency ───────────────────────────
+
+    public function test_refund_cancels_linked_paid_invoice(): void
+    {
+        $sa      = $this->superAdmin();
+        $org     = $this->makeOrg();
+        $invoice = Invoice::factory()->paid()->create(['organization_id' => $org->id, 'amount' => 499000]);
+        $payment = $this->makePayment([
+            'organization_id' => $org->id,
+            'invoice_id'      => $invoice->id,
+            'status'          => 'paid',
+            'amount'          => 499000,
+        ]);
+
+        $this->actingAs($sa, 'sanctum')
+            ->postJson("/api/v1/super-admin/payments/{$payment->id}/refund", [
+                'reason' => 'Test refund',
+            ])
+            ->assertOk()
+            ->assertJsonPath('data.status', 'refunded');
+
+        $this->assertDatabaseHas('payments', ['id' => $payment->id, 'status' => 'refunded']);
+        $this->assertDatabaseHas('invoices', ['id' => $invoice->id,  'status' => 'cancelled']);
+    }
+
+    public function test_refund_logs_invoice_cancelled_activity(): void
+    {
+        $sa      = $this->superAdmin();
+        $org     = $this->makeOrg();
+        $invoice = Invoice::factory()->paid()->create(['organization_id' => $org->id]);
+        $payment = $this->makePayment([
+            'organization_id' => $org->id,
+            'invoice_id'      => $invoice->id,
+            'status'          => 'paid',
+        ]);
+
+        $this->actingAs($sa, 'sanctum')
+            ->postJson("/api/v1/super-admin/payments/{$payment->id}/refund")
+            ->assertOk();
+
+        $this->assertDatabaseHas('activity_logs', [
+            'action'          => 'invoice.cancelled',
+            'organization_id' => $org->id,
+        ]);
+    }
+
+    public function test_refund_without_linked_invoice_succeeds(): void
+    {
+        $sa      = $this->superAdmin();
+        $org     = $this->makeOrg();
+        // invoice_id is null by default in factory
+        $payment = $this->makePayment(['organization_id' => $org->id, 'status' => 'paid']);
+
+        $this->actingAs($sa, 'sanctum')
+            ->postJson("/api/v1/super-admin/payments/{$payment->id}/refund")
+            ->assertOk()
+            ->assertJsonPath('data.status', 'refunded');
+
+        $this->assertDatabaseHas('payments', ['id' => $payment->id, 'status' => 'refunded']);
+    }
+
+    public function test_refund_with_pending_invoice_preserves_invoice_status(): void
+    {
+        $sa      = $this->superAdmin();
+        $org     = $this->makeOrg();
+        $invoice = Invoice::factory()->create(['organization_id' => $org->id, 'status' => 'pending']);
+        $payment = $this->makePayment([
+            'organization_id' => $org->id,
+            'invoice_id'      => $invoice->id,
+            'status'          => 'paid',
+        ]);
+
+        $this->actingAs($sa, 'sanctum')
+            ->postJson("/api/v1/super-admin/payments/{$payment->id}/refund")
+            ->assertOk();
+
+        // Invoice was never marked paid, so it stays pending
+        $this->assertDatabaseHas('invoices', ['id' => $invoice->id, 'status' => 'pending']);
+    }
+
+    public function test_invoice_summary_excludes_cancelled_invoice_after_refund(): void
+    {
+        $sa      = $this->superAdmin();
+        $org     = $this->makeOrg();
+        $invoice = Invoice::factory()->paid()->create(['organization_id' => $org->id, 'amount' => 499000]);
+        $payment = $this->makePayment([
+            'organization_id' => $org->id,
+            'invoice_id'      => $invoice->id,
+            'status'          => 'paid',
+            'amount'          => 499000,
+        ]);
+
+        // Before refund: invoice summary shows 1 paid invoice
+        $before = $this->actingAs($sa, 'sanctum')
+            ->getJson('/api/v1/super-admin/invoices?summary=true')
+            ->assertOk()
+            ->json('summary');
+
+        $this->assertEquals(1, $before['paid']);
+        $this->assertEquals(499000.0, $before['total_paid_amount']);
+        $this->assertEquals(0, $before['cancelled']);
+
+        // Refund the payment
+        $this->actingAs($sa, 'sanctum')
+            ->postJson("/api/v1/super-admin/payments/{$payment->id}/refund")
+            ->assertOk();
+
+        // After refund: invoice moved to cancelled, paid amount drops to 0
+        $after = $this->actingAs($sa, 'sanctum')
+            ->getJson('/api/v1/super-admin/invoices?summary=true')
+            ->assertOk()
+            ->json('summary');
+
+        $this->assertEquals(0, $after['paid']);
+        $this->assertEquals(0.0, $after['total_paid_amount']);
+        $this->assertEquals(1, $after['cancelled']);
+    }
+
+    public function test_payment_summary_net_revenue_excludes_refunded_after_refund(): void
+    {
+        $sa      = $this->superAdmin();
+        $org     = $this->makeOrg();
+        $invoice = Invoice::factory()->paid()->create(['organization_id' => $org->id, 'amount' => 499000]);
+        $payment = $this->makePayment([
+            'organization_id' => $org->id,
+            'invoice_id'      => $invoice->id,
+            'status'          => 'paid',
+            'amount'          => 499000,
+        ]);
+
+        $this->actingAs($sa, 'sanctum')
+            ->postJson("/api/v1/super-admin/payments/{$payment->id}/refund")
+            ->assertOk();
+
+        $summary = $this->actingAs($sa, 'sanctum')
+            ->getJson('/api/v1/super-admin/payments?summary=true')
+            ->assertOk()
+            ->json('summary');
+
+        $this->assertEquals(0.0, $summary['net_revenue']);
+        $this->assertEquals(499000.0, $summary['refunded_amount']);
+    }
+
+    public function test_repeated_refund_is_rejected_and_does_not_corrupt_invoice(): void
+    {
+        $sa      = $this->superAdmin();
+        $org     = $this->makeOrg();
+        $invoice = Invoice::factory()->paid()->create(['organization_id' => $org->id]);
+        $payment = $this->makePayment([
+            'organization_id' => $org->id,
+            'invoice_id'      => $invoice->id,
+            'status'          => 'paid',
+        ]);
+
+        // First refund succeeds
+        $this->actingAs($sa, 'sanctum')
+            ->postJson("/api/v1/super-admin/payments/{$payment->id}/refund")
+            ->assertOk();
+
+        $this->assertDatabaseHas('invoices', ['id' => $invoice->id, 'status' => 'cancelled']);
+
+        // Second refund is rejected (payment is now 'refunded', not 'paid')
+        $this->actingAs($sa, 'sanctum')
+            ->postJson("/api/v1/super-admin/payments/{$payment->id}/refund")
+            ->assertUnprocessable();
+
+        // Invoice still cancelled, not changed again
+        $this->assertDatabaseHas('invoices', ['id' => $invoice->id, 'status' => 'cancelled']);
+    }
+
+    public function test_unauthorized_refund_is_still_rejected(): void
+    {
+        $org     = $this->makeOrg();
+        $invoice = Invoice::factory()->paid()->create(['organization_id' => $org->id]);
+        $payment = $this->makePayment([
+            'organization_id' => $org->id,
+            'invoice_id'      => $invoice->id,
+            'status'          => 'paid',
+        ]);
+
+        $this->postJson("/api/v1/super-admin/payments/{$payment->id}/refund")
+             ->assertUnauthorized();
+
+        // Nothing changed
+        $this->assertDatabaseHas('payments', ['id' => $payment->id, 'status' => 'paid']);
+        $this->assertDatabaseHas('invoices', ['id' => $invoice->id,  'status' => 'paid']);
+    }
+
+    public function test_admin_cannot_refund_payment(): void
+    {
+        $org     = $this->makeOrg();
+        $admin   = User::factory()->create(['role' => User::ROLE_ADMIN, 'organization_id' => $org->id]);
+        $invoice = Invoice::factory()->paid()->create(['organization_id' => $org->id]);
+        $payment = $this->makePayment([
+            'organization_id' => $org->id,
+            'invoice_id'      => $invoice->id,
+            'status'          => 'paid',
+        ]);
+
+        $this->actingAs($admin, 'sanctum')
+            ->postJson("/api/v1/super-admin/payments/{$payment->id}/refund")
+            ->assertForbidden();
+
+        $this->assertDatabaseHas('payments', ['id' => $payment->id, 'status' => 'paid']);
+        $this->assertDatabaseHas('invoices', ['id' => $invoice->id,  'status' => 'paid']);
     }
 }

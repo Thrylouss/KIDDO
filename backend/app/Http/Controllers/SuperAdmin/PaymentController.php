@@ -7,6 +7,7 @@ use App\Models\Payment;
 use App\Models\Plan;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class PaymentController extends SuperAdminController
 {
@@ -55,7 +56,7 @@ class PaymentController extends SuperAdminController
             $query->whereDate('created_at', '<=', $dateTo);
         }
 
-        $paginated = $query->paginate((int) $request->query('per_page', 20));
+        $paginated = $query->paginate(min((int) $request->query('per_page', 20), 100));
 
         $response = [
             'data' => $paginated->map(fn($p) => $this->formatPayment($p))->values(),
@@ -128,7 +129,7 @@ class PaymentController extends SuperAdminController
 
     public function refund(Request $request, int $id): JsonResponse
     {
-        $payment = Payment::findOrFail($id);
+        $payment = Payment::with('invoice')->findOrFail($id);
 
         if ($payment->status !== 'paid') {
             return response()->json([
@@ -138,25 +139,55 @@ class PaymentController extends SuperAdminController
 
         $data = $request->validate(['reason' => 'nullable|string|max:500']);
 
-        $payment->update([
-            'status' => 'refunded',
-            'notes'  => $data['reason'] ?? $payment->notes,
-        ]);
+        $reason = $data['reason'] ?? null;
 
-        ActivityLog::record(
-            'payment.refunded',
-            "To'lov qaytarildi: #{$payment->id} org #{$payment->organization_id}",
-            $request->user()->id,
-            $payment->organization_id,
-            [
-                'payment_id' => $payment->id,
-                'amount'     => $payment->amount,
-                'reason'     => $data['reason'] ?? null,
-                'old_status' => 'paid',
-                'new_status' => 'refunded',
-            ],
-            $request->ip()
-        );
+        DB::transaction(function () use ($payment, $reason, $request) {
+            $payment->update([
+                'status' => 'refunded',
+                'notes'  => $reason ?? $payment->notes,
+            ]);
+
+            // Keep invoice consistent: a paid invoice whose only payment was
+            // just refunded must not remain in 'paid' status.
+            if ($payment->invoice && $payment->invoice->status === 'paid') {
+                $invoiceNote = $reason
+                    ? "Qaytarilgan to'lov: " . $reason
+                    : $payment->invoice->notes;
+
+                $payment->invoice->update([
+                    'status' => 'cancelled',
+                    'notes'  => $invoiceNote,
+                ]);
+
+                ActivityLog::record(
+                    'invoice.cancelled',
+                    "Invoice qaytarilgan to'lov tufayli bekor qilindi: {$payment->invoice->invoice_number}",
+                    $request->user()->id,
+                    $payment->organization_id,
+                    [
+                        'invoice_id' => $payment->invoice->id,
+                        'payment_id' => $payment->id,
+                        'reason'     => 'payment_refunded',
+                    ],
+                    $request->ip()
+                );
+            }
+
+            ActivityLog::record(
+                'payment.refunded',
+                "To'lov qaytarildi: #{$payment->id} org #{$payment->organization_id}",
+                $request->user()->id,
+                $payment->organization_id,
+                [
+                    'payment_id' => $payment->id,
+                    'amount'     => $payment->amount,
+                    'reason'     => $reason,
+                    'old_status' => 'paid',
+                    'new_status' => 'refunded',
+                ],
+                $request->ip()
+            );
+        });
 
         $payment->load(['organization:id,name', 'subscription.plan:id,name', 'invoice:id,invoice_number']);
 

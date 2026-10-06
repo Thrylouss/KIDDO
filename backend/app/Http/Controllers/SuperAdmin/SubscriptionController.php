@@ -80,7 +80,7 @@ class SubscriptionController extends SuperAdminController
             $query->latest();
         }
 
-        $paginated = $query->paginate((int) $request->query('per_page', 20));
+        $paginated = $query->paginate(min((int) $request->query('per_page', 20), 100));
 
         return response()->json([
             'data' => $paginated->map(fn($sub) => $this->formatSub($sub))->values(),

@@ -48,7 +48,7 @@ class UserController extends SuperAdminController
             default      => $query->latest(),
         };
 
-        $paginated = $query->paginate((int) $request->query('per_page', 20));
+        $paginated = $query->paginate(min((int) $request->query('per_page', 20), 100));
 
         return response()->json([
             'data' => $paginated->map(fn($u) => $this->formatUser($u))->values(),
@@ -154,7 +154,15 @@ class UserController extends SuperAdminController
             'is_active'       => 'sometimes|boolean',
         ]);
 
+        $wasActive = $user->is_active;
         $user->update($data);
+
+        // If is_active was explicitly set to false via the general update path,
+        // revoke tokens immediately — the same guarantee the dedicated deactivate
+        // endpoint provides.
+        if (isset($data['is_active']) && ! $data['is_active'] && $wasActive) {
+            $user->tokens()->delete();
+        }
 
         ActivityLog::record(
             'user.updated',
