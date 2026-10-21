@@ -42,7 +42,7 @@ export default function OtaOnalarPage() {
         description={uz.ota_onalar.sahifa_tavsif}
       />
 
-      <div className="bg-white rounded-xl border border-[#E5E7EB] overflow-hidden">
+      <div className="bg-white rounded-xl border border-[#EDE3E8] overflow-hidden">
         {loading ? (
           <SkeletonTable rows={5} />
         ) : error ? (
@@ -56,37 +56,37 @@ export default function OtaOnalarPage() {
         ) : (
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-[#E5E7EB] bg-[#F9FAFB]">
-                <th className="text-left px-5 py-3.5 text-xs font-semibold text-[#6B7280] uppercase tracking-wide">Ota-ona</th>
-                <th className="text-left px-5 py-3.5 text-xs font-semibold text-[#6B7280] uppercase tracking-wide hidden sm:table-cell">{uz.ota_onalar.telefon}</th>
-                <th className="text-left px-5 py-3.5 text-xs font-semibold text-[#6B7280] uppercase tracking-wide">{uz.ota_onalar.bola}</th>
+              <tr className="border-b border-[#EDE3E8] bg-[#FAF5F8]">
+                <th className="text-left px-5 py-3.5 text-xs font-semibold text-[#766B73] uppercase tracking-wide">Ota-ona</th>
+                <th className="text-left px-5 py-3.5 text-xs font-semibold text-[#766B73] uppercase tracking-wide hidden sm:table-cell">{uz.ota_onalar.telefon}</th>
+                <th className="text-left px-5 py-3.5 text-xs font-semibold text-[#766B73] uppercase tracking-wide">{uz.ota_onalar.bola}</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#F3F4F6]">
+            <tbody className="divide-y divide-[#F2ECF0]">
               {parents.map((p) => (
-                <tr key={p.id} className="hover:bg-[#F9FAFB] transition-colors duration-100">
+                <tr key={p.id} className="hover:bg-[#FAF5F8] transition-colors duration-100">
                   <td className="px-5 py-4">
                     <div className="flex items-center gap-3">
                       <Avatar name={`${p.first_name} ${p.last_name}`} size="sm" />
                       <div>
-                        <p className="font-medium text-[#111827]">{p.last_name} {p.first_name}</p>
-                        <p className="text-xs text-[#9CA3AF] sm:hidden">{p.phone}</p>
+                        <p className="font-medium text-[#29232A]">{p.last_name} {p.first_name}</p>
+                        <p className="text-xs text-[#B8AAB2] sm:hidden">{p.phone}</p>
                       </div>
                     </div>
                   </td>
-                  <td className="px-5 py-4 text-[#6B7280] hidden sm:table-cell">{p.phone}</td>
+                  <td className="px-5 py-4 text-[#766B73] hidden sm:table-cell">{p.phone}</td>
                   <td className="px-5 py-4">
                     {p.children && p.children.length > 0 ? (
                       <div className="flex flex-wrap gap-1.5">
                         {p.children.map((c) => (
-                          <span key={c.id} className="inline-flex items-center gap-1 text-xs bg-[#F3F4F6] text-[#374151] px-2 py-0.5 rounded-full">
-                            <span className="h-1.5 w-1.5 rounded-full bg-[#9CA3AF]" />
+                          <span key={c.id} className="inline-flex items-center gap-1 text-xs bg-[#F2ECF0] text-[#3D3240] px-2 py-0.5 rounded-full">
+                            <span className="h-1.5 w-1.5 rounded-full bg-[#B8AAB2]" />
                             {c.last_name} {c.first_name}
                           </span>
                         ))}
                       </div>
                     ) : (
-                      <span className="text-[#D1D5DB]">—</span>
+                      <span className="text-[#D9C9D1]">—</span>
                     )}
                   </td>
                 </tr>

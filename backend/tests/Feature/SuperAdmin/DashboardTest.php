@@ -557,4 +557,214 @@ class DashboardTest extends TestCase
 
         $this->assertEquals(2, $res['tolov_kutilmoqda']);
     }
+
+    // ══════════════════════════════════════════════════════════════
+    // Expiring endpoint
+    // ══════════════════════════════════════════════════════════════
+
+    public function test_guest_cannot_access_expiring(): void
+    {
+        $this->getJson('/api/v1/super-admin/dashboard/expiring')->assertUnauthorized();
+    }
+
+    public function test_admin_cannot_access_expiring(): void
+    {
+        $this->actingAs($this->admin(), 'sanctum')
+            ->getJson('/api/v1/super-admin/dashboard/expiring')
+            ->assertForbidden();
+    }
+
+    public function test_super_admin_can_access_expiring(): void
+    {
+        $this->actingAs($this->superAdmin(), 'sanctum')
+            ->getJson('/api/v1/super-admin/dashboard/expiring')
+            ->assertOk();
+    }
+
+    public function test_expiring_has_expected_structure(): void
+    {
+        $this->actingAs($this->superAdmin(), 'sanctum')
+            ->getJson('/api/v1/super-admin/dashboard/expiring')
+            ->assertOk()
+            ->assertJsonStructure(['subscriptions', 'total']);
+    }
+
+    public function test_expiring_returns_active_subs_within_30_days(): void
+    {
+        $sa   = $this->superAdmin();
+        $org  = $this->makeOrg();
+        $plan = $this->makePlan();
+
+        $this->makeSub($org, $plan, 'active', ['ends_at' => now()->addDays(7)]);
+
+        $org2 = $this->makeOrg();
+        $this->makeSub($org2, $plan, 'active', ['ends_at' => now()->addDays(45)]);
+
+        $res = $this->actingAs($sa, 'sanctum')
+            ->getJson('/api/v1/super-admin/dashboard/expiring')
+            ->assertOk()
+            ->json();
+
+        $this->assertEquals(1, $res['total']);
+        $this->assertCount(1, $res['subscriptions']);
+    }
+
+    public function test_expiring_includes_trial_subscriptions(): void
+    {
+        $sa   = $this->superAdmin();
+        $org  = $this->makeOrg();
+        $plan = $this->makePlan();
+
+        $this->makeSub($org, $plan, 'trial', [
+            'ends_at'       => now()->addDays(30),
+            'trial_ends_at' => now()->addDays(5),
+        ]);
+
+        $res = $this->actingAs($sa, 'sanctum')
+            ->getJson('/api/v1/super-admin/dashboard/expiring')
+            ->assertOk()
+            ->json();
+
+        $this->assertNotEmpty($res['subscriptions']);
+        $found = collect($res['subscriptions'])->firstWhere('status', 'trial');
+        $this->assertNotNull($found);
+    }
+
+    public function test_expiring_excludes_already_expired_subs(): void
+    {
+        $sa   = $this->superAdmin();
+        $org  = $this->makeOrg();
+        $plan = $this->makePlan();
+
+        $this->makeSub($org, $plan, 'expired', ['ends_at' => now()->subDays(2)]);
+
+        $org2 = $this->makeOrg();
+        $this->makeSub($org2, $plan, 'active', ['ends_at' => now()->addDays(5)]);
+
+        $res = $this->actingAs($sa, 'sanctum')
+            ->getJson('/api/v1/super-admin/dashboard/expiring')
+            ->assertOk()
+            ->json();
+
+        $this->assertEquals(1, $res['total']);
+        $this->assertEquals('active', $res['subscriptions'][0]['status']);
+    }
+
+    public function test_expiring_excludes_cancelled_subs(): void
+    {
+        $sa   = $this->superAdmin();
+        $org  = $this->makeOrg();
+        $plan = $this->makePlan();
+
+        $this->makeSub($org, $plan, 'cancelled', ['ends_at' => now()->addDays(3)]);
+
+        $res = $this->actingAs($sa, 'sanctum')
+            ->getJson('/api/v1/super-admin/dashboard/expiring')
+            ->assertOk()
+            ->json();
+
+        $this->assertEquals(0, $res['total']);
+    }
+
+    public function test_expiring_includes_organization_and_plan(): void
+    {
+        $sa   = $this->superAdmin();
+        $org  = $this->makeOrg();
+        $plan = $this->makePlan(['name' => 'Pro Plan']);
+
+        $this->makeSub($org, $plan, 'active', ['ends_at' => now()->addDays(10)]);
+
+        $res = $this->actingAs($sa, 'sanctum')
+            ->getJson('/api/v1/super-admin/dashboard/expiring')
+            ->assertOk()
+            ->json();
+
+        $this->assertNotEmpty($res['subscriptions']);
+        $sub = $res['subscriptions'][0];
+        $this->assertNotNull($sub['organization']);
+        $this->assertEquals($org->id, $sub['organization']['id']);
+        $this->assertEquals('Pro Plan', $sub['plan']);
+        $this->assertArrayHasKey('days_remaining', $sub);
+        $this->assertArrayHasKey('ends_at', $sub);
+    }
+
+    public function test_expiring_ordered_by_soonest_first(): void
+    {
+        $sa   = $this->superAdmin();
+        $plan = $this->makePlan();
+
+        $org1 = $this->makeOrg();
+        $this->makeSub($org1, $plan, 'active', ['ends_at' => now()->addDays(20)]);
+
+        $org2 = $this->makeOrg();
+        $this->makeSub($org2, $plan, 'active', ['ends_at' => now()->addDays(5)]);
+
+        $org3 = $this->makeOrg();
+        $this->makeSub($org3, $plan, 'active', ['ends_at' => now()->addDays(14)]);
+
+        $res = $this->actingAs($sa, 'sanctum')
+            ->getJson('/api/v1/super-admin/dashboard/expiring')
+            ->assertOk()
+            ->json();
+
+        $days = array_column($res['subscriptions'], 'days_remaining');
+        $sorted = $days;
+        sort($sorted);
+        $this->assertEquals($sorted, $days);
+    }
+
+    public function test_expiring_limited_to_20_records(): void
+    {
+        $sa   = $this->superAdmin();
+        $plan = $this->makePlan();
+
+        for ($i = 1; $i <= 25; $i++) {
+            $org = $this->makeOrg();
+            $this->makeSub($org, $plan, 'active', ['ends_at' => now()->addDays($i)]);
+        }
+
+        $res = $this->actingAs($sa, 'sanctum')
+            ->getJson('/api/v1/super-admin/dashboard/expiring')
+            ->assertOk()
+            ->json();
+
+        $this->assertLessThanOrEqual(20, count($res['subscriptions']));
+    }
+
+    public function test_expiring_empty_when_no_subs_expiring(): void
+    {
+        $sa = $this->superAdmin();
+
+        $res = $this->actingAs($sa, 'sanctum')
+            ->getJson('/api/v1/super-admin/dashboard/expiring')
+            ->assertOk()
+            ->json();
+
+        $this->assertEquals(0, $res['total']);
+        $this->assertEmpty($res['subscriptions']);
+    }
+
+    public function test_expiring_days_parameter_controls_window(): void
+    {
+        $sa   = $this->superAdmin();
+        $org  = $this->makeOrg();
+        $plan = $this->makePlan();
+
+        // Subscription expires exactly 20 days from now
+        $this->makeSub($org, $plan, 'active', ['ends_at' => now()->addDays(20)]);
+
+        // days=10 window: should NOT include a sub expiring in 20 days
+        $res = $this->actingAs($sa, 'sanctum')
+            ->getJson('/api/v1/super-admin/dashboard/expiring?days=10')
+            ->assertOk()
+            ->json();
+        $this->assertEquals(0, $res['total']);
+
+        // days=25 window: should include a sub expiring in 20 days
+        $res = $this->actingAs($sa, 'sanctum')
+            ->getJson('/api/v1/super-admin/dashboard/expiring?days=25')
+            ->assertOk()
+            ->json();
+        $this->assertEquals(1, $res['total']);
+    }
 }

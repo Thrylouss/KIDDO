@@ -30,28 +30,28 @@ function GroupCard({ group }: { group: Group }) {
   const capacity = group.capacity;
   const pct      = capacity ? Math.min(100, Math.round((count / capacity) * 100)) : null;
   const barColor =
-    pct === null ? "bg-[#2563EB]" :
+    pct === null ? "bg-[#8E315D]" :
     pct >= 100   ? "bg-[#EF4444]" :
     pct >= 80    ? "bg-[#F59E0B]" :
                    "bg-[#22C55E]";
 
   return (
-    <div className="bg-white rounded-xl border border-[#E5E7EB] p-5 hover:shadow-sm transition-shadow duration-200 flex flex-col gap-4">
+    <div className="bg-white rounded-xl border border-[#EDE3E8] p-5 hover:shadow-sm transition-shadow duration-200 flex flex-col gap-4">
       {/* Header */}
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-xl bg-[#EFF6FF] flex items-center justify-center text-[#2563EB] flex-shrink-0">
+          <div className="h-10 w-10 rounded-xl bg-[#FDF2F6] flex items-center justify-center text-[#8E315D] flex-shrink-0">
             <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round"
                 d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
             </svg>
           </div>
           <div>
-            <p className="font-semibold text-[#111827]">{group.name}</p>
+            <p className="font-semibold text-[#29232A]">{group.name}</p>
             {group.age_category ? (
-              <p className="text-xs text-[#9CA3AF] mt-0.5">{group.age_category}</p>
+              <p className="text-xs text-[#B8AAB2] mt-0.5">{group.age_category}</p>
             ) : (
-              <p className="text-xs text-[#D1D5DB] mt-0.5">— yosh oralig'i ko'rsatilmagan</p>
+              <p className="text-xs text-[#D9C9D1] mt-0.5">— yosh oralig'i ko'rsatilmagan</p>
             )}
           </div>
         </div>
@@ -62,13 +62,13 @@ function GroupCard({ group }: { group: Group }) {
 
       {/* Progress */}
       <div>
-        <div className="flex items-center justify-between mb-1.5 text-xs text-[#6B7280]">
+        <div className="flex items-center justify-between mb-1.5 text-xs text-[#766B73]">
           <span>{uz.guruhlar.bolalar_soni}</span>
-          <span className="font-medium text-[#111827]">
+          <span className="font-medium text-[#29232A]">
             {count}{capacity ? ` / ${capacity}` : ""}
           </span>
         </div>
-        <div className="w-full h-1.5 bg-[#F3F4F6] rounded-full overflow-hidden">
+        <div className="w-full h-1.5 bg-[#F2ECF0] rounded-full overflow-hidden">
           {pct !== null ? (
             <div
               className={`h-full rounded-full transition-all duration-500 ${barColor}`}
@@ -76,18 +76,18 @@ function GroupCard({ group }: { group: Group }) {
             />
           ) : (
             <div
-              className="h-full rounded-full bg-[#2563EB]/30"
+              className="h-full rounded-full bg-[#8E315D]/30"
               style={{ width: count > 0 ? "40%" : "0%" }}
             />
           )}
         </div>
         {pct !== null && (
-          <p className="text-xs text-[#9CA3AF] mt-1">{pct}% {uz.guruhlar.sigim_korsatish}</p>
+          <p className="text-xs text-[#B8AAB2] mt-1">{pct}% {uz.guruhlar.sigim_korsatish}</p>
         )}
       </div>
 
       {/* Footer */}
-      <div className="flex items-center gap-1.5 text-xs text-[#9CA3AF] pt-1 border-t border-[#F3F4F6]">
+      <div className="flex items-center gap-1.5 text-xs text-[#B8AAB2] pt-1 border-t border-[#F2ECF0]">
         <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
         </svg>
@@ -99,17 +99,17 @@ function GroupCard({ group }: { group: Group }) {
 
 function SkeletonCard() {
   return (
-    <div className="bg-white rounded-xl border border-[#E5E7EB] p-5 space-y-4">
+    <div className="bg-white rounded-xl border border-[#EDE3E8] p-5 space-y-4">
       <div className="flex items-start gap-3">
-        <div className="h-10 w-10 rounded-xl bg-[#F3F4F6] animate-skeleton flex-shrink-0" />
+        <div className="h-10 w-10 rounded-xl bg-[#F2ECF0] animate-skeleton flex-shrink-0" />
         <div className="flex-1 space-y-2">
-          <div className="h-4 w-2/3 bg-[#F3F4F6] rounded animate-skeleton" />
-          <div className="h-3 w-1/3 bg-[#F3F4F6] rounded animate-skeleton" />
+          <div className="h-4 w-2/3 bg-[#F2ECF0] rounded animate-skeleton" />
+          <div className="h-3 w-1/3 bg-[#F2ECF0] rounded animate-skeleton" />
         </div>
       </div>
       <div className="space-y-1.5">
-        <div className="h-3 w-full bg-[#F3F4F6] rounded animate-skeleton" />
-        <div className="h-1.5 w-full bg-[#F3F4F6] rounded-full animate-skeleton" />
+        <div className="h-3 w-full bg-[#F2ECF0] rounded animate-skeleton" />
+        <div className="h-1.5 w-full bg-[#F2ECF0] rounded-full animate-skeleton" />
       </div>
     </div>
   );
@@ -187,11 +187,11 @@ export default function GuruhlarPage() {
           {Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)}
         </div>
       ) : error ? (
-        <div className="bg-white rounded-xl border border-[#E5E7EB]">
+        <div className="bg-white rounded-xl border border-[#EDE3E8]">
           <EmptyState title={uz.common.yuklash_xatosi} action={{ label: uz.common.qayta_urinish, onClick: load }} icon={groupIcon} />
         </div>
       ) : groups.length === 0 ? (
-        <div className="bg-white rounded-xl border border-[#E5E7EB]">
+        <div className="bg-white rounded-xl border border-[#EDE3E8]">
           <EmptyState
             icon={groupIcon}
             title={uz.guruhlar.bosh_sarlavha}

@@ -1,11 +1,11 @@
 type Variant = "success" | "warning" | "error" | "info" | "neutral";
 
 const cls: Record<Variant, string> = {
-  success: "bg-[#DCFCE7] text-[#166534]",
-  warning: "bg-[#FEF9C3] text-[#854D0E]",
-  error:   "bg-[#FEE2E2] text-[#991B1B]",
-  info:    "bg-[#DBEAFE] text-[#1E40AF]",
-  neutral: "bg-[#F3F4F6] text-[#374151]",
+  success: "bg-[var(--success-bg)] text-[var(--success)]",
+  warning: "bg-[var(--warning-bg)] text-[var(--warning)]",
+  error:   "bg-[var(--error-bg)] text-[var(--error)]",
+  info:    "bg-[var(--info-bg)] text-[var(--primary)]",
+  neutral: "bg-[var(--border-2)] text-[var(--text-2)]",
 };
 
 interface BadgeProps {

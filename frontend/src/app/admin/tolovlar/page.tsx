@@ -89,27 +89,27 @@ function Pagination({
   if (meta.last_page <= 1) return null;
   const pages = Array.from({ length: Math.min(5, meta.last_page) }, (_, i) => i + 1);
   return (
-    <div className="flex items-center justify-between px-5 py-3.5 border-t border-[#E5E7EB]">
-      <p className="text-sm text-[#6B7280]">Jami {meta.total} ta</p>
+    <div className="flex items-center justify-between px-5 py-3.5 border-t border-[#EDE3E8]">
+      <p className="text-sm text-[#766B73]">Jami {meta.total} ta</p>
       <div className="flex items-center gap-1">
         <button
           onClick={() => onPage(meta.current_page - 1)}
           disabled={meta.current_page === 1}
-          className="px-3 py-1.5 text-sm rounded-lg border border-[#E5E7EB] text-[#374151] disabled:opacity-40 hover:bg-[#F8FAFC] transition-colors"
+          className="px-3 py-1.5 text-sm rounded-lg border border-[#EDE3E8] text-[#3D3240] disabled:opacity-40 hover:bg-[#FFF9F5] transition-colors"
         >Oldingi</button>
         {pages.map((p) => (
           <button key={p} onClick={() => onPage(p)}
             className={`px-3 py-1.5 text-sm rounded-lg transition-colors ${
               p === meta.current_page
-                ? "bg-[#7C3AED] text-white"
-                : "border border-[#E5E7EB] text-[#374151] hover:bg-[#F8FAFC]"
+                ? "bg-[#8E315D] text-white"
+                : "border border-[#EDE3E8] text-[#3D3240] hover:bg-[#FFF9F5]"
             }`}
           >{p}</button>
         ))}
         <button
           onClick={() => onPage(meta.current_page + 1)}
           disabled={meta.current_page === meta.last_page}
-          className="px-3 py-1.5 text-sm rounded-lg border border-[#E5E7EB] text-[#374151] disabled:opacity-40 hover:bg-[#F8FAFC] transition-colors"
+          className="px-3 py-1.5 text-sm rounded-lg border border-[#EDE3E8] text-[#3D3240] disabled:opacity-40 hover:bg-[#FFF9F5] transition-colors"
         >Keyingi</button>
       </div>
     </div>
@@ -125,9 +125,9 @@ function Modal({ open, title, onClose, children }: {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-[#E5E7EB]">
-          <h2 className="text-lg font-semibold text-[#111827]">{title}</h2>
-          <button onClick={onClose} className="p-1.5 rounded-lg text-[#9CA3AF] hover:text-[#374151] hover:bg-[#F3F4F6] transition-colors">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[#EDE3E8]">
+          <h2 className="text-lg font-semibold text-[#29232A]">{title}</h2>
+          <button onClick={onClose} className="p-1.5 rounded-lg text-[#B8AAB2] hover:text-[#3D3240] hover:bg-[#F2ECF0] transition-colors">
             <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
             </svg>
@@ -143,9 +143,9 @@ function Modal({ open, title, onClose, children }: {
 
 function Row({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <div className="flex items-start gap-4 py-2.5 border-b border-[#F3F4F6] last:border-0">
-      <span className="w-36 flex-shrink-0 text-sm text-[#6B7280]">{label}</span>
-      <span className="flex-1 text-sm font-medium text-[#111827]">{children}</span>
+    <div className="flex items-start gap-4 py-2.5 border-b border-[#F2ECF0] last:border-0">
+      <span className="w-36 flex-shrink-0 text-sm text-[#766B73]">{label}</span>
+      <span className="flex-1 text-sm font-medium text-[#29232A]">{children}</span>
     </div>
   );
 }
@@ -283,11 +283,11 @@ export default function TolovlarPage() {
       label: uz.super_admin.jami_tushum,
       value: summary ? formatMoney(summary.net_revenue) : "—",
       icon: (
-        <svg className="h-5 w-5 text-[#7C3AED]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <svg className="h-5 w-5 text-[#8E315D]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
       ),
-      color: "text-[#111827]",
+      color: "text-[#29232A]",
     },
     {
       label: uz.super_admin.bugungi_tushum,
@@ -297,7 +297,7 @@ export default function TolovlarPage() {
           <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v1m0 16v1m8.66-9H20M4 12H3m15.07-7.07l-.71.71M6.64 17.36l-.7.7M17.36 17.36l.7.7M6.64 6.64l-.7-.7M12 7a5 5 0 100 10A5 5 0 0012 7z" />
         </svg>
       ),
-      color: "text-[#1D4ED8]",
+      color: "text-[#742548]",
     },
     {
       label: uz.super_admin.shu_oy_tushum,
@@ -313,11 +313,11 @@ export default function TolovlarPage() {
       label: uz.super_admin.jami_tolov_soni,
       value: summary ? String(summary.total_count) : "—",
       icon: (
-        <svg className="h-5 w-5 text-[#6B7280]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <svg className="h-5 w-5 text-[#766B73]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
         </svg>
       ),
-      color: "text-[#374151]",
+      color: "text-[#3D3240]",
     },
     {
       label: uz.super_admin.to_langan_soni,
@@ -357,7 +357,7 @@ export default function TolovlarPage() {
           <path strokeLinecap="round" strokeLinejoin="round" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
         </svg>
       ),
-      color: "text-[#374151]",
+      color: "text-[#3D3240]",
     },
   ];
 
@@ -365,17 +365,17 @@ export default function TolovlarPage() {
     <div className="max-w-7xl mx-auto space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-[#111827]">{uz.super_admin.tolovlar}</h1>
-        <p className="text-sm text-[#9CA3AF] mt-0.5">Barcha to&apos;lov tranzaksiyalari</p>
+        <h1 className="text-2xl font-bold text-[#29232A]">{uz.super_admin.tolovlar}</h1>
+        <p className="text-sm text-[#B8AAB2] mt-0.5">Barcha to&apos;lov tranzaksiyalari</p>
       </div>
 
       {/* 8 KPI tiles */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {TILES.map(({ label, value, icon, color }) => (
-          <div key={label} className="bg-white rounded-xl border border-[#E5E7EB] px-5 py-4">
+          <div key={label} className="bg-white rounded-xl border border-[#EDE3E8] px-5 py-4">
             <div className="flex items-center justify-between mb-3">
-              <p className="text-xs text-[#9CA3AF] uppercase tracking-wide">{label}</p>
-              <div className="h-8 w-8 rounded-lg bg-[#F9FAFB] flex items-center justify-center flex-shrink-0">{icon}</div>
+              <p className="text-xs text-[#B8AAB2] uppercase tracking-wide">{label}</p>
+              <div className="h-8 w-8 rounded-lg bg-[#FAF5F8] flex items-center justify-center flex-shrink-0">{icon}</div>
             </div>
             <p className={`text-xl font-bold ${color} truncate`}>{value}</p>
           </div>
@@ -383,13 +383,13 @@ export default function TolovlarPage() {
       </div>
 
       {/* Filters */}
-      <div className="bg-white rounded-xl border border-[#E5E7EB] px-5 py-4 space-y-3">
+      <div className="bg-white rounded-xl border border-[#EDE3E8] px-5 py-4 space-y-3">
         {/* Row 1: search + status + method */}
         <div className="flex flex-wrap items-end gap-3">
           <div className="flex-1 min-w-[180px]">
-            <label className="block text-sm font-medium text-[#374151] mb-1.5">Qidirish</label>
+            <label className="block text-sm font-medium text-[#3D3240] mb-1.5">Qidirish</label>
             <div className="relative">
-              <svg className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#9CA3AF]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <svg className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#B8AAB2]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
               <input
@@ -397,7 +397,7 @@ export default function TolovlarPage() {
                 value={searchInput}
                 onChange={(e) => handleSearch(e.target.value)}
                 placeholder="Bog'cha, invoice, tranzaksiya..."
-                className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-[#E5E7EB] bg-white text-[#111827] placeholder:text-[#9CA3AF] outline-none focus:border-[#7C3AED] focus:ring-2 focus:ring-[#7C3AED]/10 transition-all"
+                className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-[#EDE3E8] bg-white text-[#29232A] placeholder:text-[#B8AAB2] outline-none focus:border-[#8E315D] focus:ring-2 focus:ring-[#8E315D]/10 transition-all"
               />
             </div>
           </div>
@@ -437,15 +437,15 @@ export default function TolovlarPage() {
 
         {/* Row 2: date presets */}
         <div className="flex flex-wrap items-center gap-2">
-          <span className="text-xs text-[#9CA3AF] mr-1">{uz.super_admin.date_oraliq}:</span>
+          <span className="text-xs text-[#B8AAB2] mr-1">{uz.super_admin.date_oraliq}:</span>
           {DATE_PRESETS.map(({ key, label }) => (
             <button
               key={key}
               onClick={() => applyPreset(datePreset === key ? "" : key)}
               className={`px-3 py-1 text-xs rounded-full border transition-colors ${
                 datePreset === key
-                  ? "bg-[#7C3AED] text-white border-[#7C3AED]"
-                  : "border-[#E5E7EB] text-[#6B7280] hover:border-[#7C3AED] hover:text-[#7C3AED]"
+                  ? "bg-[#8E315D] text-white border-[#8E315D]"
+                  : "border-[#EDE3E8] text-[#766B73] hover:border-[#8E315D] hover:text-[#8E315D]"
               }`}
             >
               {label}
@@ -457,19 +457,19 @@ export default function TolovlarPage() {
                 type="date"
                 value={dateFrom}
                 onChange={(e) => { setDateFrom(e.target.value); setPage(1); }}
-                className="py-1 px-2 text-sm rounded-lg border border-[#E5E7EB] outline-none focus:border-[#7C3AED] transition-colors"
+                className="py-1 px-2 text-sm rounded-lg border border-[#EDE3E8] outline-none focus:border-[#8E315D] transition-colors"
               />
-              <span className="text-[#9CA3AF] text-xs">—</span>
+              <span className="text-[#B8AAB2] text-xs">—</span>
               <input
                 type="date"
                 value={dateTo}
                 onChange={(e) => { setDateTo(e.target.value); setPage(1); }}
-                className="py-1 px-2 text-sm rounded-lg border border-[#E5E7EB] outline-none focus:border-[#7C3AED] transition-colors"
+                className="py-1 px-2 text-sm rounded-lg border border-[#EDE3E8] outline-none focus:border-[#8E315D] transition-colors"
               />
             </div>
           )}
           {hasFilters && (
-            <button onClick={clearFilters} className="ml-auto px-3 py-1 text-xs text-[#6B7280] hover:text-[#374151] border border-[#E5E7EB] rounded-full hover:bg-[#F8FAFC] transition-colors">
+            <button onClick={clearFilters} className="ml-auto px-3 py-1 text-xs text-[#766B73] hover:text-[#3D3240] border border-[#EDE3E8] rounded-full hover:bg-[#FFF9F5] transition-colors">
               Tozalash
             </button>
           )}
@@ -477,67 +477,67 @@ export default function TolovlarPage() {
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-xl border border-[#E5E7EB] overflow-hidden">
+      <div className="bg-white rounded-xl border border-[#EDE3E8] overflow-hidden">
         {loading ? (
-          <div className="animate-pulse divide-y divide-[#F3F4F6]">
+          <div className="animate-pulse divide-y divide-[#F2ECF0]">
             {[...Array(8)].map((_, i) => (
               <div key={i} className="flex items-center gap-4 px-5 py-4">
-                <div className="h-4 w-12 bg-[#F3F4F6] rounded" />
-                <div className="h-4 w-32 bg-[#F3F4F6] rounded" />
-                <div className="h-4 w-40 bg-[#F3F4F6] rounded" />
-                <div className="h-4 w-28 bg-[#F3F4F6] rounded ml-auto" />
+                <div className="h-4 w-12 bg-[#F2ECF0] rounded" />
+                <div className="h-4 w-32 bg-[#F2ECF0] rounded" />
+                <div className="h-4 w-40 bg-[#F2ECF0] rounded" />
+                <div className="h-4 w-28 bg-[#F2ECF0] rounded ml-auto" />
               </div>
             ))}
           </div>
         ) : payments.length === 0 ? (
           <div className="py-16 text-center">
-            <svg className="h-10 w-10 text-[#D1D5DB] mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+            <svg className="h-10 w-10 text-[#D9C9D1] mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
             </svg>
-            <p className="text-[#9CA3AF] text-sm">{uz.common.malumot_yoq}</p>
+            <p className="text-[#B8AAB2] text-sm">{uz.common.malumot_yoq}</p>
           </div>
         ) : (
           <>
             <div className="hidden md:block overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="bg-[#F9FAFB] border-b border-[#E5E7EB]">
-                    <th className="text-left px-4 py-3.5 text-xs font-semibold text-[#6B7280] uppercase tracking-wide w-16">ID</th>
-                    <th className="text-left px-4 py-3.5 text-xs font-semibold text-[#6B7280] uppercase tracking-wide">{uz.super_admin.sana}</th>
-                    <th className="text-left px-4 py-3.5 text-xs font-semibold text-[#6B7280] uppercase tracking-wide">Bog&apos;cha</th>
-                    <th className="text-left px-4 py-3.5 text-xs font-semibold text-[#6B7280] uppercase tracking-wide">{uz.super_admin.invoice_raqam}</th>
-                    <th className="text-right px-4 py-3.5 text-xs font-semibold text-[#6B7280] uppercase tracking-wide">{uz.super_admin.summa}</th>
-                    <th className="text-left px-4 py-3.5 text-xs font-semibold text-[#6B7280] uppercase tracking-wide">{uz.super_admin.tarif}</th>
-                    <th className="text-left px-4 py-3.5 text-xs font-semibold text-[#6B7280] uppercase tracking-wide">{uz.super_admin.tolov_usuli}</th>
-                    <th className="text-left px-4 py-3.5 text-xs font-semibold text-[#6B7280] uppercase tracking-wide">{uz.super_admin.holat}</th>
+                  <tr className="bg-[#FAF5F8] border-b border-[#EDE3E8]">
+                    <th className="text-left px-4 py-3.5 text-xs font-semibold text-[#766B73] uppercase tracking-wide w-16">ID</th>
+                    <th className="text-left px-4 py-3.5 text-xs font-semibold text-[#766B73] uppercase tracking-wide">{uz.super_admin.sana}</th>
+                    <th className="text-left px-4 py-3.5 text-xs font-semibold text-[#766B73] uppercase tracking-wide">Bog&apos;cha</th>
+                    <th className="text-left px-4 py-3.5 text-xs font-semibold text-[#766B73] uppercase tracking-wide">{uz.super_admin.invoice_raqam}</th>
+                    <th className="text-right px-4 py-3.5 text-xs font-semibold text-[#766B73] uppercase tracking-wide">{uz.super_admin.summa}</th>
+                    <th className="text-left px-4 py-3.5 text-xs font-semibold text-[#766B73] uppercase tracking-wide">{uz.super_admin.tarif}</th>
+                    <th className="text-left px-4 py-3.5 text-xs font-semibold text-[#766B73] uppercase tracking-wide">{uz.super_admin.tolov_usuli}</th>
+                    <th className="text-left px-4 py-3.5 text-xs font-semibold text-[#766B73] uppercase tracking-wide">{uz.super_admin.holat}</th>
                     <th className="px-4 py-3.5 w-12" />
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#F3F4F6]">
+                <tbody className="divide-y divide-[#F2ECF0]">
                   {payments.map((p) => (
-                    <tr key={p.id} className="hover:bg-[#F9FAFB] transition-colors">
-                      <td className="px-4 py-3.5 text-xs text-[#9CA3AF] font-mono">#{p.id}</td>
-                      <td className="px-4 py-3.5 text-[#6B7280] whitespace-nowrap">
+                    <tr key={p.id} className="hover:bg-[#FAF5F8] transition-colors">
+                      <td className="px-4 py-3.5 text-xs text-[#B8AAB2] font-mono">#{p.id}</td>
+                      <td className="px-4 py-3.5 text-[#766B73] whitespace-nowrap">
                         {fmtDate(p.paid_at ?? p.created_at)}
                       </td>
                       <td className="px-4 py-3.5">
                         {p.organization ? (
                           <Link href={`/admin/bogchalar/${p.organization.id}`}
-                            className="font-medium text-[#111827] hover:text-[#7C3AED] transition-colors">
+                            className="font-medium text-[#29232A] hover:text-[#8E315D] transition-colors">
                             {p.organization.name}
                           </Link>
-                        ) : <span className="text-[#9CA3AF]">—</span>}
+                        ) : <span className="text-[#B8AAB2]">—</span>}
                       </td>
                       <td className="px-4 py-3.5">
                         {p.invoice_number
-                          ? <span className="font-mono text-xs text-[#6B7280]">{p.invoice_number}</span>
-                          : <span className="text-[#D1D5DB]">—</span>}
+                          ? <span className="font-mono text-xs text-[#766B73]">{p.invoice_number}</span>
+                          : <span className="text-[#D9C9D1]">—</span>}
                       </td>
-                      <td className="px-4 py-3.5 font-semibold text-[#111827] whitespace-nowrap text-right">
+                      <td className="px-4 py-3.5 font-semibold text-[#29232A] whitespace-nowrap text-right">
                         {formatMoney(p.amount, p.currency)}
                       </td>
-                      <td className="px-4 py-3.5 text-[#6B7280] whitespace-nowrap">{p.plan_name ?? "—"}</td>
-                      <td className="px-4 py-3.5 text-[#6B7280] whitespace-nowrap">{payMethodLabel(p.payment_method)}</td>
+                      <td className="px-4 py-3.5 text-[#766B73] whitespace-nowrap">{p.plan_name ?? "—"}</td>
+                      <td className="px-4 py-3.5 text-[#766B73] whitespace-nowrap">{payMethodLabel(p.payment_method)}</td>
                       <td className="px-4 py-3.5">
                         <Badge variant={payStatusVariant(p.status)}>{payStatusLabel(p.status)}</Badge>
                       </td>
@@ -545,16 +545,16 @@ export default function TolovlarPage() {
                         <button
                           aria-label="Amallar"
                           onClick={() => setOpenMenuId(openMenuId === p.id ? null : p.id)}
-                          className="p-1.5 rounded-lg text-[#9CA3AF] hover:text-[#374151] hover:bg-[#F3F4F6] transition-colors"
+                          className="p-1.5 rounded-lg text-[#B8AAB2] hover:text-[#3D3240] hover:bg-[#F2ECF0] transition-colors"
                         >
                           <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
                             <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
                           </svg>
                         </button>
                         {openMenuId === p.id && (
-                          <div className="absolute right-0 top-full mt-1 w-48 bg-white rounded-xl border border-[#E5E7EB] shadow-lg z-10 py-1" onClick={() => setOpenMenuId(null)}>
+                          <div className="absolute right-0 top-full mt-1 w-48 bg-white rounded-xl border border-[#EDE3E8] shadow-lg z-10 py-1" onClick={() => setOpenMenuId(null)}>
                             <button
-                              className="w-full text-left px-4 py-2.5 text-sm text-[#374151] hover:bg-[#F9FAFB] transition-colors"
+                              className="w-full text-left px-4 py-2.5 text-sm text-[#3D3240] hover:bg-[#FAF5F8] transition-colors"
                               onClick={() => openDetail(p.id)}
                             >
                               {uz.super_admin.batafsil}
@@ -585,25 +585,25 @@ export default function TolovlarPage() {
             </div>
 
             {/* Mobile cards */}
-            <div className="md:hidden divide-y divide-[#F3F4F6]">
+            <div className="md:hidden divide-y divide-[#F2ECF0]">
               {payments.map((p) => (
                 <div key={p.id} className="px-4 py-4 space-y-2">
                   <div className="flex items-center justify-between">
                     <div>
                       {p.organization
-                        ? <Link href={`/admin/bogchalar/${p.organization.id}`} className="font-medium text-[#111827] text-sm hover:text-[#7C3AED]">{p.organization.name}</Link>
-                        : <span className="text-[#9CA3AF] text-sm">—</span>}
-                      {p.invoice_number && <p className="font-mono text-xs text-[#9CA3AF]">{p.invoice_number}</p>}
+                        ? <Link href={`/admin/bogchalar/${p.organization.id}`} className="font-medium text-[#29232A] text-sm hover:text-[#8E315D]">{p.organization.name}</Link>
+                        : <span className="text-[#B8AAB2] text-sm">—</span>}
+                      {p.invoice_number && <p className="font-mono text-xs text-[#B8AAB2]">{p.invoice_number}</p>}
                     </div>
                     <Badge variant={payStatusVariant(p.status)}>{payStatusLabel(p.status)}</Badge>
                   </div>
                   <div className="flex items-center justify-between text-sm">
-                    <span className="font-semibold text-[#111827]">{formatMoney(p.amount, p.currency)}</span>
-                    <span className="text-[#9CA3AF]">{fmtDate(p.paid_at ?? p.created_at)}</span>
+                    <span className="font-semibold text-[#29232A]">{formatMoney(p.amount, p.currency)}</span>
+                    <span className="text-[#B8AAB2]">{fmtDate(p.paid_at ?? p.created_at)}</span>
                   </div>
-                  <div className="flex items-center justify-between text-xs text-[#6B7280]">
+                  <div className="flex items-center justify-between text-xs text-[#766B73]">
                     <span>{p.plan_name ?? "—"} · {payMethodLabel(p.payment_method)}</span>
-                    <Link href={`/admin/tolovlar/${p.id}`} className="text-[#7C3AED] font-medium">
+                    <Link href={`/admin/tolovlar/${p.id}`} className="text-[#8E315D] font-medium">
                       Ko&apos;rish
                     </Link>
                   </div>
@@ -624,7 +624,7 @@ export default function TolovlarPage() {
       >
         {detailLoading ? (
           <div className="animate-pulse space-y-3">
-            {[...Array(6)].map((_, i) => <div key={i} className="flex gap-4 py-2.5 border-b border-[#F3F4F6]"><div className="h-4 w-28 bg-[#F3F4F6] rounded" /><div className="h-4 w-40 bg-[#F3F4F6] rounded" /></div>)}
+            {[...Array(6)].map((_, i) => <div key={i} className="flex gap-4 py-2.5 border-b border-[#F2ECF0]"><div className="h-4 w-28 bg-[#F2ECF0] rounded" /><div className="h-4 w-40 bg-[#F2ECF0] rounded" /></div>)}
           </div>
         ) : detailPayment ? (
           <div className="space-y-4">
@@ -632,13 +632,13 @@ export default function TolovlarPage() {
               detailPayment.status === "paid"    ? "bg-[#F0FDF4] border border-[#BBF7D0]" :
               detailPayment.status === "pending" ? "bg-[#FFFBEB] border border-[#FDE68A]" :
               detailPayment.status === "failed"  ? "bg-[#FEF2F2] border border-[#FECACA]" :
-                                                   "bg-[#F9FAFB] border border-[#E5E7EB]"
+                                                   "bg-[#FAF5F8] border border-[#EDE3E8]"
             }`}>
               <Badge variant={payStatusVariant(detailPayment.status)}>{payStatusLabel(detailPayment.status)}</Badge>
-              <span className="text-lg font-bold text-[#111827]">{formatMoney(detailPayment.amount, detailPayment.currency)}</span>
-              <span className="text-xs text-[#9CA3AF] ml-auto">#{detailPayment.id}</span>
+              <span className="text-lg font-bold text-[#29232A]">{formatMoney(detailPayment.amount, detailPayment.currency)}</span>
+              <span className="text-xs text-[#B8AAB2] ml-auto">#{detailPayment.id}</span>
             </div>
-            <div className="divide-y divide-[#F3F4F6]">
+            <div className="divide-y divide-[#F2ECF0]">
               <Row label="To'lov usuli">{payMethodLabel(detailPayment.payment_method)}</Row>
               {detailPayment.transaction_id && (
                 <Row label={uz.super_admin.tranzaksiya}>
@@ -664,14 +664,14 @@ export default function TolovlarPage() {
             <div className="flex justify-end gap-2 pt-2">
               <Link
                 href={`/admin/tolovlar/${detailPayment.id}`}
-                className="px-4 py-2 text-sm text-[#7C3AED] border border-[#7C3AED] rounded-lg hover:bg-[#F5F3FF] transition-colors"
+                className="px-4 py-2 text-sm text-[#8E315D] border border-[#8E315D] rounded-lg hover:bg-[#FDF2F6] transition-colors"
                 onClick={() => setDetailPayment(null)}
               >
                 To&apos;liq sahifa
               </Link>
               <button
                 onClick={() => setDetailPayment(null)}
-                className="px-4 py-2 text-sm text-[#374151] border border-[#E5E7EB] rounded-lg hover:bg-[#F8FAFC] transition-colors"
+                className="px-4 py-2 text-sm text-[#3D3240] border border-[#EDE3E8] rounded-lg hover:bg-[#FFF9F5] transition-colors"
               >
                 {uz.common.yopish}
               </button>
@@ -688,7 +688,7 @@ export default function TolovlarPage() {
       >
         {verifyTarget && (
           <div className="space-y-4">
-            <p className="text-sm text-[#374151]">
+            <p className="text-sm text-[#3D3240]">
               <span className="font-semibold">#{verifyTarget.id}</span> raqamli to&apos;lovni tasdiqlashni xohlaysizmi?
             </p>
             <div className="rounded-xl bg-[#F0FDF4] border border-[#BBF7D0] px-4 py-3">
@@ -703,7 +703,7 @@ export default function TolovlarPage() {
               <button
                 onClick={() => setVerifyTarget(null)}
                 disabled={verifyLoading}
-                className="px-4 py-2 text-sm text-[#374151] border border-[#E5E7EB] rounded-lg hover:bg-[#F8FAFC] transition-colors disabled:opacity-50"
+                className="px-4 py-2 text-sm text-[#3D3240] border border-[#EDE3E8] rounded-lg hover:bg-[#FFF9F5] transition-colors disabled:opacity-50"
               >
                 {uz.common.bekor_qilish}
               </button>
@@ -728,7 +728,7 @@ export default function TolovlarPage() {
       >
         {refundTarget && (
           <div className="space-y-4">
-            <p className="text-sm text-[#374151]">
+            <p className="text-sm text-[#3D3240]">
               <span className="font-semibold">#{refundTarget.id}</span> raqamli to&apos;lovni qaytarishni xohlaysizmi?
             </p>
             <div className="rounded-xl bg-[#FEF2F2] border border-[#FECACA] px-4 py-3">
@@ -740,22 +740,22 @@ export default function TolovlarPage() {
               )}
             </div>
             <div>
-              <label className="block text-sm font-medium text-[#374151] mb-1.5">
-                {uz.super_admin.refund_sababi} <span className="text-[#9CA3AF] font-normal">(ixtiyoriy)</span>
+              <label className="block text-sm font-medium text-[#3D3240] mb-1.5">
+                {uz.super_admin.refund_sababi} <span className="text-[#B8AAB2] font-normal">(ixtiyoriy)</span>
               </label>
               <textarea
                 value={refundReason}
                 onChange={(e) => setRefundReason(e.target.value)}
                 rows={3}
                 placeholder="Nima sababdan qaytarilmoqda?"
-                className="w-full px-3 py-2 text-sm rounded-lg border border-[#E5E7EB] text-[#111827] placeholder:text-[#9CA3AF] outline-none focus:border-[#7C3AED] focus:ring-2 focus:ring-[#7C3AED]/10 transition-all resize-none"
+                className="w-full px-3 py-2 text-sm rounded-lg border border-[#EDE3E8] text-[#29232A] placeholder:text-[#B8AAB2] outline-none focus:border-[#8E315D] focus:ring-2 focus:ring-[#8E315D]/10 transition-all resize-none"
               />
             </div>
             <div className="flex justify-end gap-2 pt-1">
               <button
                 onClick={() => { setRefundTarget(null); setRefundReason(""); }}
                 disabled={refundLoading}
-                className="px-4 py-2 text-sm text-[#374151] border border-[#E5E7EB] rounded-lg hover:bg-[#F8FAFC] transition-colors disabled:opacity-50"
+                className="px-4 py-2 text-sm text-[#3D3240] border border-[#EDE3E8] rounded-lg hover:bg-[#FFF9F5] transition-colors disabled:opacity-50"
               >
                 {uz.common.bekor_qilish}
               </button>

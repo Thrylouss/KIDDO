@@ -14,7 +14,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
     return (
       <div className="flex flex-col gap-1.5">
         {label && (
-          <label htmlFor={inputId} className="text-sm font-medium text-[#374151]">
+          <label htmlFor={inputId} className="text-sm font-medium text-[var(--text)]">
             {label}
             {props.required && <span className="text-[#EF4444] ml-0.5">*</span>}
           </label>
@@ -25,11 +25,11 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             ref={ref}
             id={inputId}
             className={[
-              "w-full rounded-lg border bg-white px-3.5 py-2.5 text-sm text-[#111827]",
-              "placeholder:text-[#9CA3AF] outline-none transition-all duration-150 kiddo-input",
+              "w-full rounded-lg border bg-white px-3.5 py-2.5 text-sm text-[var(--text)]",
+              "placeholder:text-[var(--text-3)] outline-none transition-all duration-150 kiddo-input",
               error
                 ? "border-[#EF4444] focus:ring-2 focus:ring-[#EF4444]/20"
-                : "border-[#E5E7EB] focus:border-[#2563EB] focus:ring-2 focus:ring-[#2563EB]/15",
+                : "border-[var(--border)] focus:border-[var(--primary)] focus:ring-2 focus:ring-[#8E315D]/15",
               suffix ? "pr-11" : "",
               className,
             ].join(" ")}
@@ -52,7 +52,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         )}
 
         {hint && !error && (
-          <p className="text-xs text-[#6B7280]">{hint}</p>
+          <p className="text-xs text-[var(--text-2)]">{hint}</p>
         )}
       </div>
     );

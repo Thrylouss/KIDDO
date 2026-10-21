@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import Link from "next/link";
 import { api } from "@/lib/api";
 import Badge from "@/components/ui/Badge";
@@ -45,7 +45,7 @@ function DaysCell({ days, status }: { days: number; status: string }) {
     ? "text-[#EF4444] font-semibold"
     : days <= 14
     ? "text-[#F59E0B] font-semibold"
-    : "text-[#6B7280]";
+    : "text-[#766B73]";
   return <span className={`text-sm ${cls}`}>{days} {uz.super_admin.qolgan_kun}</span>;
 }
 
@@ -60,13 +60,13 @@ function Pagination({
 }) {
   if (meta.last_page <= 1) return null;
   return (
-    <div className="flex items-center justify-between px-5 py-3.5 border-t border-[#E5E7EB]">
-      <p className="text-sm text-[#6B7280]">Jami {meta.total} ta</p>
+    <div className="flex items-center justify-between px-5 py-3.5 border-t border-[#EDE3E8]">
+      <p className="text-sm text-[#766B73]">Jami {meta.total} ta</p>
       <div className="flex items-center gap-1">
         <button
           onClick={() => onPage(meta.current_page - 1)}
           disabled={meta.current_page === 1}
-          className="px-3 py-1.5 text-sm rounded-lg border border-[#E5E7EB] text-[#374151] disabled:opacity-40 hover:bg-[#F8FAFC] transition-colors"
+          className="px-3 py-1.5 text-sm rounded-lg border border-[#EDE3E8] text-[#3D3240] disabled:opacity-40 hover:bg-[#FFF9F5] transition-colors"
         >
           Oldingi
         </button>
@@ -78,8 +78,8 @@ function Pagination({
               onClick={() => onPage(page)}
               className={`px-3 py-1.5 text-sm rounded-lg transition-colors ${
                 page === meta.current_page
-                  ? "bg-[#7C3AED] text-white"
-                  : "border border-[#E5E7EB] text-[#374151] hover:bg-[#F8FAFC]"
+                  ? "bg-[#8E315D] text-white"
+                  : "border border-[#EDE3E8] text-[#3D3240] hover:bg-[#FFF9F5]"
               }`}
             >
               {page}
@@ -89,7 +89,7 @@ function Pagination({
         <button
           onClick={() => onPage(meta.current_page + 1)}
           disabled={meta.current_page === meta.last_page}
-          className="px-3 py-1.5 text-sm rounded-lg border border-[#E5E7EB] text-[#374151] disabled:opacity-40 hover:bg-[#F8FAFC] transition-colors"
+          className="px-3 py-1.5 text-sm rounded-lg border border-[#EDE3E8] text-[#3D3240] disabled:opacity-40 hover:bg-[#FFF9F5] transition-colors"
         >
           Keyingi
         </button>
@@ -135,6 +135,12 @@ export default function SubscriptionsPage() {
   const [changingPlan,  setChangingPlan]  = useState(false);
   const [cancelForm,    setCancelForm]    = useState({ reason: "" });
   const [cancelling,    setCancelling]    = useState(false);
+
+  const minRenewDate = useMemo(() => {
+    const d = new Date();
+    d.setDate(d.getDate() + 1);
+    return d.toISOString().split("T")[0];
+  }, []);
 
   const loadSubs = useCallback(async () => {
     setLoading(true);
@@ -246,10 +252,10 @@ export default function SubscriptionsPage() {
 
   const statTiles = [
     { key: "active",    label: uz.super_admin.faol_obunalar,        color: "bg-[#DCFCE7] text-[#166534]" },
-    { key: "trial",     label: uz.super_admin.trial_obunalar,       color: "bg-[#DBEAFE] text-[#1E40AF]" },
+    { key: "trial",     label: uz.super_admin.trial_obunalar,       color: "bg-[#FCE8F0] text-[#8E315D]" },
     { key: "past_due",  label: uz.super_admin.past_due,             color: "bg-[#FEF3C7] text-[#92400E]" },
     { key: "expired",   label: uz.super_admin.tugagan_obunalar,     color: "bg-[#FEE2E2] text-[#991B1B]" },
-    { key: "cancelled", label: uz.super_admin.bekor,                color: "bg-[#F3F4F6] text-[#374151]" },
+    { key: "cancelled", label: uz.super_admin.bekor,                color: "bg-[#F2ECF0] text-[#3D3240]" },
   ];
 
   return (
@@ -257,8 +263,8 @@ export default function SubscriptionsPage() {
       {/* Header */}
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-[#111827]">{uz.super_admin.obunalar}</h1>
-          <p className="text-sm text-[#9CA3AF] mt-0.5">Barcha bog&apos;chalar obunalarini boshqaring</p>
+          <h1 className="text-2xl font-bold text-[#29232A]">{uz.super_admin.obunalar}</h1>
+          <p className="text-sm text-[#B8AAB2] mt-0.5">Barcha bog&apos;chalar obunalarini boshqaring</p>
         </div>
       </div>
 
@@ -271,21 +277,21 @@ export default function SubscriptionsPage() {
               onClick={() => { setFilterStatus(filterStatus === key ? "" : key); setPage(1); }}
               className={`rounded-xl border p-4 text-center transition-all ${
                 filterStatus === key
-                  ? "border-[#7C3AED] ring-1 ring-[#7C3AED]"
-                  : "border-[#E5E7EB] hover:border-[#D1D5DB]"
+                  ? "border-[#8E315D] ring-1 ring-[#8E315D]"
+                  : "border-[#EDE3E8] hover:border-[#D9C9D1]"
               } bg-white`}
             >
               <div className={`text-xl font-bold mb-1 px-2 py-1 rounded-lg inline-block ${color}`}>
                 {stats[key as keyof typeof stats]}
               </div>
-              <p className="text-xs text-[#6B7280] mt-1">{label}</p>
+              <p className="text-xs text-[#766B73] mt-1">{label}</p>
             </button>
           ))}
         </div>
       )}
 
       {/* Filters */}
-      <div className="bg-white rounded-xl border border-[#E5E7EB] px-5 py-4">
+      <div className="bg-white rounded-xl border border-[#EDE3E8] px-5 py-4">
         <div className="flex flex-wrap items-end gap-3">
           <div className="w-44">
             <Select
@@ -316,7 +322,7 @@ export default function SubscriptionsPage() {
           {(filterStatus || filterPlan) && (
             <button
               onClick={() => { setFilterStatus(""); setFilterPlan(""); setPage(1); }}
-              className="px-4 py-2 text-sm text-[#6B7280] hover:text-[#374151] border border-[#E5E7EB] rounded-lg hover:bg-[#F8FAFC] transition-colors"
+              className="px-4 py-2 text-sm text-[#766B73] hover:text-[#3D3240] border border-[#EDE3E8] rounded-lg hover:bg-[#FFF9F5] transition-colors"
             >
               Tozalash
             </button>
@@ -325,24 +331,24 @@ export default function SubscriptionsPage() {
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-xl border border-[#E5E7EB] overflow-hidden">
+      <div className="bg-white rounded-xl border border-[#EDE3E8] overflow-hidden">
         {loading ? (
-          <div className="animate-pulse divide-y divide-[#F3F4F6]">
+          <div className="animate-pulse divide-y divide-[#F2ECF0]">
             {[...Array(8)].map((_, i) => (
               <div key={i} className="flex items-center gap-4 px-5 py-4">
-                <div className="h-4 w-40 bg-[#F3F4F6] rounded" />
-                <div className="h-4 w-24 bg-[#F3F4F6] rounded" />
-                <div className="h-6 w-16 bg-[#F3F4F6] rounded-full" />
-                <div className="h-4 w-20 bg-[#F3F4F6] rounded ml-auto" />
+                <div className="h-4 w-40 bg-[#F2ECF0] rounded" />
+                <div className="h-4 w-24 bg-[#F2ECF0] rounded" />
+                <div className="h-6 w-16 bg-[#F2ECF0] rounded-full" />
+                <div className="h-4 w-20 bg-[#F2ECF0] rounded ml-auto" />
               </div>
             ))}
           </div>
         ) : subs.length === 0 ? (
           <div className="py-16 text-center">
-            <svg className="h-10 w-10 text-[#D1D5DB] mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+            <svg className="h-10 w-10 text-[#D9C9D1] mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
-            <p className="text-[#9CA3AF] text-sm">{uz.common.malumot_yoq}</p>
+            <p className="text-[#B8AAB2] text-sm">{uz.common.malumot_yoq}</p>
           </div>
         ) : (
           <>
@@ -350,36 +356,36 @@ export default function SubscriptionsPage() {
             <div className="hidden lg:block overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="bg-[#F9FAFB] border-b border-[#E5E7EB]">
-                    <th className="text-left px-5 py-3.5 text-xs font-semibold text-[#6B7280] uppercase tracking-wide">Bog&apos;cha</th>
-                    <th className="text-left px-5 py-3.5 text-xs font-semibold text-[#6B7280] uppercase tracking-wide">{uz.super_admin.tarif}</th>
-                    <th className="text-left px-5 py-3.5 text-xs font-semibold text-[#6B7280] uppercase tracking-wide">{uz.super_admin.holat}</th>
-                    <th className="text-left px-5 py-3.5 text-xs font-semibold text-[#6B7280] uppercase tracking-wide">{uz.super_admin.tugash}</th>
-                    <th className="text-left px-5 py-3.5 text-xs font-semibold text-[#6B7280] uppercase tracking-wide">{uz.super_admin.qolgan}</th>
-                    <th className="text-right px-5 py-3.5 text-xs font-semibold text-[#6B7280] uppercase tracking-wide">{uz.super_admin.amallar}</th>
+                  <tr className="bg-[#FAF5F8] border-b border-[#EDE3E8]">
+                    <th className="text-left px-5 py-3.5 text-xs font-semibold text-[#766B73] uppercase tracking-wide">Bog&apos;cha</th>
+                    <th className="text-left px-5 py-3.5 text-xs font-semibold text-[#766B73] uppercase tracking-wide">{uz.super_admin.tarif}</th>
+                    <th className="text-left px-5 py-3.5 text-xs font-semibold text-[#766B73] uppercase tracking-wide">{uz.super_admin.holat}</th>
+                    <th className="text-left px-5 py-3.5 text-xs font-semibold text-[#766B73] uppercase tracking-wide">{uz.super_admin.tugash}</th>
+                    <th className="text-left px-5 py-3.5 text-xs font-semibold text-[#766B73] uppercase tracking-wide">{uz.super_admin.qolgan}</th>
+                    <th className="text-right px-5 py-3.5 text-xs font-semibold text-[#766B73] uppercase tracking-wide">{uz.super_admin.amallar}</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#F3F4F6]">
+                <tbody className="divide-y divide-[#F2ECF0]">
                   {subs.map((sub) => (
-                    <tr key={sub.id} className="hover:bg-[#F9FAFB] transition-colors">
+                    <tr key={sub.id} className="hover:bg-[#FAF5F8] transition-colors">
                       <td className="px-5 py-3.5">
                         <div className="flex items-center gap-3">
-                          <div className="h-8 w-8 rounded-lg bg-[#F5F3FF] flex items-center justify-center text-[#7C3AED] font-bold text-xs flex-shrink-0">
+                          <div className="h-8 w-8 rounded-lg bg-[#FDF2F6] flex items-center justify-center text-[#8E315D] font-bold text-xs flex-shrink-0">
                             {(sub.organization?.name ?? "?").charAt(0).toUpperCase()}
                           </div>
                           <Link
                             href={`/admin/bogchalar/${sub.organization_id}`}
-                            className="font-medium text-[#111827] hover:text-[#7C3AED] transition-colors"
+                            className="font-medium text-[#29232A] hover:text-[#8E315D] transition-colors"
                           >
                             {sub.organization?.name ?? "—"}
                           </Link>
                         </div>
                       </td>
-                      <td className="px-5 py-3.5 text-[#6B7280]">{sub.plan?.name ?? "—"}</td>
+                      <td className="px-5 py-3.5 text-[#766B73]">{sub.plan?.name ?? "—"}</td>
                       <td className="px-5 py-3.5">
                         <Badge variant={subStatusVariant(sub.status)}>{subStatusLabel(sub.status)}</Badge>
                       </td>
-                      <td className="px-5 py-3.5 text-[#6B7280]">{fmtDate(sub.ends_at)}</td>
+                      <td className="px-5 py-3.5 text-[#766B73]">{fmtDate(sub.ends_at)}</td>
                       <td className="px-5 py-3.5">
                         <DaysCell days={sub.days_remaining} status={sub.status} />
                       </td>
@@ -387,20 +393,20 @@ export default function SubscriptionsPage() {
                         <div className="flex items-center justify-end gap-1.5">
                           <Link
                             href={`/admin/bogchalar/${sub.organization_id}`}
-                            className="px-2.5 py-1.5 text-xs font-medium text-[#7C3AED] hover:bg-[#F5F3FF] rounded-lg transition-colors"
+                            className="px-2.5 py-1.5 text-xs font-medium text-[#8E315D] hover:bg-[#FDF2F6] rounded-lg transition-colors"
                           >
                             Ko&apos;rish
                           </Link>
                           <button
                             onClick={() => openRenew(sub)}
-                            className="px-2.5 py-1.5 text-xs font-medium text-[#374151] hover:bg-[#F3F4F6] rounded-lg transition-colors"
+                            className="px-2.5 py-1.5 text-xs font-medium text-[#3D3240] hover:bg-[#F2ECF0] rounded-lg transition-colors"
                           >
                             Uzaytirish
                           </button>
                           {sub.status !== "cancelled" && sub.status !== "expired" && (
                             <button
                               onClick={() => openChangePlan(sub)}
-                              className="px-2.5 py-1.5 text-xs font-medium text-[#374151] hover:bg-[#F3F4F6] rounded-lg transition-colors"
+                              className="px-2.5 py-1.5 text-xs font-medium text-[#3D3240] hover:bg-[#F2ECF0] rounded-lg transition-colors"
                             >
                               {uz.super_admin.tarif_almashtirish}
                             </button>
@@ -422,28 +428,28 @@ export default function SubscriptionsPage() {
             </div>
 
             {/* Mobile cards */}
-            <div className="lg:hidden divide-y divide-[#F3F4F6]">
+            <div className="lg:hidden divide-y divide-[#F2ECF0]">
               {subs.map((sub) => (
                 <div key={sub.id} className="px-4 py-4 space-y-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <div className="h-8 w-8 rounded-lg bg-[#F5F3FF] flex items-center justify-center text-[#7C3AED] font-bold text-xs flex-shrink-0">
+                      <div className="h-8 w-8 rounded-lg bg-[#FDF2F6] flex items-center justify-center text-[#8E315D] font-bold text-xs flex-shrink-0">
                         {(sub.organization?.name ?? "?").charAt(0).toUpperCase()}
                       </div>
                       <div>
-                        <p className="font-medium text-[#111827] text-sm">{sub.organization?.name ?? "—"}</p>
-                        <p className="text-xs text-[#9CA3AF]">{sub.plan?.name ?? "—"}</p>
+                        <p className="font-medium text-[#29232A] text-sm">{sub.organization?.name ?? "—"}</p>
+                        <p className="text-xs text-[#B8AAB2]">{sub.plan?.name ?? "—"}</p>
                       </div>
                     </div>
                     <Badge variant={subStatusVariant(sub.status)}>{subStatusLabel(sub.status)}</Badge>
                   </div>
                   <div className="flex items-center justify-between text-sm">
-                    <span className="text-[#9CA3AF]">{uz.super_admin.tugash}: {fmtDate(sub.ends_at)}</span>
+                    <span className="text-[#B8AAB2]">{uz.super_admin.tugash}: {fmtDate(sub.ends_at)}</span>
                     <DaysCell days={sub.days_remaining} status={sub.status} />
                   </div>
                   <div className="flex gap-2 flex-wrap">
-                    <Link href={`/admin/bogchalar/${sub.organization_id}`} className="text-xs px-3 py-1.5 border border-[#E5E7EB] rounded-lg text-[#374151] hover:bg-[#F8FAFC]">Ko&apos;rish</Link>
-                    <button onClick={() => openRenew(sub)} className="text-xs px-3 py-1.5 border border-[#E5E7EB] rounded-lg text-[#374151] hover:bg-[#F8FAFC]">Uzaytirish</button>
+                    <Link href={`/admin/bogchalar/${sub.organization_id}`} className="text-xs px-3 py-1.5 border border-[#EDE3E8] rounded-lg text-[#3D3240] hover:bg-[#FFF9F5]">Ko&apos;rish</Link>
+                    <button onClick={() => openRenew(sub)} className="text-xs px-3 py-1.5 border border-[#EDE3E8] rounded-lg text-[#3D3240] hover:bg-[#FFF9F5]">Uzaytirish</button>
                     {sub.status !== "cancelled" && (
                       <button onClick={() => openCancel(sub)} className="text-xs px-3 py-1.5 border border-[#FEE2E2] rounded-lg text-[#991B1B] hover:bg-[#FEF2F2]">Bekor</button>
                     )}
@@ -471,9 +477,9 @@ export default function SubscriptionsPage() {
       >
         <form id="sub-renew-form" onSubmit={handleRenew} className="space-y-4">
           {selected?.organization && (
-            <div className="px-4 py-3 bg-[#F9FAFB] rounded-lg">
-              <p className="text-xs text-[#9CA3AF] mb-1">Bog&apos;cha</p>
-              <p className="text-sm font-medium text-[#111827]">{selected.organization.name}</p>
+            <div className="px-4 py-3 bg-[#FAF5F8] rounded-lg">
+              <p className="text-xs text-[#B8AAB2] mb-1">Bog&apos;cha</p>
+              <p className="text-sm font-medium text-[#29232A]">{selected.organization.name}</p>
             </div>
           )}
           <Select
@@ -495,7 +501,7 @@ export default function SubscriptionsPage() {
             type="date"
             value={renewForm.ends_at}
             onChange={(e) => setRenewForm({ ...renewForm, ends_at: e.target.value })}
-            min={new Date(Date.now() + 86400000).toISOString().split("T")[0]}
+            min={minRenewDate}
             error={renewErrors.ends_at?.[0]}
             required
           />
@@ -531,9 +537,9 @@ export default function SubscriptionsPage() {
       >
         <form id="sub-change-plan-form" onSubmit={handleChangePlan} className="space-y-4">
           {selected?.plan && (
-            <div className="px-4 py-3 bg-[#F9FAFB] rounded-lg">
-              <p className="text-xs text-[#9CA3AF] mb-1">{uz.super_admin.joriy_tarif}</p>
-              <p className="text-sm font-medium text-[#111827]">{selected.plan.name}</p>
+            <div className="px-4 py-3 bg-[#FAF5F8] rounded-lg">
+              <p className="text-xs text-[#B8AAB2] mb-1">{uz.super_admin.joriy_tarif}</p>
+              <p className="text-sm font-medium text-[#29232A]">{selected.plan.name}</p>
             </div>
           )}
           <Select
@@ -549,7 +555,7 @@ export default function SubscriptionsPage() {
               </option>
             ))}
           </Select>
-          <p className="text-xs text-[#9CA3AF]">{uz.super_admin.darhol} kuchga kiradi</p>
+          <p className="text-xs text-[#B8AAB2]">{uz.super_admin.darhol} kuchga kiradi</p>
         </form>
       </Modal>
 
@@ -569,12 +575,12 @@ export default function SubscriptionsPage() {
       >
         <form id="sub-cancel-form" onSubmit={handleCancel} className="space-y-4">
           {selected?.organization && (
-            <p className="text-sm text-[#6B7280]">
+            <p className="text-sm text-[#766B73]">
               <strong>{selected.organization.name}</strong> obunasini bekor qilmoqchimisiz?
             </p>
           )}
           <div>
-            <label className="block text-sm font-medium text-[#374151] mb-1.5">
+            <label className="block text-sm font-medium text-[#3D3240] mb-1.5">
               {uz.super_admin.bekor_qilish_sababi} (ixtiyoriy)
             </label>
             <textarea
@@ -582,7 +588,7 @@ export default function SubscriptionsPage() {
               onChange={(e) => setCancelForm({ reason: e.target.value })}
               rows={3}
               placeholder="Sabab..."
-              className="w-full px-3.5 py-2.5 text-sm border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#7C3AED]/20 focus:border-[#7C3AED] resize-none"
+              className="w-full px-3.5 py-2.5 text-sm border border-[#EDE3E8] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#8E315D]/20 focus:border-[#8E315D] resize-none"
             />
           </div>
         </form>

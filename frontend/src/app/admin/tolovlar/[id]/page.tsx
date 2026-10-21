@@ -71,9 +71,9 @@ function payMethodLabel(m: string | null): string {
 
 function Row({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <div className="flex items-start gap-4 py-3.5 border-b border-[#F3F4F6] last:border-0">
-      <span className="w-44 flex-shrink-0 text-sm text-[#6B7280]">{label}</span>
-      <span className="flex-1 text-sm font-medium text-[#111827]">{children}</span>
+    <div className="flex items-start gap-4 py-3.5 border-b border-[#F2ECF0] last:border-0">
+      <span className="w-44 flex-shrink-0 text-sm text-[#766B73]">{label}</span>
+      <span className="flex-1 text-sm font-medium text-[#29232A]">{children}</span>
     </div>
   );
 }
@@ -109,16 +109,16 @@ export default function TolovDetailPage() {
       <div className="flex items-center gap-4">
         <button
           onClick={() => router.back()}
-          className="p-2 rounded-lg text-[#6B7280] hover:text-[#111827] hover:bg-[#F3F4F6] transition-colors"
+          className="p-2 rounded-lg text-[#766B73] hover:text-[#29232A] hover:bg-[#F2ECF0] transition-colors"
         >
           <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
           </svg>
         </button>
         <div>
-          <h1 className="text-2xl font-bold text-[#111827]">To&apos;lov tafsiloti</h1>
+          <h1 className="text-2xl font-bold text-[#29232A]">To&apos;lov tafsiloti</h1>
           {payment && (
-            <p className="text-sm text-[#9CA3AF] mt-0.5">
+            <p className="text-sm text-[#B8AAB2] mt-0.5">
               #{payment.id}
               {payment.invoice_number && (
                 <span className="ml-2 font-mono">· {payment.invoice_number}</span>
@@ -129,18 +129,18 @@ export default function TolovDetailPage() {
       </div>
 
       {loading ? (
-        <div className="bg-white rounded-xl border border-[#E5E7EB] p-6 animate-pulse space-y-4">
+        <div className="bg-white rounded-xl border border-[#EDE3E8] p-6 animate-pulse space-y-4">
           {[...Array(7)].map((_, i) => (
-            <div key={i} className="flex gap-4 py-3.5 border-b border-[#F3F4F6]">
-              <div className="h-4 w-40 bg-[#F3F4F6] rounded" />
-              <div className="h-4 w-56 bg-[#F3F4F6] rounded" />
+            <div key={i} className="flex gap-4 py-3.5 border-b border-[#F2ECF0]">
+              <div className="h-4 w-40 bg-[#F2ECF0] rounded" />
+              <div className="h-4 w-56 bg-[#F2ECF0] rounded" />
             </div>
           ))}
         </div>
       ) : error || !payment ? (
-        <div className="bg-white rounded-xl border border-[#E5E7EB] p-12 text-center space-y-3">
-          <p className="text-[#6B7280]">{uz.common.yuklash_xatosi}</p>
-          <Link href="/admin/tolovlar" className="text-sm text-[#7C3AED] hover:underline">
+        <div className="bg-white rounded-xl border border-[#EDE3E8] p-12 text-center space-y-3">
+          <p className="text-[#766B73]">{uz.common.yuklash_xatosi}</p>
+          <Link href="/admin/tolovlar" className="text-sm text-[#8E315D] hover:underline">
             To&apos;lovlar ro&apos;yxatiga qaytish
           </Link>
         </div>
@@ -151,22 +151,22 @@ export default function TolovDetailPage() {
             payment.status === "paid"    ? "bg-[#F0FDF4] border border-[#BBF7D0]" :
             payment.status === "pending" ? "bg-[#FFFBEB] border border-[#FDE68A]" :
             payment.status === "failed"  ? "bg-[#FEF2F2] border border-[#FECACA]" :
-                                           "bg-[#F9FAFB] border border-[#E5E7EB]"
+                                           "bg-[#FAF5F8] border border-[#EDE3E8]"
           }`}>
             <Badge variant={payStatusVariant(payment.status)}>
               {payStatusLabel(payment.status)}
             </Badge>
-            <span className="text-sm font-bold text-[#111827]">
+            <span className="text-sm font-bold text-[#29232A]">
               {fmtMoney(payment.amount, payment.currency)}
             </span>
             {payment.paid_at && (
-              <span className="text-sm text-[#6B7280] ml-auto">{fmtDate(payment.paid_at)}</span>
+              <span className="text-sm text-[#766B73] ml-auto">{fmtDate(payment.paid_at)}</span>
             )}
           </div>
 
           {/* Details card */}
-          <div className="bg-white rounded-xl border border-[#E5E7EB] px-6 py-2">
-            <h2 className="text-sm font-semibold text-[#374151] uppercase tracking-wide py-3.5 border-b border-[#F3F4F6]">
+          <div className="bg-white rounded-xl border border-[#EDE3E8] px-6 py-2">
+            <h2 className="text-sm font-semibold text-[#3D3240] uppercase tracking-wide py-3.5 border-b border-[#F2ECF0]">
               To&apos;lov ma&apos;lumotlari
             </h2>
 
@@ -191,8 +191,8 @@ export default function TolovDetailPage() {
           </div>
 
           {/* Organization & subscription */}
-          <div className="bg-white rounded-xl border border-[#E5E7EB] px-6 py-2">
-            <h2 className="text-sm font-semibold text-[#374151] uppercase tracking-wide py-3.5 border-b border-[#F3F4F6]">
+          <div className="bg-white rounded-xl border border-[#EDE3E8] px-6 py-2">
+            <h2 className="text-sm font-semibold text-[#3D3240] uppercase tracking-wide py-3.5 border-b border-[#F2ECF0]">
               Tashkilot va obuna
             </h2>
 
@@ -200,7 +200,7 @@ export default function TolovDetailPage() {
               {payment.organization ? (
                 <Link
                   href={`/admin/bogchalar/${payment.organization.id}`}
-                  className="text-[#7C3AED] hover:text-[#6D28D9] transition-colors"
+                  className="text-[#8E315D] hover:text-[#742548] transition-colors"
                 >
                   {payment.organization.name}
                 </Link>
@@ -213,8 +213,8 @@ export default function TolovDetailPage() {
           </div>
 
           {/* Dates */}
-          <div className="bg-white rounded-xl border border-[#E5E7EB] px-6 py-2">
-            <h2 className="text-sm font-semibold text-[#374151] uppercase tracking-wide py-3.5 border-b border-[#F3F4F6]">
+          <div className="bg-white rounded-xl border border-[#EDE3E8] px-6 py-2">
+            <h2 className="text-sm font-semibold text-[#3D3240] uppercase tracking-wide py-3.5 border-b border-[#F2ECF0]">
               Sanalar
             </h2>
 
@@ -227,7 +227,7 @@ export default function TolovDetailPage() {
           <div className="pb-4">
             <Link
               href="/admin/tolovlar"
-              className="text-sm text-[#7C3AED] hover:text-[#6D28D9] font-medium transition-colors"
+              className="text-sm text-[#8E315D] hover:text-[#742548] font-medium transition-colors"
             >
               ← To&apos;lovlar ro&apos;yxatiga qaytish
             </Link>

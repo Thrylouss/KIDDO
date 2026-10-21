@@ -87,6 +87,20 @@ const mockSubscriptions = {
   arr: 59880000,
 };
 
+const mockExpiring = {
+  subscriptions: [
+    {
+      id: 1,
+      organization: { id: 1, name: "Yulduzcha Bog'cha" },
+      plan: "Premium",
+      status: "active" as const,
+      ends_at: "2026-10-20",
+      days_remaining: 7,
+    },
+  ],
+  total: 1,
+};
+
 const mockRecent = {
   payments: [
     {
@@ -140,6 +154,7 @@ const mockRecent = {
 function setupMocks() {
   vi.mocked(api.get).mockImplementation((url: string) => {
     if (url.includes("/dashboard/recent"))      return Promise.resolve(mockRecent);
+    if (url.includes("/dashboard/expiring"))    return Promise.resolve(mockExpiring);
     if (url.includes("/dashboard"))             return Promise.resolve(mockSummary);
     if (url.includes("/reports/revenue"))       return Promise.resolve(mockRevenue);
     if (url.includes("/reports/subscriptions")) return Promise.resolve(mockSubscriptions);

@@ -110,7 +110,7 @@ function SendModal({
           required
         />
         <div>
-          <label className="block text-sm font-medium text-[#374151] mb-1.5">
+          <label className="block text-sm font-medium text-[#3D3240] mb-1.5">
             {uz.super_admin.xabar_matni} <span className="text-[#EF4444]">*</span>
           </label>
           <textarea
@@ -118,7 +118,7 @@ function SendModal({
             onChange={(e) => setForm({ ...form, message: e.target.value })}
             required
             rows={4}
-            className="w-full rounded-xl border border-[#E5E7EB] bg-white px-4 py-3 text-sm text-[#111827] placeholder:text-[#9CA3AF] outline-none transition-all focus:border-[#2563EB] focus:ring-2 focus:ring-[#2563EB]/15 resize-none"
+            className="w-full rounded-xl border border-[#EDE3E8] bg-white px-4 py-3 text-sm text-[#29232A] placeholder:text-[#B8AAB2] outline-none transition-all focus:border-[#8E315D] focus:ring-2 focus:ring-[#8E315D]/15 resize-none"
             placeholder="Xabar matnini kiriting..."
           />
           {errors.message?.[0] && (
@@ -210,9 +210,9 @@ export default function XabarlarPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <h1 className="text-2xl font-bold text-[#111827]">{uz.super_admin.xabarlar}</h1>
+          <h1 className="text-2xl font-bold text-[#29232A]">{uz.super_admin.xabarlar}</h1>
           {unreadCount > 0 && (
-            <span className="inline-flex items-center justify-center h-6 min-w-[24px] px-1.5 rounded-full bg-[#7C3AED] text-white text-xs font-bold">
+            <span className="inline-flex items-center justify-center h-6 min-w-[24px] px-1.5 rounded-full bg-[#8E315D] text-white text-xs font-bold">
               {unreadCount}
             </span>
           )}
@@ -234,15 +234,15 @@ export default function XabarlarPage() {
       </div>
 
       {/* List */}
-      <div className="bg-white rounded-xl border border-[#E5E7EB] overflow-hidden">
+      <div className="bg-white rounded-xl border border-[#EDE3E8] overflow-hidden">
         {loading ? (
-          <div className="animate-pulse divide-y divide-[#F3F4F6]">
+          <div className="animate-pulse divide-y divide-[#F2ECF0]">
             {[...Array(5)].map((_, i) => (
               <div key={i} className="flex items-start gap-4 px-5 py-4">
-                <div className="h-9 w-9 rounded-lg bg-[#F3F4F6] flex-shrink-0" />
+                <div className="h-9 w-9 rounded-lg bg-[#F2ECF0] flex-shrink-0" />
                 <div className="flex-1 space-y-2">
-                  <div className="h-4 w-48 bg-[#F3F4F6] rounded" />
-                  <div className="h-3 w-64 bg-[#F3F4F6] rounded" />
+                  <div className="h-4 w-48 bg-[#F2ECF0] rounded" />
+                  <div className="h-3 w-64 bg-[#F2ECF0] rounded" />
                 </div>
               </div>
             ))}
@@ -252,7 +252,7 @@ export default function XabarlarPage() {
             <EmptyState title={uz.super_admin.xabar_yoq} icon={bellIcon} />
           </div>
         ) : (
-          <ul className="divide-y divide-[#F3F4F6]">
+          <ul className="divide-y divide-[#F2ECF0]">
             {notifications.map((n) => (
               <li
                 key={n.id}
@@ -265,7 +265,7 @@ export default function XabarlarPage() {
                   n.type === "alert"   ? "bg-[#FEF2F2] text-[#EF4444]" :
                   n.type === "warning" ? "bg-[#FFFBEB] text-[#F59E0B]" :
                   n.type === "payment" ? "bg-[#F0FDF4] text-[#22C55E]" :
-                                        "bg-[#EFF6FF] text-[#2563EB]"
+                                        "bg-[#FDF2F6] text-[#8E315D]"
                 }`}>
                   {n.type === "alert" ? (
                     <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -290,21 +290,21 @@ export default function XabarlarPage() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <p className={`text-sm font-semibold ${n.is_read ? "text-[#374151]" : "text-[#111827]"}`}>
+                      <p className={`text-sm font-semibold ${n.is_read ? "text-[#3D3240]" : "text-[#29232A]"}`}>
                         {n.title}
                       </p>
                       <Badge variant={typeVariant(n.type)}>{typeLabel(n.type)}</Badge>
                       {!n.is_read && (
-                        <span className="h-2 w-2 rounded-full bg-[#7C3AED] flex-shrink-0" />
+                        <span className="h-2 w-2 rounded-full bg-[#8E315D] flex-shrink-0" />
                       )}
                     </div>
-                    <span className="text-xs text-[#9CA3AF] flex-shrink-0">{fmtDate(n.created_at)}</span>
+                    <span className="text-xs text-[#B8AAB2] flex-shrink-0">{fmtDate(n.created_at)}</span>
                   </div>
-                  <p className="text-sm text-[#6B7280] mt-0.5 leading-relaxed">{n.message}</p>
+                  <p className="text-sm text-[#766B73] mt-0.5 leading-relaxed">{n.message}</p>
                   {!n.is_read && (
                     <button
                       onClick={() => markRead(n.id)}
-                      className="mt-2 text-xs text-[#7C3AED] hover:text-[#6D28D9] font-medium transition-colors"
+                      className="mt-2 text-xs text-[#8E315D] hover:text-[#742548] font-medium transition-colors"
                     >
                       {uz.super_admin.o_qildi} deb belgilash
                     </button>

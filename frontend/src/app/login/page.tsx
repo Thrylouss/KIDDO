@@ -64,14 +64,14 @@ export default function LoginPage() {
   }
 
   const inputBase =
-    "w-full rounded-xl border border-[#E5E7EB] bg-white px-4 py-3 text-sm text-[#111827] " +
-    "placeholder:text-[#9CA3AF] outline-none transition-all duration-150 kiddo-input " +
-    "focus:border-[#2563EB] focus:ring-2 focus:ring-[#2563EB]/15";
+    "w-full rounded-xl border border-[#EDE3E8] bg-white px-4 py-3 text-sm text-[#29232A] " +
+    "placeholder:text-[#B8AAB2] outline-none transition-all duration-150 kiddo-input " +
+    "focus:border-[#8E315D] focus:ring-2 focus:ring-[#8E315D]/15";
 
   return (
-    <div className="min-h-screen flex bg-[#F8FAFC]">
+    <div className="min-h-screen flex bg-[#FFF9F5]">
       {/* Left panel — branding */}
-      <div className="hidden lg:flex flex-col justify-between w-[440px] bg-[#2563EB] relative overflow-hidden flex-shrink-0 p-12">
+      <div className="hidden lg:flex flex-col justify-between w-[440px] bg-[#8E315D] relative overflow-hidden flex-shrink-0 p-12">
         {/* Dot grid decoration */}
         <div
           className="absolute inset-0 opacity-[0.07]"
@@ -99,7 +99,7 @@ export default function LoginPage() {
           <h1 className="text-3xl font-bold text-white leading-snug mb-3">
             {uz.login.tagline}
           </h1>
-          <p className="text-blue-200 text-sm leading-relaxed mb-10">
+          <p className="text-[#F4C7D7] text-sm leading-relaxed mb-10">
             Bolalar, guruhlar, tarbiyachilar va ota-onalarni bitta platformada boshqaring.
           </p>
 
@@ -127,22 +127,22 @@ export default function LoginPage() {
         <div className="w-full max-w-sm">
           {/* Mobile logo */}
           <div className="lg:hidden flex items-center gap-2.5 mb-10 justify-center">
-            <div className="h-9 w-9 rounded-xl bg-[#2563EB] flex items-center justify-center">
+            <div className="h-9 w-9 rounded-xl bg-[#8E315D] flex items-center justify-center">
               <svg className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v1m0 16v1m8.66-9h-1M4.34 12h-1m14.95 5.66l-.707-.707M6.757 6.757l-.707-.707m12.02 0l-.707.707M6.757 17.243l-.707.707" />
               </svg>
             </div>
-            <span className="text-2xl font-bold text-[#111827] tracking-tight">KIDDO</span>
+            <span className="text-2xl font-bold text-[#29232A] tracking-tight">KIDDO</span>
           </div>
 
           <div className="mb-8">
-            <h2 className="text-2xl font-bold text-[#111827]">{uz.auth.xush_kelibsiz}</h2>
-            <p className="text-[#6B7280] mt-1.5 text-sm">{uz.auth.xush_kelibsiz_tavsif}</p>
+            <h2 className="text-2xl font-bold text-[#29232A]">{uz.auth.xush_kelibsiz}</h2>
+            <p className="text-[#766B73] mt-1.5 text-sm">{uz.auth.xush_kelibsiz_tavsif}</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-[#374151] mb-1.5">
+              <label className="block text-sm font-medium text-[#3D3240] mb-1.5">
                 {uz.auth.telefon}
               </label>
               <input
@@ -157,7 +157,7 @@ export default function LoginPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-[#374151] mb-1.5">
+              <label className="block text-sm font-medium text-[#3D3240] mb-1.5">
                 {uz.auth.parol}
               </label>
               <div className="relative">
@@ -173,7 +173,7 @@ export default function LoginPage() {
                   type="button"
                   onClick={() => setShowPassword((v) => !v)}
                   aria-label={showPassword ? uz.auth.parolni_yashirish : uz.auth.parolni_korsatish}
-                  className="absolute inset-y-0 right-0 flex items-center px-3.5 text-[#9CA3AF] hover:text-[#374151] transition-colors"
+                  className="absolute inset-y-0 right-0 flex items-center px-3.5 text-[#B8AAB2] hover:text-[#3D3240] transition-colors"
                 >
                   <EyeIcon open={showPassword} />
                 </button>
@@ -192,7 +192,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full h-11 bg-[#2563EB] hover:bg-[#1D4ED8] disabled:opacity-60 disabled:cursor-not-allowed text-white font-semibold rounded-xl transition-all duration-150 active:scale-[0.99] flex items-center justify-center gap-2 mt-2"
+              className="w-full h-11 bg-[#8E315D] hover:bg-[#742548] disabled:opacity-60 disabled:cursor-not-allowed text-white font-semibold rounded-xl transition-all duration-150 active:scale-[0.99] flex items-center justify-center gap-2 mt-2"
             >
               {loading && (
                 <span className="h-4 w-4 rounded-full border-2 border-white border-t-transparent animate-spin" />

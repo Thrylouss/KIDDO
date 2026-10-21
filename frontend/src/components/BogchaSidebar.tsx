@@ -210,24 +210,24 @@ export default function BogchaSidebar({ onClose }: BogchaSidebarProps) {
   }
 
   return (
-    <aside className="flex flex-col w-64 h-full bg-white border-r border-[#E5E7EB]">
+    <aside className="flex flex-col w-64 h-full bg-white border-r border-[var(--border)]">
       {/* Logo */}
       <div className="flex items-center justify-between px-5 pt-6 pb-5">
         <div>
           <div className="flex items-center gap-2">
-            <div className="h-7 w-7 rounded-lg bg-[#2563EB] flex items-center justify-center flex-shrink-0">
+            <div className="h-7 w-7 rounded-lg bg-[var(--primary)] flex items-center justify-center flex-shrink-0">
               <svg className="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v1m0 16v1m8.66-9h-1M4.34 12h-1m14.95 5.66l-.707-.707M6.757 6.757l-.707-.707m12.02 0l-.707.707M6.757 17.243l-.707.707" />
               </svg>
             </div>
-            <span className="text-lg font-bold text-[#111827] tracking-tight">KIDDO</span>
+            <span className="text-lg font-bold text-[var(--text)] tracking-tight">KIDDO</span>
           </div>
-          <p className="text-[11px] text-[#9CA3AF] mt-0.5 ml-9">Boshqaruv tizimi</p>
+          <p className="text-[11px] text-[var(--text-3)] mt-0.5 ml-9">Boshqaruv tizimi</p>
         </div>
         {onClose && (
           <button
             onClick={onClose}
-            className="lg:hidden p-1.5 text-[#9CA3AF] hover:text-[#374151] rounded-lg hover:bg-[#F3F4F6] transition-colors"
+            className="lg:hidden p-1.5 text-[var(--text-3)] hover:text-[var(--label)] rounded-lg hover:bg-[var(--border-2)] transition-colors"
           >
             <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -240,7 +240,7 @@ export default function BogchaSidebar({ onClose }: BogchaSidebarProps) {
       <nav className="flex-1 px-3 pb-3 overflow-y-auto space-y-4">
         {sections.map((section) => (
           <div key={section.label}>
-            <p className="px-3 pb-1.5 text-[10px] font-semibold uppercase tracking-wider text-[#C4C9D4]">
+            <p className="px-3 pb-1.5 text-[10px] font-semibold uppercase tracking-wider text-[var(--text-3)]">
               {section.label}
             </p>
             <div className="space-y-0.5">
@@ -249,11 +249,11 @@ export default function BogchaSidebar({ onClose }: BogchaSidebarProps) {
                   return (
                     <div
                       key={item.label}
-                      className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-[#C4C9D4] cursor-default select-none"
+                      className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-[var(--text-3)] cursor-default select-none"
                     >
-                      <span className="flex-shrink-0 text-[#D1D5DB]">{item.icon}</span>
+                      <span className="flex-shrink-0 text-[#D9C9D1]">{item.icon}</span>
                       <span className="flex-1">{item.label}</span>
-                      <span className="text-[10px] font-medium text-[#C4C9D4] bg-[#F3F4F6] px-1.5 py-0.5 rounded-full leading-none">
+                      <span className="text-[10px] font-medium text-[var(--text-3)] bg-[var(--border-2)] px-1.5 py-0.5 rounded-full leading-none">
                         {uz.common.tez_kunda}
                       </span>
                     </div>
@@ -269,16 +269,16 @@ export default function BogchaSidebar({ onClose }: BogchaSidebarProps) {
                     className={[
                       "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150 group",
                       active
-                        ? "bg-[#EFF6FF] text-[#2563EB]"
-                        : "text-[#374151] hover:bg-[#F8FAFC] hover:text-[#111827]",
+                        ? "bg-[var(--primary-lt)] text-[var(--primary)]"
+                        : "text-[var(--label)] hover:bg-[var(--bg)] hover:text-[var(--text)]",
                     ].join(" ")}
                   >
-                    <span className={`flex-shrink-0 ${active ? "text-[#2563EB]" : "text-[#9CA3AF] group-hover:text-[#6B7280]"} transition-colors`}>
+                    <span className={`flex-shrink-0 ${active ? "text-[var(--primary)]" : "text-[var(--text-3)] group-hover:text-[var(--text-2)]"} transition-colors`}>
                       {item.icon}
                     </span>
                     <span className="flex-1">{item.label}</span>
                     {active && (
-                      <span className="h-1.5 w-1.5 rounded-full bg-[#2563EB] flex-shrink-0" />
+                      <span className="h-1.5 w-1.5 rounded-full bg-[var(--primary)] flex-shrink-0" />
                     )}
                   </Link>
                 );
@@ -289,19 +289,19 @@ export default function BogchaSidebar({ onClose }: BogchaSidebarProps) {
       </nav>
 
       {/* User */}
-      <div className="px-3 py-3 border-t border-[#E5E7EB]">
+      <div className="px-3 py-3 border-t border-[var(--border)]">
         <div className="flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1">
           <Avatar name={user?.name ?? "?"} size="sm" />
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-[#111827] truncate">{user?.name ?? "—"}</p>
-            <p className="text-xs text-[#9CA3AF] capitalize">
+            <p className="text-sm font-medium text-[var(--text)] truncate">{user?.name ?? "—"}</p>
+            <p className="text-xs text-[var(--text-3)] capitalize">
               {user?.role === "super_admin" ? "Bosh admin" : user?.role ?? ""}
             </p>
           </div>
         </div>
         <button
           onClick={handleLogout}
-          className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-[#6B7280] hover:bg-[#FEF2F2] hover:text-[#EF4444] transition-colors duration-150"
+          className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-[var(--text-2)] hover:bg-[#FEF2F2] hover:text-[#EF4444] transition-colors duration-150"
         >
           <svg className="h-4 w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />

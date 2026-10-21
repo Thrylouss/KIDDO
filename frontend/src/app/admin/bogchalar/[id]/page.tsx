@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { api, impersonation } from "@/lib/api";
@@ -111,13 +111,13 @@ function actionIcon(action: string): React.ReactNode {
 
 function KpiCard({ label, value, icon }: { label: string; value: number; icon: React.ReactNode }) {
   return (
-    <div className="bg-white rounded-xl border border-[#E5E7EB] px-5 py-4 flex items-center gap-4">
-      <div className="h-10 w-10 rounded-xl bg-[#F3F4F6] text-[#9CA3AF] flex items-center justify-center flex-shrink-0">
+    <div className="bg-white rounded-xl border border-[#EDE3E8] px-5 py-4 flex items-center gap-4">
+      <div className="h-10 w-10 rounded-xl bg-[#F2ECF0] text-[#B8AAB2] flex items-center justify-center flex-shrink-0">
         {icon}
       </div>
       <div>
-        <p className="text-2xl font-bold text-[#111827] leading-none">{value}</p>
-        <p className="text-xs text-[#9CA3AF] mt-1">{label}</p>
+        <p className="text-2xl font-bold text-[#29232A] leading-none">{value}</p>
+        <p className="text-xs text-[#B8AAB2] mt-1">{label}</p>
       </div>
     </div>
   );
@@ -128,9 +128,9 @@ function SectionCard({ title, children, action }: {
   action?: React.ReactNode;
 }) {
   return (
-    <div className="bg-white rounded-xl border border-[#E5E7EB]">
-      <div className="flex items-center justify-between px-6 py-4 border-b border-[#E5E7EB]">
-        <h2 className="text-sm font-semibold text-[#111827]">{title}</h2>
+    <div className="bg-white rounded-xl border border-[#EDE3E8]">
+      <div className="flex items-center justify-between px-6 py-4 border-b border-[#EDE3E8]">
+        <h2 className="text-sm font-semibold text-[#29232A]">{title}</h2>
         {action}
       </div>
       {children}
@@ -140,9 +140,9 @@ function SectionCard({ title, children, action }: {
 
 function Row({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <div className="flex items-center justify-between py-2.5 border-b border-[#F3F4F6] last:border-0">
-      <span className="text-sm text-[#6B7280]">{label}</span>
-      <div className="text-sm font-medium text-[#111827]">{children}</div>
+    <div className="flex items-center justify-between py-2.5 border-b border-[#F2ECF0] last:border-0">
+      <span className="text-sm text-[#766B73]">{label}</span>
+      <div className="text-sm font-medium text-[#29232A]">{children}</div>
     </div>
   );
 }
@@ -191,6 +191,12 @@ export default function OrgDetailPage() {
   const [resetPwding,   setResetPwding]   = useState(false);
   const [resetPwdError, setResetPwdError] = useState("");
 
+  const minRenewDate = useMemo(() => {
+    const d = new Date();
+    d.setDate(d.getDate() + 1);
+    return d.toISOString().split("T")[0];
+  }, []);
+
   async function load() {
     setError(false);
     setLoading(true);
@@ -212,6 +218,7 @@ export default function OrgDetailPage() {
     }
   }
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { load(); }, [id]);
 
   async function handleEnter() {
@@ -336,18 +343,18 @@ export default function OrgDetailPage() {
   if (loading) {
     return (
       <div className="max-w-5xl mx-auto space-y-6 animate-pulse">
-        <div className="h-4 w-32 bg-[#F3F4F6] rounded" />
-        <div className="bg-white rounded-xl border border-[#E5E7EB] p-6">
+        <div className="h-4 w-32 bg-[#F2ECF0] rounded" />
+        <div className="bg-white rounded-xl border border-[#EDE3E8] p-6">
           <div className="flex items-center gap-4">
-            <div className="h-14 w-14 rounded-xl bg-[#F3F4F6]" />
+            <div className="h-14 w-14 rounded-xl bg-[#F2ECF0]" />
             <div className="space-y-2 flex-1">
-              <div className="h-5 w-48 bg-[#F3F4F6] rounded" />
-              <div className="h-3 w-32 bg-[#F3F4F6] rounded" />
+              <div className="h-5 w-48 bg-[#F2ECF0] rounded" />
+              <div className="h-3 w-32 bg-[#F2ECF0] rounded" />
             </div>
           </div>
         </div>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          {[1,2,3,4].map(i => <div key={i} className="h-20 bg-white rounded-xl border border-[#E5E7EB] bg-[#F3F4F6]" />)}
+          {[1,2,3,4].map(i => <div key={i} className="h-20 bg-white rounded-xl border border-[#EDE3E8] bg-[#F2ECF0]" />)}
         </div>
       </div>
     );
@@ -356,8 +363,8 @@ export default function OrgDetailPage() {
   if (error || !org) {
     return (
       <div className="max-w-5xl mx-auto">
-        <div className="bg-white rounded-xl border border-[#E5E7EB] p-12 text-center space-y-3">
-          <p className="text-[#6B7280]">{uz.common.yuklash_xatosi}</p>
+        <div className="bg-white rounded-xl border border-[#EDE3E8] p-12 text-center space-y-3">
+          <p className="text-[#766B73]">{uz.common.yuklash_xatosi}</p>
           <Button onClick={load}>{uz.common.qayta_urinish}</Button>
         </div>
       </div>
@@ -377,7 +384,7 @@ export default function OrgDetailPage() {
       {/* Breadcrumb */}
       <Link
         href="/admin/bogchalar"
-        className="inline-flex items-center gap-1.5 text-sm text-[#9CA3AF] hover:text-[#374151] transition-colors"
+        className="inline-flex items-center gap-1.5 text-sm text-[#B8AAB2] hover:text-[#3D3240] transition-colors"
       >
         <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -386,39 +393,39 @@ export default function OrgDetailPage() {
       </Link>
 
       {/* Header card */}
-      <div className="bg-white rounded-xl border border-[#E5E7EB] p-6">
+      <div className="bg-white rounded-xl border border-[#EDE3E8] p-6">
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
           <div className="flex items-start gap-4">
             {/* Avatar */}
-            <div className="h-14 w-14 rounded-xl bg-[#F5F3FF] flex items-center justify-center text-[#7C3AED] text-xl font-bold flex-shrink-0 select-none">
+            <div className="h-14 w-14 rounded-xl bg-[#FDF2F6] flex items-center justify-center text-[#8E315D] text-xl font-bold flex-shrink-0 select-none">
               {org.name.charAt(0).toUpperCase()}
             </div>
             <div>
               <div className="flex items-center gap-2.5 flex-wrap">
-                <h1 className="text-xl font-bold text-[#111827]">{org.name}</h1>
+                <h1 className="text-xl font-bold text-[#29232A]">{org.name}</h1>
                 <Badge variant={org.is_active ? "success" : "neutral"}>
                   {org.is_active ? uz.common.faol : uz.common.nofaol}
                 </Badge>
               </div>
               <div className="mt-1.5 space-y-0.5">
                 {org.phone && (
-                  <p className="text-sm text-[#6B7280] flex items-center gap-1.5">
-                    <svg className="h-3.5 w-3.5 text-[#9CA3AF]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <p className="text-sm text-[#766B73] flex items-center gap-1.5">
+                    <svg className="h-3.5 w-3.5 text-[#B8AAB2]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                     </svg>
                     {org.phone}
                   </p>
                 )}
                 {org.address && (
-                  <p className="text-sm text-[#6B7280] flex items-center gap-1.5">
-                    <svg className="h-3.5 w-3.5 text-[#9CA3AF]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <p className="text-sm text-[#766B73] flex items-center gap-1.5">
+                    <svg className="h-3.5 w-3.5 text-[#B8AAB2]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                       <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                     </svg>
                     {org.address}
                   </p>
                 )}
-                <p className="text-xs text-[#C4C9D4]">
+                <p className="text-xs text-[#C9B8C0]">
                   Qo&apos;shilgan: {fmtDate(org.created_at)}
                 </p>
               </div>
@@ -479,7 +486,7 @@ export default function OrgDetailPage() {
             action={
               <button
                 onClick={() => setShowRenew(true)}
-                className="text-xs text-[#7C3AED] hover:text-[#6D28D9] font-medium transition-colors"
+                className="text-xs text-[#8E315D] hover:text-[#742548] font-medium transition-colors"
               >
                 {uz.super_admin.obuna_uzaytirish}
               </button>
@@ -504,7 +511,7 @@ export default function OrgDetailPage() {
                   </Row>
                   {sub.ends_at && (
                     <div className="pt-3">
-                      <div className="w-full h-1.5 bg-[#F3F4F6] rounded-full overflow-hidden">
+                      <div className="w-full h-1.5 bg-[#F2ECF0] rounded-full overflow-hidden">
                         <div
                           className={`h-full rounded-full transition-all duration-500 ${daysBarColor}`}
                           style={{ width: `${daysBarPct}%` }}
@@ -514,7 +521,7 @@ export default function OrgDetailPage() {
                   )}
                 </div>
               ) : (
-                <p className="text-sm text-[#9CA3AF] py-2">{uz.super_admin.obuna_yoq}</p>
+                <p className="text-sm text-[#B8AAB2] py-2">{uz.super_admin.obuna_yoq}</p>
               )}
             </div>
           </SectionCard>
@@ -522,33 +529,33 @@ export default function OrgDetailPage() {
           {/* Payment history */}
           <SectionCard title={uz.super_admin.tolov_tarixi}>
             {payments.length === 0 ? (
-              <div className="px-6 py-8 text-center text-sm text-[#9CA3AF]">
+              <div className="px-6 py-8 text-center text-sm text-[#B8AAB2]">
                 {uz.super_admin.hech_tolov_yoq}
               </div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b border-[#F3F4F6] bg-[#F9FAFB]">
-                      <th className="text-left px-5 py-3 text-xs font-semibold text-[#6B7280] uppercase tracking-wide">{uz.super_admin.sana}</th>
-                      <th className="text-left px-5 py-3 text-xs font-semibold text-[#6B7280] uppercase tracking-wide">{uz.super_admin.summa}</th>
-                      <th className="text-left px-5 py-3 text-xs font-semibold text-[#6B7280] uppercase tracking-wide hidden sm:table-cell">{uz.super_admin.tarif}</th>
-                      <th className="text-left px-5 py-3 text-xs font-semibold text-[#6B7280] uppercase tracking-wide">{uz.super_admin.holat}</th>
+                    <tr className="border-b border-[#F2ECF0] bg-[#FAF5F8]">
+                      <th className="text-left px-5 py-3 text-xs font-semibold text-[#766B73] uppercase tracking-wide">{uz.super_admin.sana}</th>
+                      <th className="text-left px-5 py-3 text-xs font-semibold text-[#766B73] uppercase tracking-wide">{uz.super_admin.summa}</th>
+                      <th className="text-left px-5 py-3 text-xs font-semibold text-[#766B73] uppercase tracking-wide hidden sm:table-cell">{uz.super_admin.tarif}</th>
+                      <th className="text-left px-5 py-3 text-xs font-semibold text-[#766B73] uppercase tracking-wide">{uz.super_admin.holat}</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-[#F3F4F6]">
+                  <tbody className="divide-y divide-[#F2ECF0]">
                     {payments.map((p) => (
-                      <tr key={p.id} className="hover:bg-[#F9FAFB] transition-colors">
+                      <tr key={p.id} className="hover:bg-[#FAF5F8] transition-colors">
                         <td className="px-5 py-3.5">
-                          <p className="text-[#111827]">{fmtDate(p.paid_at ?? p.created_at)}</p>
+                          <p className="text-[#29232A]">{fmtDate(p.paid_at ?? p.created_at)}</p>
                           {p.invoice_number && (
-                            <p className="text-xs text-[#C4C9D4] font-mono mt-0.5">{p.invoice_number}</p>
+                            <p className="text-xs text-[#C9B8C0] font-mono mt-0.5">{p.invoice_number}</p>
                           )}
                         </td>
-                        <td className="px-5 py-3.5 font-medium text-[#111827]">
+                        <td className="px-5 py-3.5 font-medium text-[#29232A]">
                           {formatMoney(p.amount, p.currency)}
                         </td>
-                        <td className="px-5 py-3.5 text-[#6B7280] hidden sm:table-cell">
+                        <td className="px-5 py-3.5 text-[#766B73] hidden sm:table-cell">
                           {p.plan_name ?? "—"}
                         </td>
                         <td className="px-5 py-3.5">
@@ -565,23 +572,23 @@ export default function OrgDetailPage() {
           {/* Activity log */}
           <SectionCard title={uz.super_admin.faoliyat_tarixi}>
             {activity.length === 0 ? (
-              <div className="px-6 py-8 text-center text-sm text-[#9CA3AF]">
+              <div className="px-6 py-8 text-center text-sm text-[#B8AAB2]">
                 {uz.super_admin.hech_faoliyat_yoq}
               </div>
             ) : (
-              <ul className="divide-y divide-[#F3F4F6]">
+              <ul className="divide-y divide-[#F2ECF0]">
                 {activity.map((log) => (
                   <li key={log.id} className="flex items-start gap-3 px-6 py-3.5">
-                    <div className="h-6 w-6 rounded-full bg-[#F3F4F6] text-[#9CA3AF] flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <div className="h-6 w-6 rounded-full bg-[#F2ECF0] text-[#B8AAB2] flex items-center justify-center flex-shrink-0 mt-0.5">
                       {actionIcon(log.action)}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm text-[#111827]">{log.description}</p>
-                      <p className="text-xs text-[#9CA3AF] mt-0.5">
+                      <p className="text-sm text-[#29232A]">{log.description}</p>
+                      <p className="text-xs text-[#B8AAB2] mt-0.5">
                         {log.user ? `${log.user.name} · ` : ""}{relTime(log.created_at)}
                       </p>
                     </div>
-                    <span className="text-xs text-[#D1D5DB] flex-shrink-0 hidden sm:inline">{actionLabel(log.action)}</span>
+                    <span className="text-xs text-[#D9C9D1] flex-shrink-0 hidden sm:inline">{actionLabel(log.action)}</span>
                   </li>
                 ))}
               </ul>
@@ -593,8 +600,8 @@ export default function OrgDetailPage() {
         <div className="space-y-5">
 
           {/* Quick actions */}
-          <div className="bg-white rounded-xl border border-[#E5E7EB] p-5 space-y-2">
-            <p className="text-xs font-semibold text-[#9CA3AF] uppercase tracking-wider mb-3">{uz.super_admin.amallar}</p>
+          <div className="bg-white rounded-xl border border-[#EDE3E8] p-5 space-y-2">
+            <p className="text-xs font-semibold text-[#B8AAB2] uppercase tracking-wider mb-3">{uz.super_admin.amallar}</p>
 
             <Button
               className="w-full justify-center"
@@ -611,7 +618,7 @@ export default function OrgDetailPage() {
 
             <button
               onClick={() => setShowRenew(true)}
-              className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-xl border border-[#E5E7EB] text-sm font-medium text-[#374151] hover:bg-[#F8FAFC] transition-colors"
+              className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-xl border border-[#EDE3E8] text-sm font-medium text-[#3D3240] hover:bg-[#FFF9F5] transition-colors"
             >
               <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -622,7 +629,7 @@ export default function OrgDetailPage() {
             {sub && sub.status !== "cancelled" && sub.status !== "expired" && (
               <button
                 onClick={() => setShowChangePlan(true)}
-                className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-xl border border-[#E5E7EB] text-sm font-medium text-[#374151] hover:bg-[#F8FAFC] transition-colors"
+                className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-xl border border-[#EDE3E8] text-sm font-medium text-[#3D3240] hover:bg-[#FFF9F5] transition-colors"
               >
                 <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
@@ -645,19 +652,19 @@ export default function OrgDetailPage() {
 
             <button
               disabled
-              className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-xl border border-[#E5E7EB] text-sm font-medium text-[#D1D5DB] cursor-not-allowed"
+              className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-xl border border-[#EDE3E8] text-sm font-medium text-[#D9C9D1] cursor-not-allowed"
             >
               <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
               </svg>
               Xabar yuborish
-              <span className="ml-auto text-[10px] bg-[#F3F4F6] text-[#C4C9D4] px-1.5 py-0.5 rounded-full">{uz.common.tez_kunda}</span>
+              <span className="ml-auto text-[10px] bg-[#F2ECF0] text-[#C9B8C0] px-1.5 py-0.5 rounded-full">{uz.common.tez_kunda}</span>
             </button>
 
-            <div className="border-t border-[#F3F4F6] pt-2 mt-2 space-y-1.5">
+            <div className="border-t border-[#F2ECF0] pt-2 mt-2 space-y-1.5">
               <button
                 onClick={() => setShowResetPwd(true)}
-                className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-xl border border-[#E5E7EB] text-sm font-medium text-[#374151] hover:bg-[#F8FAFC] transition-colors"
+                className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-xl border border-[#EDE3E8] text-sm font-medium text-[#3D3240] hover:bg-[#FFF9F5] transition-colors"
               >
                 <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
@@ -688,23 +695,23 @@ export default function OrgDetailPage() {
           </div>
 
           {/* Admins */}
-          <div className="bg-white rounded-xl border border-[#E5E7EB]">
-            <div className="px-5 py-4 border-b border-[#E5E7EB]">
-              <h2 className="text-sm font-semibold text-[#111827]">{uz.super_admin.admin_malumotlari}</h2>
+          <div className="bg-white rounded-xl border border-[#EDE3E8]">
+            <div className="px-5 py-4 border-b border-[#EDE3E8]">
+              <h2 className="text-sm font-semibold text-[#29232A]">{uz.super_admin.admin_malumotlari}</h2>
             </div>
             <div className="p-5">
               {org.admins.length === 0 ? (
-                <p className="text-sm text-[#9CA3AF]">{uz.super_admin.admin_yoq}</p>
+                <p className="text-sm text-[#B8AAB2]">{uz.super_admin.admin_yoq}</p>
               ) : (
                 <ul className="space-y-3">
                   {org.admins.map((admin) => (
                     <li key={admin.id} className="flex items-center gap-3">
-                      <div className="h-8 w-8 rounded-lg bg-[#EFF6FF] flex items-center justify-center text-[#2563EB] text-xs font-bold flex-shrink-0">
+                      <div className="h-8 w-8 rounded-lg bg-[#FDF2F6] flex items-center justify-center text-[#8E315D] text-xs font-bold flex-shrink-0">
                         {(admin.name ?? "?").charAt(0).toUpperCase()}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-[#111827] truncate">{admin.name}</p>
-                        <p className="text-xs text-[#9CA3AF] truncate">{admin.phone ?? admin.email ?? "—"}</p>
+                        <p className="text-sm font-medium text-[#29232A] truncate">{admin.name}</p>
+                        <p className="text-xs text-[#B8AAB2] truncate">{admin.phone ?? admin.email ?? "—"}</p>
                       </div>
                       <Badge variant={admin.is_active ? "success" : "neutral"}>
                         {admin.is_active ? uz.common.faol : uz.common.nofaol}
@@ -751,7 +758,7 @@ export default function OrgDetailPage() {
             type="date"
             value={renewForm.ends_at}
             onChange={(e) => setRenewForm({ ...renewForm, ends_at: e.target.value })}
-            min={new Date(Date.now() + 86400000).toISOString().split("T")[0]}
+            min={minRenewDate}
             error={renewErrors.ends_at?.[0]}
             required
           />
@@ -789,9 +796,9 @@ export default function OrgDetailPage() {
       >
         <form id="change-plan-form" onSubmit={handleChangePlan} className="space-y-4">
           {sub?.plan && (
-            <div className="px-4 py-3 bg-[#F9FAFB] rounded-lg">
-              <p className="text-xs text-[#9CA3AF] mb-1">{uz.super_admin.joriy_tarif}</p>
-              <p className="text-sm font-medium text-[#111827]">{sub.plan.name}</p>
+            <div className="px-4 py-3 bg-[#FAF5F8] rounded-lg">
+              <p className="text-xs text-[#B8AAB2] mb-1">{uz.super_admin.joriy_tarif}</p>
+              <p className="text-sm font-medium text-[#29232A]">{sub.plan.name}</p>
             </div>
           )}
           <Select
@@ -807,7 +814,7 @@ export default function OrgDetailPage() {
               </option>
             ))}
           </Select>
-          <p className="text-xs text-[#9CA3AF]">{uz.super_admin.darhol} kuchga kiradi</p>
+          <p className="text-xs text-[#B8AAB2]">{uz.super_admin.darhol} kuchga kiradi</p>
         </form>
       </Modal>
 
@@ -836,7 +843,7 @@ export default function OrgDetailPage() {
             onChange={(e) => setResetPwdForm({ password: e.target.value })}
             required
           />
-          <p className="text-xs text-[#9CA3AF]">Parol kamida 6 ta belgidan iborat bo&apos;lishi kerak.</p>
+          <p className="text-xs text-[#B8AAB2]">Parol kamida 6 ta belgidan iborat bo&apos;lishi kerak.</p>
         </form>
       </Modal>
 
@@ -855,9 +862,9 @@ export default function OrgDetailPage() {
         }
       >
         <form id="cancel-form" onSubmit={handleCancel} className="space-y-4">
-          <p className="text-sm text-[#6B7280]">{uz.super_admin.obuna_bekor_tasdiq}</p>
+          <p className="text-sm text-[#766B73]">{uz.super_admin.obuna_bekor_tasdiq}</p>
           <div>
-            <label className="block text-sm font-medium text-[#374151] mb-1.5">
+            <label className="block text-sm font-medium text-[#3D3240] mb-1.5">
               {uz.super_admin.bekor_qilish_sababi} (ixtiyoriy)
             </label>
             <textarea
@@ -865,7 +872,7 @@ export default function OrgDetailPage() {
               onChange={(e) => setCancelForm({ reason: e.target.value })}
               rows={3}
               placeholder="Sabab..."
-              className="w-full px-3.5 py-2.5 text-sm border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#7C3AED]/20 focus:border-[#7C3AED] resize-none"
+              className="w-full px-3.5 py-2.5 text-sm border border-[#EDE3E8] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#8E315D]/20 focus:border-[#8E315D] resize-none"
             />
           </div>
         </form>

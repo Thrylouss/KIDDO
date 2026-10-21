@@ -564,3 +564,15 @@ export interface ActivityLogEntry {
   user: { id: number; name: string } | null;
   organization: { id: number; name: string } | null;
 }
+
+export interface DashboardExpiring {
+  subscriptions: {
+    id: number;
+    organization: { id: number; name: string } | null;
+    plan: string | null;
+    status: "active" | "trial";
+    ends_at: string | null;
+    days_remaining: number;
+  }[];
+  total: number;
+}

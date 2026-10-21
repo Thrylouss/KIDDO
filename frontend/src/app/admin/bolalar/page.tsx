@@ -131,7 +131,7 @@ export default function BolalarPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             suffix={
-              <svg className="h-4 w-4 text-[#9CA3AF]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <svg className="h-4 w-4 text-[#B8AAB2]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
               </svg>
             }
@@ -147,7 +147,7 @@ export default function BolalarPage() {
         </div>
       </div>
 
-      <div className="bg-white rounded-xl border border-[#E5E7EB] overflow-hidden">
+      <div className="bg-white rounded-xl border border-[#EDE3E8] overflow-hidden">
         {loading ? (
           <SkeletonTable rows={6} />
         ) : error ? (
@@ -166,24 +166,24 @@ export default function BolalarPage() {
         ) : (
           <>
             {/* Mobile card list (< sm) */}
-            <ul className="sm:hidden divide-y divide-[#F3F4F6]">
+            <ul className="sm:hidden divide-y divide-[#F2ECF0]">
               {filtered.map((c) => (
                 <li key={c.id} className="flex items-center gap-3 px-4 py-3.5">
                   <Avatar name={`${c.first_name} ${c.last_name}`} size="sm" />
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium text-[#111827] truncate">
+                    <p className="font-medium text-[#29232A] truncate">
                       {c.last_name} {c.first_name}
                     </p>
-                    <p className="text-xs text-[#9CA3AF] mt-0.5">
+                    <p className="text-xs text-[#B8AAB2] mt-0.5">
                       {c.birth_date} · {c.gender === "erkak" ? uz.bolalar.jins_erkak : uz.bolalar.jins_qiz}
                     </p>
                     {c.group?.name ? (
-                      <span className="inline-flex items-center gap-1 text-xs text-[#6B7280] mt-0.5">
+                      <span className="inline-flex items-center gap-1 text-xs text-[#766B73] mt-0.5">
                         <span className="h-1.5 w-1.5 rounded-full bg-[#22C55E]" />
                         {c.group.name}
                       </span>
                     ) : (
-                      <span className="text-xs text-[#D1D5DB]">{uz.bolalar.guruhsiz}</span>
+                      <span className="text-xs text-[#D9C9D1]">{uz.bolalar.guruhsiz}</span>
                     )}
                   </div>
                   <Badge variant={c.is_active ? "success" : "neutral"}>
@@ -196,37 +196,37 @@ export default function BolalarPage() {
             {/* Desktop table (sm+) */}
             <table className="hidden sm:table w-full text-sm">
               <thead>
-                <tr className="border-b border-[#E5E7EB] bg-[#F9FAFB]">
-                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-[#6B7280] uppercase tracking-wide">Bola</th>
-                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-[#6B7280] uppercase tracking-wide hidden md:table-cell">{uz.bolalar.tug_sanasi}</th>
-                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-[#6B7280] uppercase tracking-wide hidden lg:table-cell">{uz.bolalar.jinsi}</th>
-                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-[#6B7280] uppercase tracking-wide">{uz.bolalar.guruh}</th>
-                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-[#6B7280] uppercase tracking-wide">{uz.bolalar.holat}</th>
+                <tr className="border-b border-[#EDE3E8] bg-[#FAF5F8]">
+                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-[#766B73] uppercase tracking-wide">Bola</th>
+                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-[#766B73] uppercase tracking-wide hidden md:table-cell">{uz.bolalar.tug_sanasi}</th>
+                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-[#766B73] uppercase tracking-wide hidden lg:table-cell">{uz.bolalar.jinsi}</th>
+                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-[#766B73] uppercase tracking-wide">{uz.bolalar.guruh}</th>
+                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-[#766B73] uppercase tracking-wide">{uz.bolalar.holat}</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#F3F4F6]">
+              <tbody className="divide-y divide-[#F2ECF0]">
                 {filtered.map((c) => (
-                  <tr key={c.id} className="hover:bg-[#F9FAFB] transition-colors duration-100">
+                  <tr key={c.id} className="hover:bg-[#FAF5F8] transition-colors duration-100">
                     <td className="px-5 py-4">
                       <div className="flex items-center gap-3">
                         <Avatar name={`${c.first_name} ${c.last_name}`} size="sm" />
-                        <p className="font-medium text-[#111827]">{c.last_name} {c.first_name}</p>
+                        <p className="font-medium text-[#29232A]">{c.last_name} {c.first_name}</p>
                       </div>
                     </td>
-                    <td className="px-5 py-4 text-[#6B7280] hidden md:table-cell">{c.birth_date}</td>
+                    <td className="px-5 py-4 text-[#766B73] hidden md:table-cell">{c.birth_date}</td>
                     <td className="px-5 py-4 hidden lg:table-cell">
                       <Badge variant={c.gender === "erkak" ? "info" : "neutral"}>
                         {c.gender === "erkak" ? uz.bolalar.jins_erkak : uz.bolalar.jins_qiz}
                       </Badge>
                     </td>
-                    <td className="px-5 py-4 text-[#6B7280]">
+                    <td className="px-5 py-4 text-[#766B73]">
                       {c.group?.name ? (
                         <span className="inline-flex items-center gap-1">
                           <span className="h-1.5 w-1.5 rounded-full bg-[#22C55E]" />
                           {c.group.name}
                         </span>
                       ) : (
-                        <span className="text-[#D1D5DB]">{uz.bolalar.guruhsiz}</span>
+                        <span className="text-[#D9C9D1]">{uz.bolalar.guruhsiz}</span>
                       )}
                     </td>
                     <td className="px-5 py-4">
@@ -256,7 +256,7 @@ export default function BolalarPage() {
       >
         <form id="child-form" onSubmit={handleSubmit} className="space-y-5">
           <div>
-            <p className="text-xs font-semibold text-[#9CA3AF] uppercase tracking-wide mb-3">{uz.bolalar.bolaning_malumotlari}</p>
+            <p className="text-xs font-semibold text-[#B8AAB2] uppercase tracking-wide mb-3">{uz.bolalar.bolaning_malumotlari}</p>
             <div className="grid grid-cols-2 gap-3">
               <Input
                 label={uz.bolalar.ismi}
@@ -298,8 +298,8 @@ export default function BolalarPage() {
             </Select>
           </div>
 
-          <div className="pt-1 border-t border-[#E5E7EB]">
-            <p className="text-xs font-semibold text-[#9CA3AF] uppercase tracking-wide mb-3 mt-3">{uz.bolalar.bogcha_malumotlari}</p>
+          <div className="pt-1 border-t border-[#EDE3E8]">
+            <p className="text-xs font-semibold text-[#B8AAB2] uppercase tracking-wide mb-3 mt-3">{uz.bolalar.bogcha_malumotlari}</p>
             <Select
               label={uz.bolalar.guruh}
               value={form.group_id}

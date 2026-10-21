@@ -1,21 +1,75 @@
 @import "tailwindcss";
 
-/* ── Design tokens ─────────────────────────────────────────── */
-:root {
-  --bg:          #F8FAFC;
-  --card:        #FFFFFF;
-  --text:        #111827;
-  --text-2:      #6B7280;
-  --border:      #E5E7EB;
-  --primary:     #2563EB;
-  --primary-h:   #1D4ED8;
-  --success:     #16A34A;
-  --warning:     #F59E0B;
-  --error:       #EF4444;
-  --sidebar-w:   256px;
+/* ── Tailwind v4 theme — generates bg-*, text-*, border-* utilities ── */
+@theme {
+  --color-primary:       #8F3158;
+  --color-primary-h:     #742544;
+  --color-secondary:     #D95F87;
+  --color-app-bg:        #FFF7F2;
+  --color-surface:       #FFFFFF;
+  --color-surface-2:     #FAF5F8;
+  --color-surface-soft:  #F4DCE5;
+  --color-text:          #29232A;
+  --color-text-2:        #746873;
+  --color-text-3:        #B8AAB2;
+  --color-label:         #3D3240;
+  --color-border:        #EDE3E8;
+  --color-border-2:      #F2ECF0;
+  --color-primary-lt:    #FDF2F6;
+  --color-primary-md:    #F4DCE5;
+  --color-success:       #166534;
+  --color-success-bg:    #DCFCE7;
+  --color-warning:       #854D0E;
+  --color-warning-bg:    #FEF9C3;
+  --color-error:         #991B1B;
+  --color-error-bg:      #FEE2E2;
+  --color-error-border:  #FECACA;
+  --color-error-text:    #B91C1C;
+  --color-info-bg:       #FCE8F0;
 }
 
-/* ── Base ──────────────────────────────────────────────────── */
+/* ── CSS custom properties — direct var() usage in CSS & arbitrary Tailwind ── */
+:root {
+  /* Backgrounds */
+  --bg:           #FFF7F2;
+  --card:         #FFFFFF;
+  --surface-2:    #FAF5F8;
+  --surface-soft: #F4DCE5;
+
+  /* Text */
+  --text:         #29232A;
+  --text-2:       #746873;
+  --text-3:       #B8AAB2;
+  --label:        #3D3240;
+
+  /* Borders */
+  --border:       #EDE3E8;
+  --border-2:     #F2ECF0;
+
+  /* Brand — Berry Pink */
+  --primary:      #8F3158;
+  --primary-h:    #742544;
+  --secondary:    #D95F87;
+  --primary-lt:   #FDF2F6;
+  --primary-md:   #F4DCE5;
+
+  /* Semantic */
+  --success:      #166534;
+  --success-bg:   #DCFCE7;
+  --warning:      #854D0E;
+  --warning-bg:   #FEF9C3;
+  --error:        #991B1B;
+  --error-bg:     #FEE2E2;
+  --error-border: #FECACA;
+  --error-text:   #B91C1C;
+  --info:         #8F3158;
+  --info-bg:      #FCE8F0;
+
+  /* Layout */
+  --sidebar-w: 256px;
+}
+
+/* ── Base ──────────────────────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; }
 
 html { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
@@ -27,13 +81,13 @@ body {
   line-height: 1.5;
 }
 
-/* ── Scrollbar ─────────────────────────────────────────────── */
+/* ── Scrollbar ─────────────────────────────────────────────────────────── */
 ::-webkit-scrollbar          { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track    { background: transparent; }
-::-webkit-scrollbar-thumb    { background: #D1D5DB; border-radius: 9px; }
-::-webkit-scrollbar-thumb:hover { background: #9CA3AF; }
+::-webkit-scrollbar-thumb    { background: #D4C0CC; border-radius: 9px; }
+::-webkit-scrollbar-thumb:hover { background: #BFA8B8; }
 
-/* ── Animations ────────────────────────────────────────────── */
+/* ── Animations ────────────────────────────────────────────────────────── */
 @keyframes fade-in {
   from { opacity: 0; }
   to   { opacity: 1; }
@@ -53,11 +107,11 @@ body {
 .animate-slide-up { animation: slide-up 0.2s  ease-out both; }
 .animate-skeleton { animation: skeleton-pulse 1.8s ease-in-out infinite; }
 
-/* ── Autofill override ─────────────────────────────────────── */
+/* ── Autofill override ─────────────────────────────────────────────────── */
 .kiddo-input:-webkit-autofill,
 .kiddo-input:-webkit-autofill:hover,
 .kiddo-input:-webkit-autofill:focus {
-  -webkit-text-fill-color: #111827;
+  -webkit-text-fill-color: #29232A;
   -webkit-box-shadow: 0 0 0px 1000px #fff inset;
   transition: background-color 9999s ease-in-out 0s;
 }

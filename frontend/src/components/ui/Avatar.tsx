@@ -1,8 +1,8 @@
 type Size = "xs" | "sm" | "md" | "lg";
 
 const palette: [string, string][] = [
-  ["#DBEAFE", "#1D4ED8"], ["#DCFCE7", "#15803D"], ["#EDE9FE", "#6D28D9"],
-  ["#FEF3C7", "#92400E"], ["#FCE7F3", "#9D174D"], ["#E0F2FE", "#0369A1"],
+  ["var(--info-bg)", "var(--primary)"], ["var(--success-bg)", "var(--success)"], ["var(--primary-lt)", "var(--primary-h)"],
+  ["var(--warning-bg)", "var(--warning)"], ["var(--info-bg)", "var(--primary)"], ["var(--success-bg)", "var(--success)"],
 ];
 
 function getColor(name: string): [string, string] {

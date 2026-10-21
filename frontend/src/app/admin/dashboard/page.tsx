@@ -8,6 +8,7 @@ import uz from "@/i18n/uz";
 import type {
   DashboardSummaryEnhanced,
   DashboardRecent,
+  DashboardExpiring,
   ReportRevenue,
   ReportSubscriptions,
 } from "@/types";
@@ -76,7 +77,7 @@ function getPresetRange(key: string): { from: string; to: string } {
 // ── Skeleton ─────────────────────────────────────────────────────────────────
 
 function Skeleton({ className }: { className?: string }) {
-  return <div className={`animate-pulse bg-[#F3F4F6] rounded-lg ${className ?? ""}`} />;
+  return <div className={`animate-pulse bg-[#EDE3E8] rounded-lg ${className ?? ""}`} />;
 }
 
 // ── Error block ───────────────────────────────────────────────────────────────
@@ -84,10 +85,10 @@ function Skeleton({ className }: { className?: string }) {
 function ErrorBlock({ onRetry }: { onRetry: () => void }) {
   return (
     <div className="flex flex-col items-center justify-center py-10 gap-3 text-center">
-      <p className="text-sm text-[#6B7280]">{uz.common.yuklash_xatosi}</p>
+      <p className="text-sm text-[#766B73]">{uz.common.yuklash_xatosi}</p>
       <button
         onClick={onRetry}
-        className="text-sm text-[#7C3AED] hover:underline font-medium"
+        className="text-sm text-[#8E315D] hover:underline font-medium"
       >
         {uz.common.qayta_urinish}
       </button>
@@ -112,18 +113,18 @@ function KpiCard({
 }) {
   const accentMap = {
     green:  "bg-[#DCFCE7] text-[#166534]",
-    blue:   "bg-[#DBEAFE] text-[#1E40AF]",
+    blue:   "bg-[#FCE8F0] text-[#8E315D]",
     yellow: "bg-[#FEF9C3] text-[#854D0E]",
     red:    "bg-[#FEE2E2] text-[#991B1B]",
-    purple: "bg-[#F5F3FF] text-[#6D28D9]",
+    purple: "bg-[#FDF2F6] text-[#8E315D]",
   };
   const dot = accentMap[accent ?? "purple"];
 
   return (
-    <div className="bg-white rounded-xl border border-[#E5E7EB] p-5 flex flex-col gap-2">
-      <p className="text-xs text-[#9CA3AF] font-medium uppercase tracking-wide">{title}</p>
-      <p className="text-2xl font-bold text-[#111827] leading-none">{value}</p>
-      {sub && <p className="text-xs text-[#6B7280]">{sub}</p>}
+    <div className="bg-white rounded-xl border border-[#EDE3E8] p-5 flex flex-col gap-2">
+      <p className="text-xs text-[#B8AAB2] font-medium uppercase tracking-wide">{title}</p>
+      <p className="text-2xl font-bold text-[#29232A] leading-none">{value}</p>
+      {sub && <p className="text-xs text-[#766B73]">{sub}</p>}
       {trend && (
         <span
           className={`inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full w-fit ${
@@ -154,7 +155,7 @@ function BarChart({ series }: { series: { label: string; total: number }[] }) {
             width={12}
             height={h}
             rx={2}
-            fill="#7C3AED"
+            fill="#8E315D"
             opacity={0.8}
           >
             <title>{`${item.label}: ${fmt(item.total)}`}</title>
@@ -169,7 +170,7 @@ function BarChart({ series }: { series: { label: string; total: number }[] }) {
 
 function DistBar({ items }: { items: { label: string; count: number; color: string }[] }) {
   const total = items.reduce((s, i) => s + i.count, 0);
-  if (total === 0) return <p className="text-sm text-[#9CA3AF]">—</p>;
+  if (total === 0) return <p className="text-sm text-[#B8AAB2]">—</p>;
   return (
     <div className="space-y-2">
       <div className="flex h-3 rounded-full overflow-hidden gap-px">
@@ -186,8 +187,8 @@ function DistBar({ items }: { items: { label: string; count: number; color: stri
         {items.map((item) => (
           <div key={item.label} className="flex items-center gap-1.5">
             <span className={`w-2 h-2 rounded-full flex-shrink-0 ${item.color}`} />
-            <span className="text-xs text-[#6B7280] truncate">
-              {item.label} <span className="font-semibold text-[#374151]">{item.count}</span>
+            <span className="text-xs text-[#766B73] truncate">
+              {item.label} <span className="font-semibold text-[#3D3240]">{item.count}</span>
             </span>
           </div>
         ))}
@@ -262,7 +263,7 @@ function KpiSection({
 
   if (error) {
     return (
-      <div className="bg-white rounded-xl border border-[#E5E7EB]">
+      <div className="bg-white rounded-xl border border-[#EDE3E8]">
         <ErrorBlock onRetry={load} />
       </div>
     );
@@ -340,8 +341,8 @@ function KpiSection({
       </div>
 
       {/* Subscription status distribution */}
-      <div className="bg-white rounded-xl border border-[#E5E7EB] p-5">
-        <h2 className="text-sm font-semibold text-[#111827] mb-4">{uz.super_admin.obuna_holati}</h2>
+      <div className="bg-white rounded-xl border border-[#EDE3E8] p-5">
+        <h2 className="text-sm font-semibold text-[#29232A] mb-4">{uz.super_admin.obuna_holati}</h2>
         <DistBar
           items={[
             { label: uz.super_admin.faol,            count: data.obuna_holati.active,    color: "bg-green-400" },
@@ -361,9 +362,9 @@ function KpiSection({
           { label: uz.super_admin.kutilayotgan_tushum, value: fmt(data.billing.pending_revenue) },
           { label: uz.super_admin.qaytarilgan_summa, value: fmt(data.billing.total_refunded) },
         ].map(({ label, value }) => (
-          <div key={label} className="bg-white rounded-xl border border-[#E5E7EB] p-4">
-            <p className="text-xs text-[#9CA3AF] uppercase tracking-wide mb-1">{label}</p>
-            <p className="text-lg font-bold text-[#111827]">{value}</p>
+          <div key={label} className="bg-white rounded-xl border border-[#EDE3E8] p-4">
+            <p className="text-xs text-[#B8AAB2] uppercase tracking-wide mb-1">{label}</p>
+            <p className="text-lg font-bold text-[#29232A]">{value}</p>
           </div>
         ))}
       </div>
@@ -371,43 +372,43 @@ function KpiSection({
       {/* Recent orgs table */}
       <div>
         <div className="flex items-center justify-between mb-3">
-          <h2 className="text-sm font-semibold text-[#111827]">{uz.super_admin.oxirgi_bogchalar}</h2>
-          <Link href="/admin/bogchalar" className="text-xs text-[#7C3AED] hover:text-[#6D28D9] font-medium">
+          <h2 className="text-sm font-semibold text-[#29232A]">{uz.super_admin.oxirgi_bogchalar}</h2>
+          <Link href="/admin/bogchalar" className="text-xs text-[#8E315D] hover:text-[#742548] font-medium">
             {uz.super_admin.barchasini_korish}
           </Link>
         </div>
-        <div className="bg-white rounded-xl border border-[#E5E7EB] overflow-hidden">
+        <div className="bg-white rounded-xl border border-[#EDE3E8] overflow-hidden">
           {data.oxirgi_bogchalar.length === 0 ? (
-            <p className="text-sm text-[#9CA3AF] text-center py-8">
+            <p className="text-sm text-[#B8AAB2] text-center py-8">
               {uz.common.malumot_yoq}
             </p>
           ) : (
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-[#E5E7EB] bg-[#F9FAFB]">
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-[#6B7280] uppercase tracking-wide">
+                <tr className="border-b border-[#EDE3E8] bg-[#FAF5F8]">
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-[#766B73] uppercase tracking-wide">
                     {uz.super_admin.bogchalar}
                   </th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-[#6B7280] uppercase tracking-wide hidden sm:table-cell">
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-[#766B73] uppercase tracking-wide hidden sm:table-cell">
                     {uz.super_admin.obuna}
                   </th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-[#6B7280] uppercase tracking-wide hidden md:table-cell">
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-[#766B73] uppercase tracking-wide hidden md:table-cell">
                     {uz.super_admin.tarif}
                   </th>
                   <th className="px-4 py-3" />
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#F3F4F6]">
+              <tbody className="divide-y divide-[#F2ECF0]">
                 {data.oxirgi_bogchalar.map((org) => (
-                  <tr key={org.id} className="hover:bg-[#F9FAFB] transition-colors">
+                  <tr key={org.id} className="hover:bg-[#FAF5F8] transition-colors">
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
-                        <div className="h-7 w-7 rounded-lg bg-[#F5F3FF] flex items-center justify-center text-[#7C3AED] font-semibold text-xs flex-shrink-0">
+                        <div className="h-7 w-7 rounded-lg bg-[#FDF2F6] flex items-center justify-center text-[#8E315D] font-semibold text-xs flex-shrink-0">
                           {org.name.charAt(0).toUpperCase()}
                         </div>
                         <div>
-                          <p className="font-medium text-[#111827] text-sm">{org.name}</p>
-                          <p className="text-xs text-[#9CA3AF]">{org.phone ?? "—"}</p>
+                          <p className="font-medium text-[#29232A] text-sm">{org.name}</p>
+                          <p className="text-xs text-[#B8AAB2]">{org.phone ?? "—"}</p>
                         </div>
                       </div>
                     </td>
@@ -415,16 +416,16 @@ function KpiSection({
                       {org.subscription ? (
                         <SubStatusBadge status={org.subscription.status} />
                       ) : (
-                        <span className="text-[#D1D5DB] text-sm">—</span>
+                        <span className="text-[#D9C9D1] text-sm">—</span>
                       )}
                     </td>
-                    <td className="px-4 py-3 hidden md:table-cell text-sm text-[#6B7280]">
+                    <td className="px-4 py-3 hidden md:table-cell text-sm text-[#766B73]">
                       {org.subscription?.plan ?? "—"}
                     </td>
                     <td className="px-4 py-3">
                       <Link
                         href={`/admin/bogchalar/${org.id}`}
-                        className="text-xs text-[#7C3AED] hover:text-[#6D28D9] font-medium"
+                        className="text-xs text-[#8E315D] hover:text-[#742548] font-medium"
                       >
                         {uz.super_admin.batafsil}
                       </Link>
@@ -463,11 +464,11 @@ function RevenueTrendSection({ dateFrom, dateTo }: { dateFrom: string; dateTo: s
   useEffect(() => { load(); }, [load]);
 
   return (
-    <div className="bg-white rounded-xl border border-[#E5E7EB] p-5">
+    <div className="bg-white rounded-xl border border-[#EDE3E8] p-5">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-sm font-semibold text-[#111827]">{uz.super_admin.daromad_dinamikasi}</h2>
+        <h2 className="text-sm font-semibold text-[#29232A]">{uz.super_admin.daromad_dinamikasi}</h2>
         {data && (
-          <span className="text-xs text-[#6B7280]">
+          <span className="text-xs text-[#766B73]">
             {uz.super_admin.jami}: <strong>{fmt(data.total)}</strong>
           </span>
         )}
@@ -477,19 +478,19 @@ function RevenueTrendSection({ dateFrom, dateTo }: { dateFrom: string; dateTo: s
       ) : error ? (
         <ErrorBlock onRetry={load} />
       ) : !data || data.series.length === 0 ? (
-        <p className="text-sm text-[#9CA3AF] text-center py-6">{uz.super_admin.hech_daromad_yoq}</p>
+        <p className="text-sm text-[#B8AAB2] text-center py-6">{uz.super_admin.hech_daromad_yoq}</p>
       ) : (
         <div className="space-y-4">
           <BarChart series={data.series.map((s) => ({ label: s.label, total: s.total }))} />
           {data.by_plan.length > 0 && (
             <div className="space-y-1">
-              <p className="text-xs font-semibold text-[#6B7280] uppercase tracking-wide">
+              <p className="text-xs font-semibold text-[#766B73] uppercase tracking-wide">
                 {uz.super_admin.tarif_boyicha}
               </p>
               {data.by_plan.map((p) => (
                 <div key={p.plan_name} className="flex justify-between text-sm">
-                  <span className="text-[#374151]">{p.plan_name}</span>
-                  <span className="font-medium text-[#111827]">{fmt(p.total)}</span>
+                  <span className="text-[#3D3240]">{p.plan_name}</span>
+                  <span className="font-medium text-[#29232A]">{fmt(p.total)}</span>
                 </div>
               ))}
             </div>
@@ -523,8 +524,8 @@ function SubsDistSection({ dateFrom, dateTo }: { dateFrom: string; dateTo: strin
   useEffect(() => { load(); }, [load]);
 
   return (
-    <div className="bg-white rounded-xl border border-[#E5E7EB] p-5">
-      <h2 className="text-sm font-semibold text-[#111827] mb-4">{uz.super_admin.tarif_taqsimoti}</h2>
+    <div className="bg-white rounded-xl border border-[#EDE3E8] p-5">
+      <h2 className="text-sm font-semibold text-[#29232A] mb-4">{uz.super_admin.tarif_taqsimoti}</h2>
       {loading ? (
         <Skeleton className="h-28" />
       ) : error ? (
@@ -541,23 +542,23 @@ function SubsDistSection({ dateFrom, dateTo }: { dateFrom: string; dateTo: strin
             ]}
           />
           {data.plan_distribution.length > 0 && (
-            <div className="space-y-1 pt-2 border-t border-[#F3F4F6]">
+            <div className="space-y-1 pt-2 border-t border-[#F2ECF0]">
               {data.plan_distribution.map((p) => (
                 <div key={p.plan_id} className="flex justify-between text-sm">
-                  <span className="text-[#374151]">{p.plan_name}</span>
-                  <span className="font-medium text-[#111827]">{p.count}</span>
+                  <span className="text-[#3D3240]">{p.plan_name}</span>
+                  <span className="font-medium text-[#29232A]">{p.count}</span>
                 </div>
               ))}
             </div>
           )}
-          <div className="grid grid-cols-2 gap-2 pt-1 border-t border-[#F3F4F6]">
+          <div className="grid grid-cols-2 gap-2 pt-1 border-t border-[#F2ECF0]">
             <div>
-              <p className="text-xs text-[#9CA3AF]">{uz.super_admin.yangi_obunalar}</p>
-              <p className="font-semibold text-[#111827]">{data.new_in_period}</p>
+              <p className="text-xs text-[#B8AAB2]">{uz.super_admin.yangi_obunalar}</p>
+              <p className="font-semibold text-[#29232A]">{data.new_in_period}</p>
             </div>
             <div>
-              <p className="text-xs text-[#9CA3AF]">{uz.super_admin.yaqin_tugaydi}</p>
-              <p className="font-semibold text-[#111827]">{data.expiring_soon}</p>
+              <p className="text-xs text-[#B8AAB2]">{uz.super_admin.yaqin_tugaydi}</p>
+              <p className="font-semibold text-[#29232A]">{data.expiring_soon}</p>
             </div>
           </div>
         </div>
@@ -597,7 +598,7 @@ function RecentSection() {
 
   if (error) {
     return (
-      <div className="bg-white rounded-xl border border-[#E5E7EB]">
+      <div className="bg-white rounded-xl border border-[#EDE3E8]">
         <ErrorBlock onRetry={load} />
       </div>
     );
@@ -610,27 +611,27 @@ function RecentSection() {
       {/* Payments + Invoices */}
       <div className="grid lg:grid-cols-2 gap-6">
         {/* Recent payments */}
-        <div className="bg-white rounded-xl border border-[#E5E7EB] overflow-hidden">
-          <div className="flex items-center justify-between px-5 py-4 border-b border-[#E5E7EB]">
-            <h2 className="text-sm font-semibold text-[#111827]">{uz.super_admin.oxirgi_tolovlar}</h2>
-            <Link href="/admin/tolovlar" className="text-xs text-[#7C3AED] hover:text-[#6D28D9] font-medium">
+        <div className="bg-white rounded-xl border border-[#EDE3E8] overflow-hidden">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-[#EDE3E8]">
+            <h2 className="text-sm font-semibold text-[#29232A]">{uz.super_admin.oxirgi_tolovlar}</h2>
+            <Link href="/admin/tolovlar" className="text-xs text-[#8E315D] hover:text-[#742548] font-medium">
               {uz.super_admin.barchasini_korish}
             </Link>
           </div>
           {data.payments.length === 0 ? (
-            <p className="text-sm text-[#9CA3AF] text-center py-8">{uz.super_admin.hech_tolov_yoq}</p>
+            <p className="text-sm text-[#B8AAB2] text-center py-8">{uz.super_admin.hech_tolov_yoq}</p>
           ) : (
-            <div className="divide-y divide-[#F3F4F6]">
+            <div className="divide-y divide-[#F2ECF0]">
               {data.payments.map((p) => (
                 <div key={p.id} className="flex items-center justify-between px-5 py-3">
                   <div className="min-w-0">
-                    <p className="text-sm font-medium text-[#111827] truncate">
+                    <p className="text-sm font-medium text-[#29232A] truncate">
                       {p.organization?.name ?? "—"}
                     </p>
-                    <p className="text-xs text-[#9CA3AF]">{fmtTime(p.created_at)}</p>
+                    <p className="text-xs text-[#B8AAB2]">{fmtTime(p.created_at)}</p>
                   </div>
                   <div className="flex items-center gap-3 flex-shrink-0 ml-2">
-                    <span className="text-sm font-semibold text-[#111827]">
+                    <span className="text-sm font-semibold text-[#29232A]">
                       {fmtStr(p.amount, p.currency)}
                     </span>
                     <PayStatusBadge status={p.status} />
@@ -642,27 +643,27 @@ function RecentSection() {
         </div>
 
         {/* Recent invoices */}
-        <div className="bg-white rounded-xl border border-[#E5E7EB] overflow-hidden">
-          <div className="flex items-center justify-between px-5 py-4 border-b border-[#E5E7EB]">
-            <h2 className="text-sm font-semibold text-[#111827]">{uz.super_admin.oxirgi_invoicelar}</h2>
-            <Link href="/admin/invoicelar" className="text-xs text-[#7C3AED] hover:text-[#6D28D9] font-medium">
+        <div className="bg-white rounded-xl border border-[#EDE3E8] overflow-hidden">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-[#EDE3E8]">
+            <h2 className="text-sm font-semibold text-[#29232A]">{uz.super_admin.oxirgi_invoicelar}</h2>
+            <Link href="/admin/invoices" className="text-xs text-[#8E315D] hover:text-[#742548] font-medium">
               {uz.super_admin.barchasini_korish}
             </Link>
           </div>
           {data.invoices.length === 0 ? (
-            <p className="text-sm text-[#9CA3AF] text-center py-8">{uz.super_admin.hech_invoice_yoq}</p>
+            <p className="text-sm text-[#B8AAB2] text-center py-8">{uz.super_admin.hech_invoice_yoq}</p>
           ) : (
-            <div className="divide-y divide-[#F3F4F6]">
+            <div className="divide-y divide-[#F2ECF0]">
               {data.invoices.map((inv) => (
                 <div key={inv.id} className="flex items-center justify-between px-5 py-3">
                   <div className="min-w-0">
-                    <p className="text-sm font-medium text-[#111827] truncate">
+                    <p className="text-sm font-medium text-[#29232A] truncate">
                       {inv.organization?.name ?? "—"}
                     </p>
-                    <p className="text-xs text-[#9CA3AF]">{inv.invoice_number}</p>
+                    <p className="text-xs text-[#B8AAB2]">{inv.invoice_number}</p>
                   </div>
                   <div className="flex items-center gap-3 flex-shrink-0 ml-2">
-                    <span className="text-sm font-semibold text-[#111827]">
+                    <span className="text-sm font-semibold text-[#29232A]">
                       {fmtStr(inv.amount, inv.currency)}
                     </span>
                     <PayStatusBadge status={inv.status} />
@@ -675,34 +676,34 @@ function RecentSection() {
       </div>
 
       {/* Recent activity */}
-      <div className="bg-white rounded-xl border border-[#E5E7EB] overflow-hidden">
-        <div className="flex items-center justify-between px-5 py-4 border-b border-[#E5E7EB]">
-          <h2 className="text-sm font-semibold text-[#111827]">{uz.super_admin.oxirgi_faoliyat_logi}</h2>
-          <Link href="/admin/faoliyat" className="text-xs text-[#7C3AED] hover:text-[#6D28D9] font-medium">
+      <div className="bg-white rounded-xl border border-[#EDE3E8] overflow-hidden">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-[#EDE3E8]">
+          <h2 className="text-sm font-semibold text-[#29232A]">{uz.super_admin.oxirgi_faoliyat_logi}</h2>
+          <Link href="/admin/faollik" className="text-xs text-[#8E315D] hover:text-[#742548] font-medium">
             {uz.super_admin.barchasini_korish}
           </Link>
         </div>
         {data.activity.length === 0 ? (
-          <p className="text-sm text-[#9CA3AF] text-center py-8">{uz.super_admin.faollik_yoq}</p>
+          <p className="text-sm text-[#B8AAB2] text-center py-8">{uz.super_admin.faollik_yoq}</p>
         ) : (
-          <div className="divide-y divide-[#F3F4F6]">
+          <div className="divide-y divide-[#F2ECF0]">
             {data.activity.map((log) => (
               <div key={log.id} className="flex items-start justify-between px-5 py-3 gap-3">
                 <div className="flex items-start gap-3 min-w-0">
-                  <div className="h-6 w-6 rounded-full bg-[#F5F3FF] flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <span className="text-[#7C3AED] text-xs font-bold">
+                  <div className="h-6 w-6 rounded-full bg-[#FDF2F6] flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <span className="text-[#8E315D] text-xs font-bold">
                       {(log.user?.name ?? log.organization?.name ?? "?").charAt(0).toUpperCase()}
                     </span>
                   </div>
                   <div className="min-w-0">
-                    <p className="text-sm text-[#111827] truncate">{log.description}</p>
-                    <p className="text-xs text-[#9CA3AF]">
+                    <p className="text-sm text-[#29232A] truncate">{log.description}</p>
+                    <p className="text-xs text-[#B8AAB2]">
                       {log.user?.name ?? "—"}
                       {log.organization && ` · ${log.organization.name}`}
                     </p>
                   </div>
                 </div>
-                <p className="text-xs text-[#9CA3AF] flex-shrink-0">{fmtTime(log.created_at)}</p>
+                <p className="text-xs text-[#B8AAB2] flex-shrink-0">{fmtTime(log.created_at)}</p>
               </div>
             ))}
           </div>
@@ -717,26 +718,174 @@ function QuickActions() {
     { label: uz.super_admin.bogchalarni_boshqarish,       href: "/admin/bogchalar",   icon: "🏫" },
     { label: uz.super_admin.obunalarni_boshqarish,        href: "/admin/obunalar",    icon: "📋" },
     { label: uz.super_admin.tolovlarni_boshqarish,        href: "/admin/tolovlar",    icon: "💳" },
-    { label: uz.super_admin.invoicelarni_boshqarish,      href: "/admin/invoicelar",  icon: "🧾" },
+    { label: uz.super_admin.invoicelarni_boshqarish,      href: "/admin/invoices",    icon: "🧾" },
     { label: uz.super_admin.foydalanuvchilarni_boshqarish, href: "/admin/foydalanuvchilar", icon: "👤" },
     { label: uz.super_admin.hisobotlarni_korish,          href: "/admin/hisobotlar",  icon: "📊" },
   ];
 
   return (
-    <div className="bg-white rounded-xl border border-[#E5E7EB] p-5">
-      <h2 className="text-sm font-semibold text-[#111827] mb-4">{uz.super_admin.tez_amallar}</h2>
+    <div className="bg-white rounded-xl border border-[#EDE3E8] p-5">
+      <h2 className="text-sm font-semibold text-[#29232A] mb-4">{uz.super_admin.tez_amallar}</h2>
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
         {actions.map((a) => (
           <Link
             key={a.href}
             href={a.href}
-            className="flex items-center gap-2 px-3 py-2.5 rounded-lg border border-[#E5E7EB] hover:border-[#7C3AED] hover:bg-[#F5F3FF] transition-colors group"
+            className="flex items-center gap-2 px-3 py-2.5 rounded-lg border border-[#EDE3E8] hover:border-[#8E315D] hover:bg-[#FDF2F6] transition-colors group"
           >
             <span className="text-base">{a.icon}</span>
-            <span className="text-sm text-[#374151] group-hover:text-[#7C3AED] font-medium">{a.label}</span>
+            <span className="text-sm text-[#3D3240] group-hover:text-[#8E315D] font-medium">{a.label}</span>
           </Link>
         ))}
       </div>
+    </div>
+  );
+}
+
+// ── Expiring subscriptions ────────────────────────────────────────────────────
+
+function ExpiringSubscriptionsSection() {
+  const [data, setData] = useState<DashboardExpiring | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+
+  const load = useCallback(async () => {
+    setError(false);
+    setLoading(true);
+    try {
+      const res = await api.get<DashboardExpiring>(
+        "/v1/super-admin/dashboard/expiring"
+      );
+      setData(res);
+    } catch {
+      setError(true);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => { load(); }, [load]);
+
+  if (loading) {
+    return (
+      <div className="bg-white rounded-xl border border-[#EDE3E8] p-5">
+        <Skeleton className="h-5 w-48 mb-4" />
+        <div className="space-y-3">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Skeleton key={i} className="h-10" />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="bg-white rounded-xl border border-[#EDE3E8]">
+        <ErrorBlock onRetry={load} />
+      </div>
+    );
+  }
+
+  if (!data) return null;
+
+  return (
+    <div className="bg-white rounded-xl border border-[#EDE3E8] overflow-hidden">
+      <div className="flex items-center justify-between px-5 py-4 border-b border-[#EDE3E8]">
+        <div className="flex items-center gap-2">
+          <h2 className="text-sm font-semibold text-[#29232A]">
+            {uz.super_admin.muddati_yaqin_bolim}
+          </h2>
+          {data.total > 0 && (
+            <span className="inline-flex items-center justify-center h-5 min-w-[20px] px-1.5 rounded-full bg-[#FEF9C3] text-[#854D0E] text-xs font-semibold">
+              {data.total}
+            </span>
+          )}
+        </div>
+        <Link
+          href="/admin/obunalar"
+          className="text-xs text-[#8E315D] hover:text-[#742548] font-medium"
+        >
+          {uz.super_admin.barchasini_korish}
+        </Link>
+      </div>
+
+      {data.subscriptions.length === 0 ? (
+        <p className="text-sm text-[#B8AAB2] text-center py-8">
+          {uz.super_admin.hech_muddati_yaqin_yoq}
+        </p>
+      ) : (
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b border-[#EDE3E8] bg-[#FAF5F8]">
+              <th className="text-left px-4 py-3 text-xs font-semibold text-[#766B73] uppercase tracking-wide">
+                {uz.super_admin.bogchalar}
+              </th>
+              <th className="text-left px-4 py-3 text-xs font-semibold text-[#766B73] uppercase tracking-wide hidden sm:table-cell">
+                {uz.super_admin.tarif}
+              </th>
+              <th className="text-left px-4 py-3 text-xs font-semibold text-[#766B73] uppercase tracking-wide hidden md:table-cell">
+                {uz.super_admin.tugash}
+              </th>
+              <th className="text-left px-4 py-3 text-xs font-semibold text-[#766B73] uppercase tracking-wide">
+                {uz.super_admin.qolgan}
+              </th>
+              <th className="text-left px-4 py-3 text-xs font-semibold text-[#766B73] uppercase tracking-wide hidden sm:table-cell">
+                {uz.super_admin.holat}
+              </th>
+              <th className="px-4 py-3" />
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-[#F2ECF0]">
+            {data.subscriptions.map((sub) => {
+              const urgency =
+                sub.days_remaining <= 3
+                  ? "text-[#991B1B] bg-[#FEE2E2]"
+                  : sub.days_remaining <= 7
+                  ? "text-[#854D0E] bg-[#FEF9C3]"
+                  : "text-[#3D3240] bg-[#F2ECF0]";
+              return (
+                <tr key={sub.id} className="hover:bg-[#FAF5F8] transition-colors">
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-2">
+                      <div className="h-7 w-7 rounded-lg bg-[#FDF2F6] flex items-center justify-center text-[#8E315D] font-semibold text-xs flex-shrink-0">
+                        {(sub.organization?.name ?? "?").charAt(0).toUpperCase()}
+                      </div>
+                      <span className="font-medium text-[#29232A] text-sm">
+                        {sub.organization?.name ?? "—"}
+                      </span>
+                    </div>
+                  </td>
+                  <td className="px-4 py-3 text-[#766B73] hidden sm:table-cell">
+                    {sub.plan ?? "—"}
+                  </td>
+                  <td className="px-4 py-3 text-[#766B73] hidden md:table-cell">
+                    {sub.ends_at ? fmtDate(sub.ends_at) : "—"}
+                  </td>
+                  <td className="px-4 py-3">
+                    <span
+                      className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold ${urgency}`}
+                    >
+                      {sub.days_remaining} {uz.super_admin.qolgan_kun}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 hidden sm:table-cell">
+                    <SubStatusBadge status={sub.status} />
+                  </td>
+                  <td className="px-4 py-3">
+                    <Link
+                      href={`/admin/obunalar?org=${sub.organization?.id ?? ""}`}
+                      className="text-xs text-[#8E315D] hover:text-[#742548] font-medium"
+                    >
+                      {uz.super_admin.batafsil}
+                    </Link>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      )}
     </div>
   );
 }
@@ -765,9 +914,9 @@ function DateFilterBar({
   onApply: () => void;
 }) {
   return (
-    <div className="bg-white rounded-xl border border-[#E5E7EB] px-4 py-3">
+    <div className="bg-white rounded-xl border border-[#EDE3E8] px-4 py-3">
       <div className="flex flex-wrap items-center gap-2">
-        <span className="text-xs font-semibold text-[#6B7280] uppercase tracking-wide mr-1">
+        <span className="text-xs font-semibold text-[#766B73] uppercase tracking-wide mr-1">
           {uz.super_admin.davr_tanlash}
         </span>
         {PRESETS.map((p) => (
@@ -776,8 +925,8 @@ function DateFilterBar({
             onClick={() => onPresetSelect(p.key)}
             className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
               activePreset === p.key
-                ? "bg-[#7C3AED] text-white"
-                : "bg-[#F3F4F6] text-[#374151] hover:bg-[#E9D5FF]"
+                ? "bg-[#8E315D] text-white"
+                : "bg-[#F2ECF0] text-[#3D3240] hover:bg-[#F4C7D7]"
             }`}
           >
             {p.label}
@@ -789,25 +938,25 @@ function DateFilterBar({
               type="date"
               value={customFrom}
               onChange={(e) => onCustomFromChange(e.target.value)}
-              className="text-xs border border-[#E5E7EB] rounded-lg px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-[#7C3AED]"
+              className="text-xs border border-[#EDE3E8] rounded-lg px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-[#8E315D]"
             />
-            <span className="text-[#9CA3AF] text-xs">—</span>
+            <span className="text-[#B8AAB2] text-xs">—</span>
             <input
               type="date"
               value={customTo}
               onChange={(e) => onCustomToChange(e.target.value)}
-              className="text-xs border border-[#E5E7EB] rounded-lg px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-[#7C3AED]"
+              className="text-xs border border-[#EDE3E8] rounded-lg px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-[#8E315D]"
             />
             <button
               onClick={onApply}
-              className="px-3 py-1.5 bg-[#7C3AED] text-white rounded-lg text-xs font-medium hover:bg-[#6D28D9] transition-colors"
+              className="px-3 py-1.5 bg-[#8E315D] text-white rounded-lg text-xs font-medium hover:bg-[#742548] transition-colors"
             >
               {uz.super_admin.filtrlash_btn}
             </button>
           </div>
         )}
         {activePreset !== "custom" && (
-          <span className="text-xs text-[#9CA3AF] ml-auto">
+          <span className="text-xs text-[#B8AAB2] ml-auto">
             {fmtDate(dateFrom)} — {fmtDate(dateTo)}
           </span>
         )}
@@ -848,10 +997,10 @@ export default function SuperAdminDashboardPage() {
     <div className="max-w-7xl mx-auto space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-[#111827]">
+        <h1 className="text-2xl font-bold text-[#29232A]">
           {uz.super_admin.sarlavha}
         </h1>
-        <p className="text-[#9CA3AF] mt-1 text-sm">{uz.super_admin.platforma_holati}</p>
+        <p className="text-[#B8AAB2] mt-1 text-sm">{uz.super_admin.platforma_holati}</p>
       </div>
 
       {/* Date filter */}
@@ -869,6 +1018,9 @@ export default function SuperAdminDashboardPage() {
 
       {/* KPIs + recent orgs */}
       <KpiSection dateFrom={dateFrom} dateTo={dateTo} />
+
+      {/* Expiring subscriptions requiring attention */}
+      <ExpiringSubscriptionsSection />
 
       {/* Revenue trend + sub distribution */}
       <div className="grid lg:grid-cols-2 gap-6">

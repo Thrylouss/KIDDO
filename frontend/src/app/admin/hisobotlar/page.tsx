@@ -54,7 +54,7 @@ interface BarItem { label: string; total: number; count?: number }
 
 function BarChart({ data, height = 160 }: { data: BarItem[]; height?: number }) {
   if (!data.length) return (
-    <div className="flex items-center justify-center h-40 text-[#9CA3AF] text-sm">
+    <div className="flex items-center justify-center h-40 text-[#B8AAB2] text-sm">
       {uz.super_admin.hech_daromad_yoq}
     </div>
   );
@@ -89,7 +89,7 @@ function BarChart({ data, height = 160 }: { data: BarItem[]; height?: number }) 
                 width={barW}
                 height={barH}
                 rx={2}
-                className="fill-[#7C3AED] opacity-80 hover:opacity-100 transition-opacity"
+                className="fill-[#8E315D] opacity-80 hover:opacity-100 transition-opacity"
               />
               <title>{`${item.label}: ${fmt(item.total)}`}</title>
               {visible.length <= 15 && (
@@ -98,7 +98,7 @@ function BarChart({ data, height = 160 }: { data: BarItem[]; height?: number }) 
                   y={height - 4}
                   textAnchor="middle"
                   fontSize={9}
-                  className="fill-[#9CA3AF]"
+                  className="fill-[#B8AAB2]"
                 >
                   {item.label}
                 </text>
@@ -118,10 +118,10 @@ function DistBar({ label, value, total, color }: { label: string; value: number;
   return (
     <div>
       <div className="flex items-center justify-between mb-1">
-        <span className="text-sm text-[#374151]">{label}</span>
-        <span className="text-sm font-medium text-[#111827]">{value} <span className="text-[#9CA3AF] font-normal text-xs">({pct}%)</span></span>
+        <span className="text-sm text-[#3D3240]">{label}</span>
+        <span className="text-sm font-medium text-[#29232A]">{value} <span className="text-[#B8AAB2] font-normal text-xs">({pct}%)</span></span>
       </div>
-      <div className="h-2 rounded-full bg-[#F3F4F6] overflow-hidden">
+      <div className="h-2 rounded-full bg-[#F2ECF0] overflow-hidden">
         <div className="h-full rounded-full transition-all duration-500" style={{ width: `${pct}%`, backgroundColor: color }} />
       </div>
     </div>
@@ -132,10 +132,10 @@ function DistBar({ label, value, total, color }: { label: string; value: number;
 
 function KpiCard({ title, value, sub, accent }: { title: string; value: string | number; sub?: string; accent?: boolean }) {
   return (
-    <div className={`bg-white rounded-xl border p-5 ${accent ? "border-[#7C3AED]" : "border-[#E5E7EB]"}`}>
-      <p className="text-xs text-[#9CA3AF] uppercase tracking-wide mb-2">{title}</p>
-      <p className={`text-xl font-bold truncate ${accent ? "text-[#7C3AED]" : "text-[#111827]"}`}>{value}</p>
-      {sub && <p className="text-xs text-[#9CA3AF] mt-1">{sub}</p>}
+    <div className={`bg-white rounded-xl border p-5 ${accent ? "border-[#8E315D]" : "border-[#EDE3E8]"}`}>
+      <p className="text-xs text-[#B8AAB2] uppercase tracking-wide mb-2">{title}</p>
+      <p className={`text-xl font-bold truncate ${accent ? "text-[#8E315D]" : "text-[#29232A]"}`}>{value}</p>
+      {sub && <p className="text-xs text-[#B8AAB2] mt-1">{sub}</p>}
     </div>
   );
 }
@@ -146,9 +146,9 @@ function Skeleton({ count = 4 }: { count?: number }) {
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
       {Array.from({ length: count }).map((_, i) => (
-        <div key={i} className="bg-white rounded-xl border border-[#E5E7EB] p-5 animate-pulse">
-          <div className="h-3 w-24 bg-[#F3F4F6] rounded mb-3" />
-          <div className="h-6 w-32 bg-[#F3F4F6] rounded" />
+        <div key={i} className="bg-white rounded-xl border border-[#EDE3E8] p-5 animate-pulse">
+          <div className="h-3 w-24 bg-[#F2ECF0] rounded mb-3" />
+          <div className="h-6 w-32 bg-[#F2ECF0] rounded" />
         </div>
       ))}
     </div>
@@ -159,9 +159,9 @@ function Skeleton({ count = 4 }: { count?: number }) {
 
 function ErrorBlock({ onRetry }: { onRetry: () => void }) {
   return (
-    <div className="bg-white rounded-xl border border-[#E5E7EB] py-12 flex flex-col items-center gap-3">
-      <p className="text-[#6B7280]">{uz.common.yuklash_xatosi}</p>
-      <button onClick={onRetry} className="text-sm text-[#7C3AED] hover:underline">{uz.common.qayta_urinish}</button>
+    <div className="bg-white rounded-xl border border-[#EDE3E8] py-12 flex flex-col items-center gap-3">
+      <p className="text-[#766B73]">{uz.common.yuklash_xatosi}</p>
+      <button onClick={onRetry} className="text-sm text-[#8E315D] hover:underline">{uz.common.qayta_urinish}</button>
     </div>
   );
 }
@@ -215,7 +215,7 @@ function OverviewTab({ dateFrom, dateTo }: { dateFrom: string; dateTo: string })
     <div className="space-y-6">
       {/* Org KPIs */}
       <div>
-        <h3 className="text-sm font-semibold text-[#6B7280] uppercase tracking-wide mb-3">Tashkilotlar</h3>
+        <h3 className="text-sm font-semibold text-[#766B73] uppercase tracking-wide mb-3">Tashkilotlar</h3>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           <KpiCard title={uz.super_admin.jami_bogchalar}      value={data.organizations.total}    sub="Jami ro'yxatda" />
           <KpiCard title={uz.super_admin.faol_bogchalar}      value={data.organizations.active}   sub="Faol" accent />
@@ -226,7 +226,7 @@ function OverviewTab({ dateFrom, dateTo }: { dateFrom: string; dateTo: string })
 
       {/* Sub KPIs */}
       <div>
-        <h3 className="text-sm font-semibold text-[#6B7280] uppercase tracking-wide mb-3">Obunalar</h3>
+        <h3 className="text-sm font-semibold text-[#766B73] uppercase tracking-wide mb-3">Obunalar</h3>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           <KpiCard title="MRR"                               value={fmt(data.subscriptions.mrr)} sub="Oylik takrorlanuvchi" accent />
           <KpiCard title="ARR"                               value={fmt(data.subscriptions.arr)} sub="Yillik takrorlanuvchi" />
@@ -235,21 +235,21 @@ function OverviewTab({ dateFrom, dateTo }: { dateFrom: string; dateTo: string })
         </div>
 
         {/* Status breakdown */}
-        <div className="mt-4 bg-white rounded-xl border border-[#E5E7EB] p-5">
-          <p className="text-sm font-semibold text-[#111827] mb-4">{uz.super_admin.holat_taqsimoti}</p>
+        <div className="mt-4 bg-white rounded-xl border border-[#EDE3E8] p-5">
+          <p className="text-sm font-semibold text-[#29232A] mb-4">{uz.super_admin.holat_taqsimoti}</p>
           <div className="space-y-3">
             <DistBar label={uz.super_admin.faol}            value={data.subscriptions.active}    total={subTotal} color="#16A34A" />
-            <DistBar label={uz.super_admin.sinov}           value={data.subscriptions.trial}     total={subTotal} color="#2563EB" />
+            <DistBar label={uz.super_admin.sinov}           value={data.subscriptions.trial}     total={subTotal} color="#8E315D" />
             <DistBar label={uz.super_admin.past_due}        value={data.subscriptions.past_due}  total={subTotal} color="#D97706" />
             <DistBar label={uz.super_admin.muddati_tugagan} value={data.subscriptions.expired}   total={subTotal} color="#DC2626" />
-            <DistBar label={uz.super_admin.bekor}           value={data.subscriptions.cancelled} total={subTotal} color="#9CA3AF" />
+            <DistBar label={uz.super_admin.bekor}           value={data.subscriptions.cancelled} total={subTotal} color="#B8AAB2" />
           </div>
         </div>
       </div>
 
       {/* Revenue KPIs */}
       <div>
-        <h3 className="text-sm font-semibold text-[#6B7280] uppercase tracking-wide mb-3">Daromad</h3>
+        <h3 className="text-sm font-semibold text-[#766B73] uppercase tracking-wide mb-3">Daromad</h3>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           <KpiCard title={uz.super_admin.net_tushum_hisobot}    value={fmt(data.revenue.total_paid)}      sub="Jami to'langan" accent />
           <KpiCard title={uz.super_admin.davr_tushum}           value={fmt(data.revenue.period_paid)}     sub="Tanlangan davrda" />
@@ -264,7 +264,7 @@ function OverviewTab({ dateFrom, dateTo }: { dateFrom: string; dateTo: string })
 
       {/* Invoice KPIs */}
       <div>
-        <h3 className="text-sm font-semibold text-[#6B7280] uppercase tracking-wide mb-3">Invoicelar</h3>
+        <h3 className="text-sm font-semibold text-[#766B73] uppercase tracking-wide mb-3">Invoicelar</h3>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           <KpiCard title={uz.super_admin.jami_invoice}           value={data.invoices.total}               />
           <KpiCard title={uz.super_admin.tolangan_invoice}       value={data.invoices.paid}                sub={fmt(data.invoices.paid_amount)} accent />
@@ -325,31 +325,31 @@ function RevenueTab({ dateFrom, dateTo }: { dateFrom: string; dateTo: string }) 
       </div>
 
       {/* Bar chart */}
-      <div className="bg-white rounded-xl border border-[#E5E7EB] p-5">
-        <p className="text-sm font-semibold text-[#111827] mb-4">{uz.super_admin.daromad_dinamikasi}</p>
+      <div className="bg-white rounded-xl border border-[#EDE3E8] p-5">
+        <p className="text-sm font-semibold text-[#29232A] mb-4">{uz.super_admin.daromad_dinamikasi}</p>
         <BarChart data={data.series} height={180} />
       </div>
 
       {/* By plan + by method */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <div className="bg-white rounded-xl border border-[#E5E7EB] p-5">
-          <p className="text-sm font-semibold text-[#111827] mb-4">{uz.super_admin.tarif_boyicha}</p>
+        <div className="bg-white rounded-xl border border-[#EDE3E8] p-5">
+          <p className="text-sm font-semibold text-[#29232A] mb-4">{uz.super_admin.tarif_boyicha}</p>
           {data.by_plan.length === 0 ? (
-            <p className="text-sm text-[#9CA3AF]">{uz.super_admin.hech_daromad_yoq}</p>
+            <p className="text-sm text-[#B8AAB2]">{uz.super_admin.hech_daromad_yoq}</p>
           ) : (
             <div className="space-y-3">
               {data.by_plan.map((p) => (
                 <DistBar key={p.plan_name} label={p.plan_name} value={p.total}
-                  total={data.total || 1} color="#7C3AED" />
+                  total={data.total || 1} color="#8E315D" />
               ))}
             </div>
           )}
         </div>
 
-        <div className="bg-white rounded-xl border border-[#E5E7EB] p-5">
-          <p className="text-sm font-semibold text-[#111827] mb-4">{uz.super_admin.tolov_usuli_taqsimot}</p>
+        <div className="bg-white rounded-xl border border-[#EDE3E8] p-5">
+          <p className="text-sm font-semibold text-[#29232A] mb-4">{uz.super_admin.tolov_usuli_taqsimot}</p>
           {data.by_method.length === 0 ? (
-            <p className="text-sm text-[#9CA3AF]">{uz.super_admin.hech_daromad_yoq}</p>
+            <p className="text-sm text-[#B8AAB2]">{uz.super_admin.hech_daromad_yoq}</p>
           ) : (
             <div className="space-y-3">
               {data.by_method.map((m) => (
@@ -406,11 +406,11 @@ function SubscriptionsTab({ dateFrom, dateTo, plans }: { dateFrom: string; dateT
     <div className="space-y-6">
       {/* Plan filter */}
       <div className="flex items-center gap-3">
-        <label className="text-sm text-[#6B7280]">{uz.super_admin.filter_plan}:</label>
+        <label className="text-sm text-[#766B73]">{uz.super_admin.filter_plan}:</label>
         <select
           value={planFilter}
           onChange={(e) => setPlan(e.target.value)}
-          className="text-sm border border-[#E5E7EB] rounded-lg px-3 py-1.5 text-[#374151] focus:outline-none focus:ring-2 focus:ring-[#7C3AED]/20"
+          className="text-sm border border-[#EDE3E8] rounded-lg px-3 py-1.5 text-[#3D3240] focus:outline-none focus:ring-2 focus:ring-[#8E315D]/20"
         >
           <option value="">{uz.common.hammasi}</option>
           {plans.map((p) => <option key={p.id} value={String(p.id)}>{p.name}</option>)}
@@ -432,27 +432,27 @@ function SubscriptionsTab({ dateFrom, dateTo, plans }: { dateFrom: string; dateT
 
       {/* Status distribution */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <div className="bg-white rounded-xl border border-[#E5E7EB] p-5">
-          <p className="text-sm font-semibold text-[#111827] mb-4">{uz.super_admin.holat_taqsimoti}</p>
+        <div className="bg-white rounded-xl border border-[#EDE3E8] p-5">
+          <p className="text-sm font-semibold text-[#29232A] mb-4">{uz.super_admin.holat_taqsimoti}</p>
           <div className="space-y-3">
             <DistBar label={uz.super_admin.faol}            value={sd.active}    total={total} color="#16A34A" />
-            <DistBar label={uz.super_admin.sinov}           value={sd.trial}     total={total} color="#2563EB" />
+            <DistBar label={uz.super_admin.sinov}           value={sd.trial}     total={total} color="#8E315D" />
             <DistBar label={uz.super_admin.past_due}        value={sd.past_due}  total={total} color="#D97706" />
             <DistBar label={uz.super_admin.muddati_tugagan} value={sd.expired}   total={total} color="#DC2626" />
-            <DistBar label={uz.super_admin.bekor}           value={sd.cancelled} total={total} color="#9CA3AF" />
+            <DistBar label={uz.super_admin.bekor}           value={sd.cancelled} total={total} color="#B8AAB2" />
           </div>
         </div>
 
-        <div className="bg-white rounded-xl border border-[#E5E7EB] p-5">
-          <p className="text-sm font-semibold text-[#111827] mb-4">{uz.super_admin.tarif_taqsimoti}</p>
+        <div className="bg-white rounded-xl border border-[#EDE3E8] p-5">
+          <p className="text-sm font-semibold text-[#29232A] mb-4">{uz.super_admin.tarif_taqsimoti}</p>
           {data.plan_distribution.length === 0 ? (
-            <p className="text-sm text-[#9CA3AF]">{uz.common.malumot_yoq}</p>
+            <p className="text-sm text-[#B8AAB2]">{uz.common.malumot_yoq}</p>
           ) : (
             <div className="space-y-3">
               {data.plan_distribution.map((p) => {
                 const planTotal = data.plan_distribution.reduce((s, x) => s + x.count, 0) || 1;
                 return (
-                  <DistBar key={p.plan_id} label={p.plan_name} value={p.count} total={planTotal} color="#7C3AED" />
+                  <DistBar key={p.plan_id} label={p.plan_name} value={p.count} total={planTotal} color="#8E315D" />
                 );
               })}
             </div>
@@ -500,11 +500,11 @@ function OrganizationsTab({ dateFrom, dateTo, plans }: { dateFrom: string; dateT
     <div className="space-y-6">
       {/* Plan filter */}
       <div className="flex items-center gap-3">
-        <label className="text-sm text-[#6B7280]">{uz.super_admin.filter_plan}:</label>
+        <label className="text-sm text-[#766B73]">{uz.super_admin.filter_plan}:</label>
         <select
           value={planFilter}
           onChange={(e) => setPlan(e.target.value)}
-          className="text-sm border border-[#E5E7EB] rounded-lg px-3 py-1.5 text-[#374151] focus:outline-none focus:ring-2 focus:ring-[#7C3AED]/20"
+          className="text-sm border border-[#EDE3E8] rounded-lg px-3 py-1.5 text-[#3D3240] focus:outline-none focus:ring-2 focus:ring-[#8E315D]/20"
         >
           <option value="">{uz.common.hammasi}</option>
           {plans.map((p) => <option key={p.id} value={String(p.id)}>{p.name}</option>)}
@@ -523,13 +523,13 @@ function OrganizationsTab({ dateFrom, dateTo, plans }: { dateFrom: string; dateT
 
       {/* Plan distribution */}
       {data.plan_distribution.length > 0 && (
-        <div className="bg-white rounded-xl border border-[#E5E7EB] p-5">
-          <p className="text-sm font-semibold text-[#111827] mb-4">{uz.super_admin.tarif_taqsimoti}</p>
+        <div className="bg-white rounded-xl border border-[#EDE3E8] p-5">
+          <p className="text-sm font-semibold text-[#29232A] mb-4">{uz.super_admin.tarif_taqsimoti}</p>
           <div className="space-y-3">
             {data.plan_distribution.map((p) => {
               const planTotal = data.plan_distribution.reduce((s, x) => s + x.count, 0) || 1;
               return (
-                <DistBar key={p.plan_id} label={p.plan_name} value={p.count} total={planTotal} color="#7C3AED" />
+                <DistBar key={p.plan_id} label={p.plan_name} value={p.count} total={planTotal} color="#8E315D" />
               );
             })}
           </div>
@@ -537,8 +537,8 @@ function OrganizationsTab({ dateFrom, dateTo, plans }: { dateFrom: string; dateT
       )}
 
       {/* Growth chart */}
-      <div className="bg-white rounded-xl border border-[#E5E7EB] p-5">
-        <p className="text-sm font-semibold text-[#111827] mb-4">{uz.super_admin.tashkilot_osishi}</p>
+      <div className="bg-white rounded-xl border border-[#EDE3E8] p-5">
+        <p className="text-sm font-semibold text-[#29232A] mb-4">{uz.super_admin.tashkilot_osishi}</p>
         <div className="overflow-x-auto">
           <svg viewBox={`0 0 ${data.growth_series.length * 44} 140`} width="100%" style={{ minWidth: 400 }}>
             {data.growth_series.map((item, i) => {
@@ -547,12 +547,12 @@ function OrganizationsTab({ dateFrom, dateTo, plans }: { dateFrom: string; dateT
               return (
                 <g key={item.period}>
                   <rect x={x + 4} y={110 - barH} width={36} height={barH} rx={3}
-                    className="fill-[#7C3AED] opacity-70 hover:opacity-100 transition-opacity" />
-                  <text x={x + 22} y={128} textAnchor="middle" fontSize={9} className="fill-[#9CA3AF]">
+                    className="fill-[#8E315D] opacity-70 hover:opacity-100 transition-opacity" />
+                  <text x={x + 22} y={128} textAnchor="middle" fontSize={9} className="fill-[#B8AAB2]">
                     {item.label.slice(0, 3)}
                   </text>
                   {item.count > 0 && (
-                    <text x={x + 22} y={106 - barH} textAnchor="middle" fontSize={9} className="fill-[#7C3AED]">
+                    <text x={x + 22} y={106 - barH} textAnchor="middle" fontSize={9} className="fill-[#8E315D]">
                       {item.count}
                     </text>
                   )}
@@ -602,8 +602,8 @@ function UsersTab({ dateFrom, dateTo }: { dateFrom: string; dateTo: string }) {
     parent:      uz.foydalanuvchilar.rol_parent,
   };
   const roleColors: Record<string, string> = {
-    super_admin: "#7C3AED",
-    admin:       "#2563EB",
+    super_admin: "#8E315D",
+    admin:       "#8E315D",
     teacher:     "#0891B2",
     parent:      "#16A34A",
   };
@@ -621,33 +621,33 @@ function UsersTab({ dateFrom, dateTo }: { dateFrom: string; dateTo: string }) {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* By role */}
-        <div className="bg-white rounded-xl border border-[#E5E7EB] p-5">
-          <p className="text-sm font-semibold text-[#111827] mb-4">{uz.super_admin.rol_boyicha}</p>
+        <div className="bg-white rounded-xl border border-[#EDE3E8] p-5">
+          <p className="text-sm font-semibold text-[#29232A] mb-4">{uz.super_admin.rol_boyicha}</p>
           <div className="space-y-3">
             {(Object.entries(data.by_role) as [string, number][]).map(([role, count]) => (
-              <DistBar key={role} label={roleLabels[role] ?? role} value={count} total={roleTotal} color={roleColors[role] ?? "#6B7280"} />
+              <DistBar key={role} label={roleLabels[role] ?? role} value={count} total={roleTotal} color={roleColors[role] ?? "#766B73"} />
             ))}
           </div>
         </div>
 
         {/* By org top 10 */}
-        <div className="bg-white rounded-xl border border-[#E5E7EB] p-5">
-          <p className="text-sm font-semibold text-[#111827] mb-4">{uz.super_admin.tashkilot_boyicha}</p>
+        <div className="bg-white rounded-xl border border-[#EDE3E8] p-5">
+          <p className="text-sm font-semibold text-[#29232A] mb-4">{uz.super_admin.tashkilot_boyicha}</p>
           {data.by_organization.length === 0 ? (
-            <p className="text-sm text-[#9CA3AF]">{uz.common.malumot_yoq}</p>
+            <p className="text-sm text-[#B8AAB2]">{uz.common.malumot_yoq}</p>
           ) : (
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-[#E5E7EB]">
-                  <th className="text-left py-2 text-xs font-semibold text-[#6B7280] uppercase">Tashkilot</th>
-                  <th className="text-right py-2 text-xs font-semibold text-[#6B7280] uppercase">Foydalanuvchi</th>
+                <tr className="border-b border-[#EDE3E8]">
+                  <th className="text-left py-2 text-xs font-semibold text-[#766B73] uppercase">Tashkilot</th>
+                  <th className="text-right py-2 text-xs font-semibold text-[#766B73] uppercase">Foydalanuvchi</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#F3F4F6]">
+              <tbody className="divide-y divide-[#F2ECF0]">
                 {data.by_organization.map((row) => (
-                  <tr key={row.organization_id} className="hover:bg-[#F9FAFB]">
-                    <td className="py-2.5 text-[#374151]">{row.organization_name}</td>
-                    <td className="py-2.5 text-right font-medium text-[#111827]">{row.count}</td>
+                  <tr key={row.organization_id} className="hover:bg-[#FAF5F8]">
+                    <td className="py-2.5 text-[#3D3240]">{row.organization_name}</td>
+                    <td className="py-2.5 text-right font-medium text-[#29232A]">{row.count}</td>
                   </tr>
                 ))}
               </tbody>
@@ -722,13 +722,13 @@ export default function HisobotlarPage() {
     <div className="max-w-6xl mx-auto space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-[#111827]">{uz.super_admin.hisobotlar}</h1>
-        <p className="text-[#9CA3AF] mt-1 text-sm">{uz.super_admin.hisobotlar_tavsif}</p>
+        <h1 className="text-2xl font-bold text-[#29232A]">{uz.super_admin.hisobotlar}</h1>
+        <p className="text-[#B8AAB2] mt-1 text-sm">{uz.super_admin.hisobotlar_tavsif}</p>
       </div>
 
       {/* Date filter */}
-      <div className="bg-white rounded-xl border border-[#E5E7EB] p-4">
-        <p className="text-xs font-semibold text-[#6B7280] uppercase tracking-wide mb-3">{uz.super_admin.davr_tanlash}</p>
+      <div className="bg-white rounded-xl border border-[#EDE3E8] p-4">
+        <p className="text-xs font-semibold text-[#766B73] uppercase tracking-wide mb-3">{uz.super_admin.davr_tanlash}</p>
         <div className="flex flex-wrap gap-2 mb-3">
           {PRESETS.map((p) => (
             <button
@@ -736,8 +736,8 @@ export default function HisobotlarPage() {
               onClick={() => applyPreset(p.key)}
               className={`px-3 py-1.5 text-sm rounded-lg border transition-colors ${
                 preset === p.key
-                  ? "bg-[#7C3AED] text-white border-[#7C3AED]"
-                  : "border-[#E5E7EB] text-[#374151] hover:bg-[#F8FAFC]"
+                  ? "bg-[#8E315D] text-white border-[#8E315D]"
+                  : "border-[#EDE3E8] text-[#3D3240] hover:bg-[#FFF9F5]"
               }`}
             >
               {p.label}
@@ -748,41 +748,41 @@ export default function HisobotlarPage() {
         {preset === "maxsus" && (
           <div className="flex flex-wrap items-center gap-3 mt-2">
             <div className="flex items-center gap-2">
-              <label className="text-sm text-[#6B7280]">{uz.super_admin.boshlanish_sanasi_f}:</label>
+              <label className="text-sm text-[#766B73]">{uz.super_admin.boshlanish_sanasi_f}:</label>
               <input
                 type="date"
                 value={customFrom}
                 onChange={(e) => setCustomFrom(e.target.value)}
-                className="text-sm border border-[#E5E7EB] rounded-lg px-3 py-1.5 text-[#374151] focus:outline-none focus:ring-2 focus:ring-[#7C3AED]/20"
+                className="text-sm border border-[#EDE3E8] rounded-lg px-3 py-1.5 text-[#3D3240] focus:outline-none focus:ring-2 focus:ring-[#8E315D]/20"
               />
             </div>
             <div className="flex items-center gap-2">
-              <label className="text-sm text-[#6B7280]">{uz.super_admin.tugash_sanasi_f}:</label>
+              <label className="text-sm text-[#766B73]">{uz.super_admin.tugash_sanasi_f}:</label>
               <input
                 type="date"
                 value={customTo}
                 min={customFrom}
                 onChange={(e) => setCustomTo(e.target.value)}
-                className="text-sm border border-[#E5E7EB] rounded-lg px-3 py-1.5 text-[#374151] focus:outline-none focus:ring-2 focus:ring-[#7C3AED]/20"
+                className="text-sm border border-[#EDE3E8] rounded-lg px-3 py-1.5 text-[#3D3240] focus:outline-none focus:ring-2 focus:ring-[#8E315D]/20"
               />
             </div>
             <button
               onClick={applyCustom}
               disabled={!customFrom || !customTo}
-              className="px-4 py-1.5 text-sm bg-[#7C3AED] text-white rounded-lg disabled:opacity-40 hover:bg-[#6D28D9] transition-colors"
+              className="px-4 py-1.5 text-sm bg-[#8E315D] text-white rounded-lg disabled:opacity-40 hover:bg-[#742548] transition-colors"
             >
               {uz.super_admin.filtrlash_btn}
             </button>
           </div>
         )}
 
-        <p className="text-xs text-[#9CA3AF] mt-2">
+        <p className="text-xs text-[#B8AAB2] mt-2">
           {fmtDate(appliedFrom)} — {fmtDate(appliedTo)}
         </p>
       </div>
 
       {/* Tabs */}
-      <div className="border-b border-[#E5E7EB]">
+      <div className="border-b border-[#EDE3E8]">
         <nav className="flex gap-1 overflow-x-auto" aria-label="Hisobot bo'limlari">
           {TABS.map((tab) => (
             <button
@@ -790,8 +790,8 @@ export default function HisobotlarPage() {
               onClick={() => setActiveTab(tab.key)}
               className={`px-4 py-2.5 text-sm font-medium whitespace-nowrap border-b-2 transition-colors ${
                 activeTab === tab.key
-                  ? "border-[#7C3AED] text-[#7C3AED]"
-                  : "border-transparent text-[#6B7280] hover:text-[#374151] hover:border-[#D1D5DB]"
+                  ? "border-[#8E315D] text-[#8E315D]"
+                  : "border-transparent text-[#766B73] hover:text-[#3D3240] hover:border-[#D9C9D1]"
               }`}
             >
               {tab.label}

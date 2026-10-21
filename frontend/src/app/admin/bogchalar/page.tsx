@@ -32,23 +32,6 @@ interface ApiParams { search: string; status: string; sort: string; page: number
 interface Meta { current_page: number; last_page: number; per_page: number; total: number }
 
 // ── Helpers ────────────────────────────────────────────────────────
-function subVariant(status: string): "success" | "info" | "warning" | "error" | "neutral" {
-  if (status === "active")   return "success";
-  if (status === "trial")    return "info";
-  if (status === "past_due") return "warning";
-  if (status === "expired")  return "error";
-  return "neutral";
-}
-
-function subLabel(status: string): string {
-  return ({
-    active:   uz.super_admin.faol,
-    trial:    uz.super_admin.sinov,
-    past_due: uz.super_admin.past_due,
-    expired:  uz.super_admin.muddati_tugagan,
-    cancelled: uz.super_admin.bekor,
-  } as Record<string, string>)[status] ?? status;
-}
 
 const orgIcon = (
   <svg className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -120,6 +103,7 @@ export default function BogchalarPage() {
       .catch(() => {});
   }, []);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { loadOrgs(apiParams); }, [apiParams]);
 
   // ── Filter handlers ───────────────────────────────────────────────
@@ -271,7 +255,7 @@ export default function BogchalarPage() {
             value={searchInput}
             onChange={(e) => handleSearch(e.target.value)}
             suffix={
-              <svg className="h-4 w-4 text-[#9CA3AF]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <svg className="h-4 w-4 text-[#B8AAB2]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
               </svg>
             }
@@ -296,7 +280,7 @@ export default function BogchalarPage() {
       </div>
 
       {/* Table card */}
-      <div className="bg-white rounded-xl border border-[#E5E7EB] overflow-hidden">
+      <div className="bg-white rounded-xl border border-[#EDE3E8] overflow-hidden">
         {loading ? (
           <SkeletonTable rows={6} />
         ) : error ? (
@@ -317,22 +301,22 @@ export default function BogchalarPage() {
         ) : (
           <>
             {/* Mobile cards */}
-            <ul className="sm:hidden divide-y divide-[#F3F4F6]">
+            <ul className="sm:hidden divide-y divide-[#F2ECF0]">
               {orgs.map((org) => (
                 <li key={org.id} className="flex items-center gap-3 px-4 py-3.5">
-                  <div className="h-9 w-9 rounded-lg bg-[#F5F3FF] flex items-center justify-center text-[#7C3AED] font-semibold flex-shrink-0">
+                  <div className="h-9 w-9 rounded-lg bg-[#FDF2F6] flex items-center justify-center text-[#8E315D] font-semibold flex-shrink-0">
                     {org.name.charAt(0).toUpperCase()}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium text-[#111827] truncate">{org.name}</p>
-                    <p className="text-xs text-[#9CA3AF]">{org.phone ?? "—"}</p>
+                    <p className="font-medium text-[#29232A] truncate">{org.name}</p>
+                    <p className="text-xs text-[#B8AAB2]">{org.phone ?? "—"}</p>
                     {org.subscription && <SubscriptionBadge status={org.subscription.status} />}
                   </div>
                   <div className="flex items-center gap-2">
                     <Badge variant={org.is_active ? "success" : "neutral"}>
                       {org.is_active ? uz.common.faol : uz.common.nofaol}
                     </Badge>
-                    <Link href={`/admin/bogchalar/${org.id}`} className="text-sm text-[#7C3AED] font-medium">
+                    <Link href={`/admin/bogchalar/${org.id}`} className="text-sm text-[#8E315D] font-medium">
                       Ko&apos;rish
                     </Link>
                   </div>
@@ -349,40 +333,40 @@ export default function BogchalarPage() {
             >
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-[#E5E7EB] bg-[#F9FAFB]">
-                    <th className="text-left px-5 py-3.5 text-xs font-semibold text-[#6B7280] uppercase tracking-wide">Bog&apos;cha</th>
-                    <th className="text-left px-5 py-3.5 text-xs font-semibold text-[#6B7280] uppercase tracking-wide hidden md:table-cell">{uz.super_admin.mas_ul}</th>
-                    <th className="text-left px-5 py-3.5 text-xs font-semibold text-[#6B7280] uppercase tracking-wide hidden lg:table-cell">{uz.super_admin.tarif}</th>
-                    <th className="text-left px-5 py-3.5 text-xs font-semibold text-[#6B7280] uppercase tracking-wide">{uz.super_admin.obuna}</th>
-                    <th className="text-left px-5 py-3.5 text-xs font-semibold text-[#6B7280] uppercase tracking-wide">{uz.super_admin.holat}</th>
-                    <th className="text-left px-5 py-3.5 text-xs font-semibold text-[#6B7280] uppercase tracking-wide">{uz.super_admin.amallar}</th>
+                  <tr className="border-b border-[#EDE3E8] bg-[#FAF5F8]">
+                    <th className="text-left px-5 py-3.5 text-xs font-semibold text-[#766B73] uppercase tracking-wide">Bog&apos;cha</th>
+                    <th className="text-left px-5 py-3.5 text-xs font-semibold text-[#766B73] uppercase tracking-wide hidden md:table-cell">{uz.super_admin.mas_ul}</th>
+                    <th className="text-left px-5 py-3.5 text-xs font-semibold text-[#766B73] uppercase tracking-wide hidden lg:table-cell">{uz.super_admin.tarif}</th>
+                    <th className="text-left px-5 py-3.5 text-xs font-semibold text-[#766B73] uppercase tracking-wide">{uz.super_admin.obuna}</th>
+                    <th className="text-left px-5 py-3.5 text-xs font-semibold text-[#766B73] uppercase tracking-wide">{uz.super_admin.holat}</th>
+                    <th className="text-left px-5 py-3.5 text-xs font-semibold text-[#766B73] uppercase tracking-wide">{uz.super_admin.amallar}</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#F3F4F6]">
+                <tbody className="divide-y divide-[#F2ECF0]">
                   {orgs.map((org) => (
-                    <tr key={org.id} className="hover:bg-[#F9FAFB] transition-colors duration-100">
+                    <tr key={org.id} className="hover:bg-[#FAF5F8] transition-colors duration-100">
                       <td className="px-5 py-4">
                         <div className="flex items-center gap-3">
-                          <div className="h-8 w-8 rounded-lg bg-[#F5F3FF] flex items-center justify-center text-[#7C3AED] font-semibold text-xs flex-shrink-0">
+                          <div className="h-8 w-8 rounded-lg bg-[#FDF2F6] flex items-center justify-center text-[#8E315D] font-semibold text-xs flex-shrink-0">
                             {org.name.charAt(0).toUpperCase()}
                           </div>
                           <div>
-                            <p className="font-medium text-[#111827]">{org.name}</p>
-                            <p className="text-xs text-[#9CA3AF]">{org.phone ?? "—"}</p>
+                            <p className="font-medium text-[#29232A]">{org.name}</p>
+                            <p className="text-xs text-[#B8AAB2]">{org.phone ?? "—"}</p>
                           </div>
                         </div>
                       </td>
                       <td className="px-5 py-4 hidden md:table-cell">
                         {org.admin ? (
                           <div>
-                            <p className="text-sm text-[#374151]">{org.admin.name}</p>
-                            <p className="text-xs text-[#9CA3AF]">{org.admin.phone ?? "—"}</p>
+                            <p className="text-sm text-[#3D3240]">{org.admin.name}</p>
+                            <p className="text-xs text-[#B8AAB2]">{org.admin.phone ?? "—"}</p>
                           </div>
                         ) : (
-                          <span className="text-[#D1D5DB] text-sm">{uz.super_admin.admin_yoq}</span>
+                          <span className="text-[#D9C9D1] text-sm">{uz.super_admin.admin_yoq}</span>
                         )}
                       </td>
-                      <td className="px-5 py-4 text-[#6B7280] hidden lg:table-cell">
+                      <td className="px-5 py-4 text-[#766B73] hidden lg:table-cell">
                         {org.subscription?.plan?.name ?? "—"}
                       </td>
                       <td className="px-5 py-4">
@@ -390,13 +374,13 @@ export default function BogchalarPage() {
                           <div>
                             <SubscriptionBadge status={org.subscription.status} />
                             {org.subscription.days_remaining > 0 && (
-                              <p className="text-xs text-[#9CA3AF] mt-1">
+                              <p className="text-xs text-[#B8AAB2] mt-1">
                                 {org.subscription.days_remaining} {uz.super_admin.qolgan_kun}
                               </p>
                             )}
                           </div>
                         ) : (
-                          <span className="text-[#D1D5DB]">—</span>
+                          <span className="text-[#D9C9D1]">—</span>
                         )}
                       </td>
                       <td className="px-5 py-4">
@@ -408,7 +392,7 @@ export default function BogchalarPage() {
                         <button
                           data-menu=""
                           onClick={() => setOpenMenuId(openMenuId === org.id ? null : org.id)}
-                          className="p-1.5 rounded-lg text-[#9CA3AF] hover:text-[#374151] hover:bg-[#F3F4F6] transition-colors"
+                          className="p-1.5 rounded-lg text-[#B8AAB2] hover:text-[#3D3240] hover:bg-[#F2ECF0] transition-colors"
                         >
                           <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
                             <circle cx="12" cy="5" r="1.5" /><circle cx="12" cy="12" r="1.5" /><circle cx="12" cy="19" r="1.5" />
@@ -417,7 +401,7 @@ export default function BogchalarPage() {
                         {openMenuId === org.id && (
                           <div
                             data-menu=""
-                            className="absolute right-0 top-10 bg-white border border-[#E5E7EB] rounded-xl shadow-lg z-20 min-w-[190px] py-1"
+                            className="absolute right-0 top-10 bg-white border border-[#EDE3E8] rounded-xl shadow-lg z-20 min-w-[190px] py-1"
                           >
                             <ActionMenuItem
                               label="Ko'rish"
@@ -441,7 +425,7 @@ export default function BogchalarPage() {
                               href={`/admin/bogchalar/${org.id}`}
                               onClick={() => setOpenMenuId(null)}
                             />
-                            <div className="border-t border-[#F3F4F6] my-1" />
+                            <div className="border-t border-[#F2ECF0] my-1" />
                             <ActionMenuItem
                               label={org.is_active ? uz.super_admin.faolsizlantir : uz.super_admin.faollashtirish}
                               icon={<svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d={org.is_active ? "M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" : "M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"} /></svg>}
@@ -465,25 +449,25 @@ export default function BogchalarPage() {
 
             {/* Pagination */}
             {meta && meta.last_page > 1 && (
-              <div className="flex items-center justify-between px-5 py-4 border-t border-[#F3F4F6]">
-                <p className="text-sm text-[#6B7280]">
+              <div className="flex items-center justify-between px-5 py-4 border-t border-[#F2ECF0]">
+                <p className="text-sm text-[#766B73]">
                   {uz.super_admin.jami} <span className="font-medium">{meta.total}</span>
                 </p>
                 <div className="flex items-center gap-2">
                   <button
                     disabled={meta.current_page <= 1}
                     onClick={() => setApiParams(p => ({ ...p, page: p.page - 1 }))}
-                    className="px-3 py-1.5 text-sm border border-[#E5E7EB] rounded-lg disabled:opacity-40 hover:bg-[#F3F4F6] transition-colors"
+                    className="px-3 py-1.5 text-sm border border-[#EDE3E8] rounded-lg disabled:opacity-40 hover:bg-[#F2ECF0] transition-colors"
                   >
                     ←
                   </button>
-                  <span className="text-sm text-[#6B7280]">
+                  <span className="text-sm text-[#766B73]">
                     {meta.current_page} / {meta.last_page}
                   </span>
                   <button
                     disabled={meta.current_page >= meta.last_page}
                     onClick={() => setApiParams(p => ({ ...p, page: p.page + 1 }))}
-                    className="px-3 py-1.5 text-sm border border-[#E5E7EB] rounded-lg disabled:opacity-40 hover:bg-[#F3F4F6] transition-colors"
+                    className="px-3 py-1.5 text-sm border border-[#EDE3E8] rounded-lg disabled:opacity-40 hover:bg-[#F2ECF0] transition-colors"
                   >
                     →
                   </button>
@@ -513,7 +497,7 @@ export default function BogchalarPage() {
             </div>
           )}
           <div>
-            <p className="text-xs font-semibold text-[#9CA3AF] uppercase tracking-wide mb-3">{uz.super_admin.bogcha_malumotlari}</p>
+            <p className="text-xs font-semibold text-[#B8AAB2] uppercase tracking-wide mb-3">{uz.super_admin.bogcha_malumotlari}</p>
             <div className="space-y-3">
               <Input label="Nomi *" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} error={formErrors.name?.[0]} required />
               <div className="grid grid-cols-2 gap-3">
@@ -522,8 +506,8 @@ export default function BogchalarPage() {
               </div>
             </div>
           </div>
-          <div className="pt-1 border-t border-[#E5E7EB]">
-            <p className="text-xs font-semibold text-[#9CA3AF] uppercase tracking-wide mb-3 mt-3">{uz.super_admin.admin_malumotlari}</p>
+          <div className="pt-1 border-t border-[#EDE3E8]">
+            <p className="text-xs font-semibold text-[#B8AAB2] uppercase tracking-wide mb-3 mt-3">{uz.super_admin.admin_malumotlari}</p>
             <div className="space-y-3">
               <div className="grid grid-cols-2 gap-3">
                 <Input label="Admin ismi" value={form.admin_name} onChange={(e) => setForm({ ...form, admin_name: e.target.value })} error={formErrors.admin_name?.[0]} />
@@ -533,8 +517,8 @@ export default function BogchalarPage() {
               <Input label="Parol (bo'sh: kiddo123)" type="password" value={form.admin_password} onChange={(e) => setForm({ ...form, admin_password: e.target.value })} error={formErrors.admin_password?.[0]} />
             </div>
           </div>
-          <div className="pt-1 border-t border-[#E5E7EB]">
-            <p className="text-xs font-semibold text-[#9CA3AF] uppercase tracking-wide mb-3 mt-3">{uz.super_admin.obuna_malumotlari}</p>
+          <div className="pt-1 border-t border-[#EDE3E8]">
+            <p className="text-xs font-semibold text-[#B8AAB2] uppercase tracking-wide mb-3 mt-3">{uz.super_admin.obuna_malumotlari}</p>
             <div className="space-y-3">
               <Select label={uz.super_admin.tarif} value={form.plan_id} onChange={(e) => setForm({ ...form, plan_id: e.target.value })}>
                 <option value="">— Tarif tanlang —</option>
@@ -601,13 +585,13 @@ export default function BogchalarPage() {
           </>
         }
       >
-        <p className="text-sm text-[#6B7280]">
+        <p className="text-sm text-[#766B73]">
           {confirmToggle?.is_active
             ? uz.super_admin.faolsizlantir_tasdiq
             : uz.super_admin.faollashtirish_tasdiq}
         </p>
         {confirmToggle && (
-          <p className="mt-2 font-medium text-[#111827]">{confirmToggle.name}</p>
+          <p className="mt-2 font-medium text-[#29232A]">{confirmToggle.name}</p>
         )}
       </Modal>
 
@@ -625,9 +609,9 @@ export default function BogchalarPage() {
           </>
         }
       >
-        <p className="text-sm text-[#6B7280]">{uz.super_admin.ochir_tasdiq}</p>
+        <p className="text-sm text-[#766B73]">{uz.super_admin.ochir_tasdiq}</p>
         {confirmDelete && (
-          <p className="mt-2 font-semibold text-[#111827]">{confirmDelete.name}</p>
+          <p className="mt-2 font-semibold text-[#29232A]">{confirmDelete.name}</p>
         )}
       </Modal>
     </div>
@@ -658,7 +642,7 @@ function ActionMenuItem({
   variant?: "default" | "warning" | "danger" | "success";
 }) {
   const color = {
-    default: "text-[#374151] hover:bg-[#F3F4F6]",
+    default: "text-[#3D3240] hover:bg-[#F2ECF0]",
     warning: "text-[#92400E] hover:bg-[#FFFBEB]",
     danger:  "text-[#991B1B] hover:bg-[#FEF2F2]",
     success: "text-[#166534] hover:bg-[#F0FDF4]",

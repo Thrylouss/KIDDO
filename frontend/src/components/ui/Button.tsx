@@ -12,10 +12,10 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const variantCls: Record<Variant, string> = {
-  primary:   "bg-[#2563EB] text-white hover:bg-[#1D4ED8] focus-visible:ring-[#2563EB]/40 disabled:bg-[#2563EB]/50",
-  secondary: "bg-white text-[#111827] border border-[#E5E7EB] hover:bg-[#F8FAFC] focus-visible:ring-[#2563EB]/30",
+  primary:   "bg-[var(--primary)] text-white hover:bg-[var(--primary-h)] focus-visible:ring-[#8E315D]/40 disabled:bg-[#8E315D]/50",
+  secondary: "bg-white text-[var(--text)] border border-[var(--border)] hover:bg-[var(--primary-lt)] focus-visible:ring-[#8E315D]/30",
   danger:    "bg-[#EF4444] text-white hover:bg-[#DC2626] focus-visible:ring-[#EF4444]/40 disabled:bg-[#EF4444]/50",
-  ghost:     "bg-transparent text-[#6B7280] hover:bg-[#F3F4F6] hover:text-[#111827] focus-visible:ring-[#2563EB]/30",
+  ghost:     "bg-transparent text-[var(--text-2)] hover:bg-[var(--border-2)] hover:text-[var(--text)] focus-visible:ring-[#8E315D]/30",
 };
 
 const sizeCls: Record<Size, string> = {

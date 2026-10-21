@@ -176,6 +176,52 @@ class DashboardController extends SuperAdminController
         ]);
     }
 
+    public function expiring(Request $request): JsonResponse
+    {
+        $days = (int) $request->query('days', 30);
+        $days = min(max($days, 7), 90);
+        $soon = now()->addDays($days);
+
+        $subs = Subscription::whereIn('status', [
+                Subscription::STATUS_ACTIVE,
+                Subscription::STATUS_TRIAL,
+            ])
+            ->where(function ($q) use ($soon) {
+                $q->where(function ($inner) use ($soon) {
+                        $inner->where('status', Subscription::STATUS_ACTIVE)
+                              ->where('ends_at', '>', now())
+                              ->where('ends_at', '<=', $soon);
+                    })
+                    ->orWhere(function ($inner) use ($soon) {
+                        $inner->where('status', Subscription::STATUS_TRIAL)
+                              ->where('trial_ends_at', '>', now())
+                              ->where('trial_ends_at', '<=', $soon);
+                    });
+            })
+            ->with(['organization:id,name', 'plan:id,name'])
+            ->orderByRaw("
+                CASE WHEN status = 'trial' THEN trial_ends_at ELSE ends_at END ASC NULLS LAST
+            ")
+            ->limit(20)
+            ->get();
+
+        return response()->json([
+            'subscriptions' => $subs->map(fn ($s) => [
+                'id'             => $s->id,
+                'organization'   => $s->organization
+                    ? ['id' => $s->organization->id, 'name' => $s->organization->name]
+                    : null,
+                'plan'           => $s->plan?->name,
+                'status'         => $s->status,
+                'ends_at'        => ($s->status === Subscription::STATUS_TRIAL
+                    ? $s->trial_ends_at
+                    : $s->ends_at)?->toDateString(),
+                'days_remaining' => $s->daysRemaining(),
+            ]),
+            'total' => $subs->count(),
+        ]);
+    }
+
     public function revenue(Request $request): JsonResponse
     {
         $period = (int) $request->query('period', 30);

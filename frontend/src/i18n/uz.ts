@@ -475,6 +475,10 @@ const uz = {
     foydalanuvchilarni_boshqarish: "Foydalanuvchilarni boshqarish",
     hisobotlarni_korish:      "Hisobotlarni ko'rish",
 
+    // Expiring subscriptions section
+    muddati_yaqin_bolim:      "Muddati yaqin obunalar",
+    hech_muddati_yaqin_yoq:   "Muddati yaqinlashayotgan obuna yo'q",
+
     // Filters
     davr_tanlash:             "Davr tanlash",
     shu_yil:                  "Shu yil",

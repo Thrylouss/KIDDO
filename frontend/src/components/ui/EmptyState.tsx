@@ -14,13 +14,13 @@ export default function EmptyState({ icon, title, description, action }: EmptySt
   return (
     <div className="flex flex-col items-center justify-center py-20 px-6 text-center">
       {icon && (
-        <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-[#F3F4F6] text-[#9CA3AF]">
+        <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-[var(--primary-lt)] text-[var(--primary)]">
           {icon}
         </div>
       )}
-      <h3 className="text-base font-semibold text-[#111827] mb-1">{title}</h3>
+      <h3 className="text-base font-semibold text-[var(--text)] mb-1">{title}</h3>
       {description && (
-        <p className="text-sm text-[#6B7280] max-w-sm">{description}</p>
+        <p className="text-sm text-[var(--text-2)] max-w-sm">{description}</p>
       )}
       {action && (
         <div className="mt-5">

@@ -20,7 +20,20 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'role' => RoleMiddleware::class,
         ]);
-        $middleware->appendToGroup('api', TokenFromCookieMiddleware::class);
+
+        // TokenFromCookieMiddleware must be global, NOT api-group-only.
+        //
+        // Why: same priority-sort issue as SecureHeadersMiddleware below.
+        // Laravel's $middlewarePriority puts Authenticate (auth:sanctum) at
+        // index 5 and SubstituteBindings at index 9.  Any middleware appended
+        // to the api group after SubstituteBindings has no explicit priority,
+        // so it gets sorted AFTER auth:sanctum runs.  When auth:sanctum fires
+        // first, the Authorization header is still absent (the cookie has not
+        // been converted yet) → 401.  Moving this middleware to the global
+        // stack guarantees it runs in the outer pipeline, before any route or
+        // group middleware, so the Bearer token is in place when auth:sanctum
+        // eventually runs.
+        $middleware->append(TokenFromCookieMiddleware::class);
 
         // SecureHeadersMiddleware must be global, NOT api-group-only.
         //

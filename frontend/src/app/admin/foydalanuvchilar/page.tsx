@@ -244,11 +244,11 @@ export default function FoydalanuvchilarPage() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-[#111827]">{uz.foydalanuvchilar.sarlavha}</h1>
-          <p className="text-sm text-[#6B7280] mt-0.5">{uz.foydalanuvchilar.sahifa_tavsif}</p>
+          <h1 className="text-2xl font-bold text-[#29232A]">{uz.foydalanuvchilar.sarlavha}</h1>
+          <p className="text-sm text-[#766B73] mt-0.5">{uz.foydalanuvchilar.sahifa_tavsif}</p>
         </div>
         {meta && (
-          <span className="text-sm font-medium text-[#6B7280] bg-[#F3F4F6] px-3 py-1 rounded-full">
+          <span className="text-sm font-medium text-[#766B73] bg-[#F2ECF0] px-3 py-1 rounded-full">
             {uz.foydalanuvchilar.jami}: {meta.total}
           </span>
         )}
@@ -299,7 +299,7 @@ export default function FoydalanuvchilarPage() {
       {loading ? (
         <SkeletonTable rows={8} />
       ) : error ? (
-        <div className="bg-white rounded-xl border border-[#E5E7EB] p-12 text-center">
+        <div className="bg-white rounded-xl border border-[#EDE3E8] p-12 text-center">
           <p className="text-[#EF4444] mb-3">{uz.common.yuklash_xatosi}</p>
           <Button variant="secondary" onClick={() => setApiParams(p => ({ ...p }))}>
             {uz.common.qayta_urinish}
@@ -311,11 +311,11 @@ export default function FoydalanuvchilarPage() {
           description={uz.foydalanuvchilar.bosh_tavsif}
         />
       ) : (
-        <div className="bg-white rounded-xl border border-[#E5E7EB] overflow-hidden">
+        <div className="bg-white rounded-xl border border-[#EDE3E8] overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-[#E5E7EB] bg-[#F9FAFB]">
+                <tr className="border-b border-[#EDE3E8] bg-[#FAF5F8]">
                   {[
                     uz.foydalanuvchilar.ismi,
                     uz.foydalanuvchilar.telefon,
@@ -325,23 +325,23 @@ export default function FoydalanuvchilarPage() {
                     uz.foydalanuvchilar.oxirgi_kirish,
                     uz.foydalanuvchilar.amallar,
                   ].map(h => (
-                    <th key={h} className="text-left text-xs font-medium text-[#6B7280] uppercase tracking-wide px-4 py-3 whitespace-nowrap">
+                    <th key={h} className="text-left text-xs font-medium text-[#766B73] uppercase tracking-wide px-4 py-3 whitespace-nowrap">
                       {h}
                     </th>
                   ))}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#F3F4F6]">
+              <tbody className="divide-y divide-[#F2ECF0]">
                 {users.map(u => (
-                  <tr key={u.id} className="hover:bg-[#F9FAFB] transition-colors">
+                  <tr key={u.id} className="hover:bg-[#FAF5F8] transition-colors">
                     {/* Name + email */}
                     <td className="px-4 py-3">
-                      <div className="font-medium text-[#111827]">{u.name}</div>
-                      {u.email && <div className="text-xs text-[#9CA3AF] mt-0.5">{u.email}</div>}
+                      <div className="font-medium text-[#29232A]">{u.name}</div>
+                      {u.email && <div className="text-xs text-[#B8AAB2] mt-0.5">{u.email}</div>}
                     </td>
 
                     {/* Phone */}
-                    <td className="px-4 py-3 text-[#374151] whitespace-nowrap">
+                    <td className="px-4 py-3 text-[#3D3240] whitespace-nowrap">
                       {u.phone ?? "—"}
                     </td>
 
@@ -351,10 +351,10 @@ export default function FoydalanuvchilarPage() {
                     </td>
 
                     {/* Organization */}
-                    <td className="px-4 py-3 text-[#374151]">
+                    <td className="px-4 py-3 text-[#3D3240]">
                       {u.organization
                         ? <span className="font-medium">{u.organization.name}</span>
-                        : <span className="text-[#9CA3AF] text-xs italic">{uz.foydalanuvchilar.tashkilot_yoq}</span>
+                        : <span className="text-[#B8AAB2] text-xs italic">{uz.foydalanuvchilar.tashkilot_yoq}</span>
                       }
                     </td>
 
@@ -366,7 +366,7 @@ export default function FoydalanuvchilarPage() {
                     </td>
 
                     {/* Last login */}
-                    <td className="px-4 py-3 text-[#6B7280] text-xs whitespace-nowrap">
+                    <td className="px-4 py-3 text-[#766B73] text-xs whitespace-nowrap">
                       {formatDate(u.last_login_at)}
                     </td>
 
@@ -375,7 +375,7 @@ export default function FoydalanuvchilarPage() {
                       <div className="relative">
                         <button
                           onClick={() => setOpenMenuId(openMenuId === u.id ? null : u.id)}
-                          className="p-1.5 rounded-lg text-[#9CA3AF] hover:text-[#374151] hover:bg-[#F3F4F6] transition-colors"
+                          className="p-1.5 rounded-lg text-[#B8AAB2] hover:text-[#3D3240] hover:bg-[#F2ECF0] transition-colors"
                           aria-label="Amallar"
                         >
                           <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
@@ -384,32 +384,32 @@ export default function FoydalanuvchilarPage() {
                         </button>
                         {openMenuId === u.id && (
                           <div
-                            className="absolute right-0 mt-1 w-52 bg-white rounded-lg shadow-lg border border-[#E5E7EB] z-20 py-1"
+                            className="absolute right-0 mt-1 w-52 bg-white rounded-lg shadow-lg border border-[#EDE3E8] z-20 py-1"
                             onClick={() => setOpenMenuId(null)}
                           >
                             <button
-                              className="w-full text-left px-4 py-2 text-sm text-[#374151] hover:bg-[#F3F4F6]"
+                              className="w-full text-left px-4 py-2 text-sm text-[#3D3240] hover:bg-[#F2ECF0]"
                               onClick={() => openEdit(u)}
                             >
                               {uz.foydalanuvchilar.tahrirlash}
                             </button>
                             {!u.is_active ? (
                               <button
-                                className="w-full text-left px-4 py-2 text-sm text-[#374151] hover:bg-[#F3F4F6]"
+                                className="w-full text-left px-4 py-2 text-sm text-[#3D3240] hover:bg-[#F2ECF0]"
                                 onClick={() => setConfirmActivate(u)}
                               >
                                 {uz.foydalanuvchilar.faollashtirish}
                               </button>
                             ) : (
                               <button
-                                className="w-full text-left px-4 py-2 text-sm text-[#374151] hover:bg-[#F3F4F6]"
+                                className="w-full text-left px-4 py-2 text-sm text-[#3D3240] hover:bg-[#F2ECF0]"
                                 onClick={() => setConfirmDeactivate(u)}
                               >
                                 {uz.foydalanuvchilar.faolsizlantirish}
                               </button>
                             )}
                             <button
-                              className="w-full text-left px-4 py-2 text-sm text-[#374151] hover:bg-[#F3F4F6]"
+                              className="w-full text-left px-4 py-2 text-sm text-[#3D3240] hover:bg-[#F2ECF0]"
                               onClick={() => { setResetTarget(u); setPasswordForm({ password: "" }); }}
                             >
                               {uz.foydalanuvchilar.parol_yangilash}
@@ -426,8 +426,8 @@ export default function FoydalanuvchilarPage() {
 
           {/* Pagination */}
           {meta && meta.last_page > 1 && (
-            <div className="flex items-center justify-between px-4 py-3 border-t border-[#E5E7EB]">
-              <p className="text-sm text-[#6B7280]">
+            <div className="flex items-center justify-between px-4 py-3 border-t border-[#EDE3E8]">
+              <p className="text-sm text-[#766B73]">
                 {meta.current_page} / {meta.last_page} {uz.super_admin.sahifa}
               </p>
               <div className="flex gap-2">
@@ -462,7 +462,7 @@ export default function FoydalanuvchilarPage() {
           <div className="space-y-4">
             {/* Name */}
             <div>
-              <label className="block text-sm font-medium text-[#374151] mb-1">
+              <label className="block text-sm font-medium text-[#3D3240] mb-1">
                 {uz.foydalanuvchilar.ism_familiya} <span className="text-[#EF4444]">*</span>
               </label>
               <Input
@@ -474,7 +474,7 @@ export default function FoydalanuvchilarPage() {
 
             {/* Phone */}
             <div>
-              <label className="block text-sm font-medium text-[#374151] mb-1">
+              <label className="block text-sm font-medium text-[#3D3240] mb-1">
                 {uz.foydalanuvchilar.telefon} <span className="text-[#EF4444]">*</span>
               </label>
               <Input
@@ -486,7 +486,7 @@ export default function FoydalanuvchilarPage() {
 
             {/* Email */}
             <div>
-              <label className="block text-sm font-medium text-[#374151] mb-1">
+              <label className="block text-sm font-medium text-[#3D3240] mb-1">
                 {uz.foydalanuvchilar.email}
               </label>
               <Input
@@ -499,7 +499,7 @@ export default function FoydalanuvchilarPage() {
 
             {/* Role */}
             <div>
-              <label className="block text-sm font-medium text-[#374151] mb-1">
+              <label className="block text-sm font-medium text-[#3D3240] mb-1">
                 {uz.foydalanuvchilar.rol} <span className="text-[#EF4444]">*</span>
               </label>
               <Select
@@ -515,7 +515,7 @@ export default function FoydalanuvchilarPage() {
 
             {/* Organization */}
             <div>
-              <label className="block text-sm font-medium text-[#374151] mb-1">
+              <label className="block text-sm font-medium text-[#3D3240] mb-1">
                 {uz.foydalanuvchilar.tashkilot}
               </label>
               <Select
@@ -531,7 +531,7 @@ export default function FoydalanuvchilarPage() {
 
             {/* Status */}
             <div className="flex items-center gap-3">
-              <label className="text-sm font-medium text-[#374151]">
+              <label className="text-sm font-medium text-[#3D3240]">
                 {uz.foydalanuvchilar.holat}
               </label>
               <button
@@ -539,7 +539,7 @@ export default function FoydalanuvchilarPage() {
                 onClick={() => setEditForm(f => f ? { ...f, is_active: !f.is_active } : f)}
                 className={[
                   "relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200",
-                  editForm.is_active ? "bg-[#7C3AED]" : "bg-[#D1D5DB]",
+                  editForm.is_active ? "bg-[#8E315D]" : "bg-[#D9C9D1]",
                 ].join(" ")}
                 role="switch"
                 aria-checked={editForm.is_active}
@@ -551,7 +551,7 @@ export default function FoydalanuvchilarPage() {
                   ].join(" ")}
                 />
               </button>
-              <span className="text-sm text-[#6B7280]">
+              <span className="text-sm text-[#766B73]">
                 {editForm.is_active ? uz.common.faol : uz.common.nofaol}
               </span>
             </div>
@@ -584,11 +584,11 @@ export default function FoydalanuvchilarPage() {
         onClose={() => { setConfirmActivate(null); setActionError(""); }}
         title={uz.foydalanuvchilar.faollashtirish}
       >
-        <p className="text-sm text-[#374151] mb-4">
+        <p className="text-sm text-[#3D3240] mb-4">
           {uz.foydalanuvchilar.faollashtirish_tasdiq}
         </p>
         {confirmActivate && (
-          <p className="text-sm font-medium text-[#111827] mb-4">{confirmActivate.name}</p>
+          <p className="text-sm font-medium text-[#29232A] mb-4">{confirmActivate.name}</p>
         )}
         {actionError && <p className="text-sm text-[#EF4444] mb-3">{actionError}</p>}
         <div className="flex gap-3 justify-end">
@@ -607,11 +607,11 @@ export default function FoydalanuvchilarPage() {
         onClose={() => { setConfirmDeactivate(null); setActionError(""); }}
         title={uz.foydalanuvchilar.faolsizlantirish}
       >
-        <p className="text-sm text-[#374151] mb-4">
+        <p className="text-sm text-[#3D3240] mb-4">
           {uz.foydalanuvchilar.faolsizlantirish_tasdiq}
         </p>
         {confirmDeactivate && (
-          <p className="text-sm font-medium text-[#111827] mb-4">{confirmDeactivate.name}</p>
+          <p className="text-sm font-medium text-[#29232A] mb-4">{confirmDeactivate.name}</p>
         )}
         {actionError && <p className="text-sm text-[#EF4444] mb-3">{actionError}</p>}
         <div className="flex gap-3 justify-end">
@@ -631,10 +631,10 @@ export default function FoydalanuvchilarPage() {
         title={uz.foydalanuvchilar.parol_yangilash}
       >
         {resetTarget && (
-          <p className="text-sm text-[#6B7280] mb-4">{resetTarget.name}</p>
+          <p className="text-sm text-[#766B73] mb-4">{resetTarget.name}</p>
         )}
         <div className="mb-4">
-          <label className="block text-sm font-medium text-[#374151] mb-1">
+          <label className="block text-sm font-medium text-[#3D3240] mb-1">
             {uz.foydalanuvchilar.yangi_parol}
           </label>
           <Input

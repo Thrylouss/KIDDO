@@ -123,6 +123,7 @@ Route::prefix('v1')->group(function () {
             // Dashboard extra endpoints (must come before wildcard)
             Route::get('/dashboard/recent',                  [SuperDashboard::class, 'recent']);
             Route::get('/dashboard/revenue',                 [SuperDashboard::class, 'revenue']);
+            Route::get('/dashboard/expiring',                [SuperDashboard::class, 'expiring']);
 
             // Reports
             Route::prefix('reports')->group(function () {

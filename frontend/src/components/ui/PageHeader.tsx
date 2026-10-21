@@ -8,9 +8,9 @@ export default function PageHeader({ title, description, action }: PageHeaderPro
   return (
     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
       <div>
-        <h1 className="text-xl font-bold text-[#111827]">{title}</h1>
+        <h1 className="text-xl font-bold text-[var(--text)]">{title}</h1>
         {description && (
-          <p className="text-sm text-[#6B7280] mt-0.5">{description}</p>
+          <p className="text-sm text-[var(--text-2)] mt-0.5">{description}</p>
         )}
       </div>
       {action && <div className="flex-shrink-0">{action}</div>}

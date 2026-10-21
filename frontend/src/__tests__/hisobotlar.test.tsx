@@ -377,7 +377,7 @@ describe("HisobotlarPage — date preset filter", () => {
     const bugunBtn = screen.getByText("Bugun");
     fireEvent.click(bugunBtn);
     // Button should have active styling class after click
-    expect(bugunBtn.className).toContain("bg-[#7C3AED]");
+    expect(bugunBtn.className).toContain("bg-[#8E315D]");
   });
 
   it("clicking Maxsus shows custom date inputs", async () => {

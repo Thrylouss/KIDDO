@@ -4,7 +4,7 @@ interface SkeletonProps {
 
 export function Skeleton({ className = "" }: SkeletonProps) {
   return (
-    <div className={`animate-skeleton bg-[#E5E7EB] rounded-lg ${className}`} />
+    <div className={`animate-skeleton bg-[var(--border)] rounded-lg ${className}`} />
   );
 }
 
@@ -30,7 +30,7 @@ export function SkeletonCards({ count = 4 }: { count?: number }) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
       {Array.from({ length: count }).map((_, i) => (
-        <div key={i} className="bg-white rounded-xl p-6 border border-[#E5E7EB] space-y-4">
+        <div key={i} className="bg-white rounded-xl p-6 border border-[var(--border)] space-y-4">
           <div className="flex items-center justify-between">
             <Skeleton className="h-4 w-28" />
             <Skeleton className="h-10 w-10 rounded-xl" />

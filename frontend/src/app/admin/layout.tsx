@@ -19,10 +19,10 @@ function SuperAdminGuard({ children }: { children: React.ReactNode }) {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#F8FAFC]">
+      <div className="min-h-screen flex items-center justify-center bg-[var(--bg)]">
         <div className="flex flex-col items-center gap-3">
-          <div className="h-8 w-8 rounded-full border-2 border-[#E5E7EB] border-t-[#7C3AED] animate-spin" />
-          <p className="text-sm text-[#6B7280]">Yuklanmoqda...</p>
+          <div className="h-8 w-8 rounded-full border-2 border-[var(--border)] border-t-[var(--primary)] animate-spin" />
+          <p className="text-sm text-[var(--text-2)]">Yuklanmoqda...</p>
         </div>
       </div>
     );
@@ -31,7 +31,7 @@ function SuperAdminGuard({ children }: { children: React.ReactNode }) {
   if (!user || user.role !== "super_admin") return null;
 
   return (
-    <div className="flex h-screen bg-[#F8FAFC] overflow-hidden">
+    <div className="flex h-screen bg-[var(--bg)] overflow-hidden">
       {/* Desktop sidebar */}
       <div className="hidden lg:flex flex-shrink-0">
         <SuperAdminSidebar />
