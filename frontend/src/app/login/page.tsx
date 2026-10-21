@@ -54,10 +54,9 @@ export default function LoginPage() {
       if (process.env.NODE_ENV === "development") {
         console.error("[LOGIN]", status ?? "network error", err);
       }
-      if      (status === 401) setError(uz.auth.xato_kirish);
-      else if (status === 422) setError(uz.auth.validatsiya_xatosi);
-      else if (status === 500) setError(uz.auth.server_xatosi);
-      else                     setError(uz.auth.tarmoq_xatosi);
+      if      (status === 401 || status === 422) setError(uz.auth.xato_kirish);
+      else if (status === 500)                  setError(uz.auth.server_xatosi);
+      else                                      setError(uz.auth.tarmoq_xatosi);
     } finally {
       setLoading(false);
     }
