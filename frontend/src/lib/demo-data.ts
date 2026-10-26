@@ -36,7 +36,18 @@ export const DEMO_SUPER_ADMIN_USER: User = {
   created_at: "2024-01-01T00:00:00Z",
 };
 
-export function setDemoRole(role: "admin" | "super_admin"): void {
+export const DEMO_TEACHER_USER: User = {
+  id: 50,
+  name: "Maftuna Xolmatova",
+  phone: "+998901234001",
+  email: "teacher@kiddo.uz",
+  role: "teacher",
+  organization_id: 1,
+  is_active: true,
+  created_at: "2024-01-01T00:00:00Z",
+};
+
+export function setDemoRole(role: "admin" | "super_admin" | "teacher"): void {
   if (typeof window !== "undefined") sessionStorage.setItem("demo_role", role);
 }
 
@@ -48,6 +59,7 @@ export function getDemoUser(): User | null {
   if (typeof window === "undefined") return null;
   const role = sessionStorage.getItem("demo_role");
   if (role === "super_admin") return DEMO_SUPER_ADMIN_USER;
+  if (role === "teacher") return DEMO_TEACHER_USER;
   if (role === "admin") return DEMO_USER;
   return null;
 }
@@ -362,6 +374,46 @@ export const DEMO_SA_EXPIRING: DashboardExpiring = {
   total: 3,
 };
 
+export const DEMO_TEACHER_DASHBOARD = {
+  teacher: { id: 1, name: "Maftuna Xolmatova", position: "Bosh tarbiyachi" },
+  group:   { id: 1, name: "Kamalak guruhi", age_category: "3–4 yosh", capacity: 14 },
+  today: {
+    date: "2026-10-27",
+    total: 12,
+    present: 9,
+    absent: 3,
+    children: [
+      { id: 1,  first_name: "Azizbek",  last_name: "Karimov",     status: "present" as const },
+      { id: 2,  first_name: "Malika",   last_name: "Yusupova",    status: "present" as const },
+      { id: 3,  first_name: "Sardor",   last_name: "Toshmatov",   status: "absent"  as const },
+      { id: 4,  first_name: "Shahlo",   last_name: "Normatova",   status: "present" as const },
+      { id: 5,  first_name: "Humoyun",  last_name: "Mirzayev",    status: "present" as const },
+      { id: 6,  first_name: "Dildora",  last_name: "Qodirova",    status: "absent"  as const },
+      { id: 7,  first_name: "Islom",    last_name: "Tursunov",    status: "present" as const },
+      { id: 8,  first_name: "Nozima",   last_name: "Xolmatova",   status: "present" as const },
+      { id: 9,  first_name: "Behruz",   last_name: "Ergashev",    status: "present" as const },
+      { id: 10, first_name: "Sitora",   last_name: "Raximova",    status: "absent"  as const },
+      { id: 11, first_name: "Akbar",    last_name: "Nazarov",     status: "present" as const },
+      { id: 12, first_name: "Feruza",   last_name: "Hamidova",    status: "present" as const },
+    ],
+  },
+  schedule: [
+    { time: "07:30", activity: "Bolalarni qabul qilish" },
+    { time: "08:00", activity: "Ertalabki badantarbiya" },
+    { time: "08:30", activity: "Nonushta" },
+    { time: "09:00", activity: "Mashg'ulotlar" },
+    { time: "10:30", activity: "Tashqarida o'yin" },
+    { time: "12:00", activity: "Tushlik" },
+    { time: "12:30", activity: "Kunduzgi uyqu" },
+    { time: "14:30", activity: "Uyg'onish, badantarbiya" },
+    { time: "15:00", activity: "Peshin ovqat" },
+    { time: "16:00", activity: "Erkin o'yin va ijod" },
+    { time: "17:30", activity: "Bolalarni topshirish" },
+  ],
+};
+
+export type TeacherDashboardData = typeof DEMO_TEACHER_DASHBOARD;
+
 // ─────────────────────────────────────────────────────────────────────────────
 
 type RequestOptions = { method?: string };
@@ -390,6 +442,8 @@ export function handleDemoRequest<T>(path: string, options: RequestOptions): Pro
         resolve(DEMO_SA_REVENUE as T);
       } else if (path.startsWith("/v1/super-admin/reports/subscriptions")) {
         resolve(DEMO_SA_SUBSCRIPTIONS as T);
+      } else if (path.startsWith("/v1/teacher/dashboard")) {
+        resolve(DEMO_TEACHER_DASHBOARD as T);
       } else if (path.startsWith("/v1/admin/dashboard")) {
         resolve(DEMO_SUMMARY as T);
       } else if (path.startsWith("/v1/admin/groups")) {

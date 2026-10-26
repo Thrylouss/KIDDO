@@ -24,6 +24,7 @@ const pathLabels: Record<string, string> = {
   "/bogcha/guruhlar":      uz.nav.guruhlar,
   "/bogcha/tarbiyachilar": uz.nav.tarbiyachilar,
   "/bogcha/ota-onalar":    uz.nav.ota_onalar,
+  "/tarbiyachi/dashboard": uz.tarbiyachi_panel.mening_guruhim,
 };
 
 interface TopbarProps {

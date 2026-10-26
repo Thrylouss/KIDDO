@@ -544,6 +544,23 @@ const uz = {
     standart:    "Standart",
     premium:     "Premium",
   },
+
+  tarbiyachi_panel: {
+    sarlavha:        "Tarbiyachi kabineti",
+    xayrli_kun:      "Xayrli kun",
+    mening_guruhim:  "Mening guruhim",
+    bugungi_davomat: "Bugungi davomat",
+    jami_bolalar:    "Jami bolalar",
+    keldi:           "Keldi",
+    kelmadi:         "Kelmadi",
+    bolalar_royxati: "Bolalar ro'yxati",
+    kun_tartibi:     "Kun tartibi",
+    ovqatlanish_jadvali: "Ovqatlanish jadvali",
+    demo_xabar:      "Demo rejimda davomat tahrirlash mumkin emas",
+    yosh_oralighi:   "Yosh oralig'i",
+    bolalar_soni:    "bola",
+    qoshimcha_guruh: "Qo'shimcha guruh",
+  },
 } as const;
 
 export type UzTranslations = typeof uz;
