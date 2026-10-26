@@ -2,6 +2,7 @@
 
 import React, { createContext, useCallback, useContext, useEffect, useState } from "react";
 import { api } from "@/lib/api";
+import { IS_DEMO, DEMO_USER } from "@/lib/demo-data";
 import type { User } from "@/types";
 
 interface AuthState {
@@ -18,6 +19,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   const fetchMe = useCallback(async () => {
+    if (IS_DEMO) {
+      setUser(DEMO_USER);
+      setLoading(false);
+      return;
+    }
     try {
       const res = await api.get<{ user: User }>("/v1/me");
       setUser(res.user);
@@ -33,12 +39,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [fetchMe]);
 
   const login = useCallback(async (phone: string, password: string): Promise<User> => {
+    if (IS_DEMO) {
+      setUser(DEMO_USER);
+      return DEMO_USER;
+    }
     const res = await api.post<{ user: User }>("/v1/login", { phone, password });
     setUser(res.user);
     return res.user;
   }, []);
 
   const logout = useCallback(async () => {
+    if (IS_DEMO) {
+      setUser(null);
+      return;
+    }
     try {
       await api.post("/v1/logout");
     } finally {

@@ -6,6 +6,8 @@ import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import BogchaSidebar from "@/components/BogchaSidebar";
 import Topbar from "@/components/Topbar";
 import { impersonation } from "@/lib/api";
+import DemoBanner from "@/components/DemoBanner";
+import { IS_DEMO } from "@/lib/demo-data";
 
 function ImpersonationBanner({ onExit }: { onExit: () => void }) {
   const orgName = impersonation.orgName();
@@ -76,6 +78,9 @@ function BogchaGuard({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex flex-col h-screen bg-[var(--bg)] overflow-hidden">
+      {/* Demo mode warning banner */}
+      {IS_DEMO && <DemoBanner />}
+
       {/* Impersonation banner for super admin */}
       {isImpersonating && <ImpersonationBanner onExit={handleExitImpersonation} />}
 

@@ -1,3 +1,5 @@
+import { IS_DEMO, handleDemoRequest } from "./demo-data";
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/api";
 
 type RequestOptions = Omit<RequestInit, "body"> & {
@@ -27,6 +29,8 @@ export const impersonation = {
 };
 
 async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
+  if (IS_DEMO) return handleDemoRequest<T>(path, { method: options.method });
+
   const { body, headers, ...rest } = options;
 
   const orgId = getImpersonatedOrg();

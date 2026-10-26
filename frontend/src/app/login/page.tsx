@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
+import { IS_DEMO } from "@/lib/demo-data";
 import type { Role } from "@/types";
 import uz from "@/i18n/uz";
 
@@ -41,6 +42,17 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError]               = useState("");
   const [loading, setLoading]           = useState(false);
+
+  async function handleDemoLogin() {
+    setError("");
+    setLoading(true);
+    try {
+      const user = await login("", "");
+      router.push(ROLE_ROUTES[user.role] ?? "/");
+    } finally {
+      setLoading(false);
+    }
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -133,6 +145,36 @@ export default function LoginPage() {
             </div>
             <span className="text-2xl font-bold text-[#29232A] tracking-tight">KIDDO</span>
           </div>
+
+          {/* Demo mode notice + quick-login */}
+          {IS_DEMO && (
+            <div className="mb-6 rounded-xl border-2 border-[#FDE68A] bg-[#FFFBEB] p-4">
+              <div className="flex items-center gap-2 mb-1">
+                <svg className="h-4 w-4 text-[#D97706] flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126z" />
+                </svg>
+                <p className="text-sm font-semibold text-[#92400E]">DEMO REJIMI</p>
+              </div>
+              <p className="text-xs text-[#B45309] mb-3">
+                Bu namoyish versiyasi. Haqiqiy ma&apos;lumotlar ishlatilmaydi.
+              </p>
+              <button
+                type="button"
+                onClick={handleDemoLogin}
+                disabled={loading}
+                className="w-full h-10 bg-[#F59E0B] hover:bg-[#D97706] disabled:opacity-60 disabled:cursor-not-allowed text-white font-semibold rounded-xl transition-all duration-150 active:scale-[0.99] flex items-center justify-center gap-2 text-sm"
+              >
+                {loading ? (
+                  <span className="h-4 w-4 rounded-full border-2 border-white border-t-transparent animate-spin" />
+                ) : (
+                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 0 1 0 1.972l-11.54 6.347a1.125 1.125 0 0 1-1.667-.986V5.653Z" />
+                  </svg>
+                )}
+                Demo kirish — bosing
+              </button>
+            </div>
+          )}
 
           <div className="mb-8">
             <h2 className="text-2xl font-bold text-[#29232A]">{uz.auth.xush_kelibsiz}</h2>

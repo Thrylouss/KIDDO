@@ -1,0 +1,14 @@
+[build]
+  base    = "frontend"
+  command = "npm run build"
+  publish = ".next"
+
+[build.environment]
+  NODE_VERSION             = "22"
+  NEXT_TELEMETRY_DISABLED  = "1"
+
+# NEXT_PUBLIC_API_URL must be set in Netlify dashboard → Site settings → Environment variables.
+# For demo deployment, also set: NEXT_PUBLIC_DEMO_MODE = "true"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
