@@ -8,6 +8,12 @@ import type {
   Plan,
   ReportRevenue,
   ReportSubscriptions,
+  FullSubscription,
+  SubscriptionMetrics,
+  PaymentRecord,
+  PaymentSummaryFull,
+  InvoiceRecord,
+  InvoiceSummary,
   Group,
   ParentProfile,
   TeacherProfile,
@@ -410,6 +416,91 @@ export const DEMO_SA_EXPIRING: DashboardExpiring = {
   total: 3,
 };
 
+export const DEMO_SA_FULL_SUBSCRIPTIONS: FullSubscription[] = DEMO_SA_ORGANIZATIONS.map(org => ({
+  id:              org.subscription!.id,
+  organization_id: org.id,
+  organization:    { id: org.id, name: org.name },
+  plan_id:         org.subscription!.plan!.id,
+  status:          org.subscription!.status,
+  ends_at:         org.subscription!.ends_at,
+  trial_ends_at:   org.subscription!.trial_ends_at,
+  days_remaining:  org.subscription!.days_remaining,
+  plan: {
+    id:            org.subscription!.plan!.id,
+    name:          org.subscription!.plan!.name,
+    price_monthly: org.subscription!.plan!.id === 1 ? "800000" : "1200000",
+  },
+  starts_at:        "2025-10-01T00:00:00Z",
+  auto_renew:       org.subscription!.status === "active",
+  cancelled_at:     null,
+  cancelled_reason: null,
+  is_expiring_soon: org.subscription!.days_remaining <= 14,
+  created_at:       org.created_at,
+}));
+
+export const DEMO_SA_SUBSCRIPTION_METRICS: SubscriptionMetrics = {
+  active:    8,
+  trial:     2,
+  past_due:  1,
+  expired:   1,
+  cancelled: 0,
+  mrr:       7_600_000,
+};
+
+// paid: ids 1,2,4,6,7,8,9 → 1 200 000+800 000+1 200 000+800 000+1 200 000+800 000+800 000 = 6 800 000
+// pending: ids 3,10 → 1 600 000   failed: id 5 → 800 000
+export const DEMO_SA_PAYMENTS: PaymentRecord[] = [
+  { id: 1,  organization: { id: 1,  name: "Yulduz bog'chasi" },   subscription_id: 1,  invoice_id: 1,  invoice_number: "INV-2026-001", amount: "1200000", currency: "UZS", status: "paid",    payment_method: "Click", transaction_id: "CLK-001", paid_at: "2026-10-25T10:30:00Z", due_at: "2026-11-01", plan_name: "Premium", notes: null, created_at: "2026-10-25T10:00:00Z" },
+  { id: 2,  organization: { id: 2,  name: "Nilufar bog'chasi" },  subscription_id: 2,  invoice_id: 2,  invoice_number: "INV-2026-002", amount: "800000",  currency: "UZS", status: "paid",    payment_method: "Payme", transaction_id: "PAY-002", paid_at: "2026-10-24T14:15:00Z", due_at: "2026-11-01", plan_name: "Asosiy",  notes: null, created_at: "2026-10-24T14:00:00Z" },
+  { id: 3,  organization: { id: 4,  name: "Kamalak bog'chasi" },  subscription_id: 4,  invoice_id: 3,  invoice_number: "INV-2026-003", amount: "800000",  currency: "UZS", status: "pending",  payment_method: null,    transaction_id: null,      paid_at: null,                   due_at: "2026-11-01", plan_name: "Asosiy",  notes: null, created_at: "2026-10-23T09:45:00Z" },
+  { id: 4,  organization: { id: 5,  name: "Mehr bog'chasi" },     subscription_id: 5,  invoice_id: 4,  invoice_number: "INV-2026-004", amount: "1200000", currency: "UZS", status: "paid",    payment_method: "Click", transaction_id: "CLK-004", paid_at: "2026-10-22T11:00:00Z", due_at: "2026-10-31", plan_name: "Premium", notes: null, created_at: "2026-10-22T10:30:00Z" },
+  { id: 5,  organization: { id: 3,  name: "Bahor bog'chasi" },    subscription_id: 3,  invoice_id: 5,  invoice_number: "INV-2026-005", amount: "800000",  currency: "UZS", status: "failed",   payment_method: "Click", transaction_id: null,      paid_at: null,                   due_at: "2026-10-20", plan_name: "Asosiy",  notes: null, created_at: "2026-10-21T16:20:00Z" },
+  { id: 6,  organization: { id: 7,  name: "Navruz bog'chasi" },   subscription_id: 7,  invoice_id: 6,  invoice_number: "INV-2026-006", amount: "800000",  currency: "UZS", status: "paid",    payment_method: "Payme", transaction_id: "PAY-006", paid_at: "2026-10-20T09:00:00Z", due_at: "2026-10-31", plan_name: "Asosiy",  notes: null, created_at: "2026-10-19T10:00:00Z" },
+  { id: 7,  organization: { id: 6,  name: "Gulbahor bog'chasi" }, subscription_id: 6,  invoice_id: 7,  invoice_number: "INV-2026-007", amount: "1200000", currency: "UZS", status: "paid",    payment_method: "Click", transaction_id: "CLK-007", paid_at: "2026-10-18T13:00:00Z", due_at: "2026-10-31", plan_name: "Premium", notes: null, created_at: "2026-10-18T12:00:00Z" },
+  { id: 8,  organization: { id: 8,  name: "Oftob bog'chasi" },    subscription_id: 8,  invoice_id: 8,  invoice_number: "INV-2026-008", amount: "800000",  currency: "UZS", status: "paid",    payment_method: "Click", transaction_id: "CLK-008", paid_at: "2026-10-15T10:00:00Z", due_at: "2026-10-31", plan_name: "Asosiy",  notes: null, created_at: "2026-10-14T09:00:00Z" },
+  { id: 9,  organization: { id: 10, name: "G'uncha bog'chasi" },  subscription_id: 10, invoice_id: 9,  invoice_number: "INV-2026-009", amount: "800000",  currency: "UZS", status: "paid",    payment_method: "Payme", transaction_id: "PAY-009", paid_at: "2026-10-10T11:00:00Z", due_at: "2026-10-31", plan_name: "Asosiy",  notes: null, created_at: "2026-10-09T10:00:00Z" },
+  { id: 10, organization: { id: 9,  name: "Sharq bog'chasi" },    subscription_id: 9,  invoice_id: 10, invoice_number: "INV-2026-010", amount: "800000",  currency: "UZS", status: "pending",  payment_method: null,    transaction_id: null,      paid_at: null,                   due_at: "2026-10-15", plan_name: "Asosiy",  notes: null, created_at: "2026-10-01T09:00:00Z" },
+];
+
+export const DEMO_SA_PAYMENT_SUMMARY: PaymentSummaryFull = {
+  gross_revenue:   6_800_000,
+  net_revenue:     6_800_000,
+  total_revenue:   6_800_000,
+  refunded_amount: 0,
+  today_revenue:   0,
+  monthly_revenue: 6_800_000,
+  pending_revenue: 1_600_000,
+  paid_count:      7,
+  pending_count:   2,
+  failed_count:    1,
+  refunded_count:  0,
+  total_count:     10,
+};
+
+// paid: ids 1,2,5,6,7 → 5 200 000   pending: id 3 → 800 000   overdue: ids 4,8 → 1 600 000
+export const DEMO_SA_INVOICES: InvoiceRecord[] = [
+  { id: 1, invoice_number: "INV-2026-001", organization: { id: 1,  name: "Yulduz bog'chasi" },   subscription_id: 1,  amount: "1200000", currency: "UZS", status: "paid",    due_at: "2026-11-01", paid_at: "2026-10-25T10:30:00Z", notes: null, created_at: "2026-10-15T09:00:00Z" },
+  { id: 2, invoice_number: "INV-2026-002", organization: { id: 2,  name: "Nilufar bog'chasi" },  subscription_id: 2,  amount: "800000",  currency: "UZS", status: "paid",    due_at: "2026-11-01", paid_at: "2026-10-24T14:15:00Z", notes: null, created_at: "2026-10-15T09:00:00Z" },
+  { id: 3, invoice_number: "INV-2026-003", organization: { id: 4,  name: "Kamalak bog'chasi" },  subscription_id: 4,  amount: "800000",  currency: "UZS", status: "pending",  due_at: "2026-11-01", paid_at: null,                   notes: null, created_at: "2026-10-15T09:00:00Z" },
+  { id: 4, invoice_number: "INV-2026-004", organization: { id: 3,  name: "Bahor bog'chasi" },    subscription_id: 3,  amount: "800000",  currency: "UZS", status: "overdue",  due_at: "2026-10-20", paid_at: null,                   notes: null, created_at: "2026-10-01T09:00:00Z" },
+  { id: 5, invoice_number: "INV-2026-005", organization: { id: 5,  name: "Mehr bog'chasi" },     subscription_id: 5,  amount: "1200000", currency: "UZS", status: "paid",    due_at: "2026-10-31", paid_at: "2026-10-22T11:00:00Z", notes: null, created_at: "2026-10-01T09:00:00Z" },
+  { id: 6, invoice_number: "INV-2026-006", organization: { id: 7,  name: "Navruz bog'chasi" },   subscription_id: 7,  amount: "800000",  currency: "UZS", status: "paid",    due_at: "2026-10-31", paid_at: "2026-10-20T09:00:00Z", notes: null, created_at: "2026-10-01T09:00:00Z" },
+  { id: 7, invoice_number: "INV-2026-007", organization: { id: 6,  name: "Gulbahor bog'chasi" }, subscription_id: 6,  amount: "1200000", currency: "UZS", status: "paid",    due_at: "2026-10-31", paid_at: "2026-10-18T13:00:00Z", notes: null, created_at: "2026-10-01T09:00:00Z" },
+  { id: 8, invoice_number: "INV-2026-008", organization: { id: 9,  name: "Sharq bog'chasi" },    subscription_id: 9,  amount: "800000",  currency: "UZS", status: "overdue",  due_at: "2026-10-15", paid_at: null,                   notes: null, created_at: "2026-09-15T09:00:00Z" },
+];
+
+export const DEMO_SA_INVOICE_SUMMARY: InvoiceSummary = {
+  total:                8,
+  draft:                0,
+  pending:              1,
+  paid:                 5,
+  overdue:              2,
+  cancelled:            0,
+  total_pending_amount: 800_000,
+  total_paid_amount:    5_200_000,
+  total_overdue_amount: 1_600_000,
+};
+
 export const DEMO_TEACHER_DASHBOARD = {
   teacher: { id: 1, name: "Maftuna Xolmatova", position: "Bosh tarbiyachi" },
   group:   { id: 1, name: "Kamalak guruhi", age_category: "3–4 yosh", capacity: 14 },
@@ -543,6 +634,68 @@ export function handleDemoRequest<T>(path: string, options: RequestOptions): Pro
         } as T);
       } else if (path.startsWith("/v1/super-admin/plans")) {
         resolve({ data: DEMO_SA_PLANS } as T);
+      } else if (path.startsWith("/v1/super-admin/subscriptions/metrics")) {
+        resolve({ data: DEMO_SA_SUBSCRIPTION_METRICS } as T);
+      } else if (path.startsWith("/v1/super-admin/subscriptions")) {
+        const qsIdx = path.indexOf("?");
+        const params = qsIdx >= 0 ? new URLSearchParams(path.slice(qsIdx + 1)) : new URLSearchParams();
+        const search  = (params.get("search") ?? "").toLowerCase();
+        const status  = params.get("status") ?? "";
+        const sort    = params.get("sort") ?? "newest";
+        const page    = Math.max(1, parseInt(params.get("page") ?? "1"));
+        const perPage = parseInt(params.get("per_page") ?? "20");
+        let list = [...DEMO_SA_FULL_SUBSCRIPTIONS];
+        if (search) list = list.filter(s => (s.organization?.name ?? "").toLowerCase().includes(search));
+        if (status) list = list.filter(s => s.status === status);
+        if (sort === "ending_soon") list = [...list].sort((a, b) => a.days_remaining - b.days_remaining);
+        else list = [...list].reverse(); // newest = reverse insertion order
+        const total = list.length;
+        resolve({
+          data: list.slice((page - 1) * perPage, page * perPage),
+          meta: { current_page: page, last_page: Math.max(1, Math.ceil(total / perPage)), per_page: perPage, total },
+        } as T);
+      } else if (/^\/v1\/super-admin\/payments\/\d+/.test(path)) {
+        const id = parseInt(path.replace(/^\/v1\/super-admin\/payments\//, ""));
+        const found = DEMO_SA_PAYMENTS.find(p => p.id === id);
+        resolve(found ? ({ data: found } as T) : (undefined as T));
+      } else if (path.startsWith("/v1/super-admin/payments")) {
+        const qsIdx = path.indexOf("?");
+        const params = qsIdx >= 0 ? new URLSearchParams(path.slice(qsIdx + 1)) : new URLSearchParams();
+        const search  = (params.get("search") ?? "").toLowerCase();
+        const status  = params.get("status") ?? "";
+        const method  = params.get("payment_method") ?? "";
+        const page    = Math.max(1, parseInt(params.get("page") ?? "1"));
+        const perPage = parseInt(params.get("per_page") ?? "20");
+        let payList = [...DEMO_SA_PAYMENTS];
+        if (search) payList = payList.filter(p => (p.organization?.name ?? "").toLowerCase().includes(search));
+        if (status) payList = payList.filter(p => p.status === status);
+        if (method) payList = payList.filter(p => p.payment_method === method);
+        const payTotal = payList.length;
+        resolve({
+          data: payList.slice((page - 1) * perPage, page * perPage),
+          meta: { current_page: page, last_page: Math.max(1, Math.ceil(payTotal / perPage)), per_page: perPage, total: payTotal },
+          summary: DEMO_SA_PAYMENT_SUMMARY,
+        } as T);
+      } else if (/^\/v1\/super-admin\/invoices\/\d+/.test(path)) {
+        const id = parseInt(path.replace(/^\/v1\/super-admin\/invoices\//, ""));
+        const found = DEMO_SA_INVOICES.find(inv => inv.id === id);
+        resolve(found ? ({ data: found } as T) : (undefined as T));
+      } else if (path.startsWith("/v1/super-admin/invoices")) {
+        const qsIdx = path.indexOf("?");
+        const params = qsIdx >= 0 ? new URLSearchParams(path.slice(qsIdx + 1)) : new URLSearchParams();
+        const search  = (params.get("search") ?? "").toLowerCase();
+        const status  = params.get("status") ?? "";
+        const page    = Math.max(1, parseInt(params.get("page") ?? "1"));
+        const perPage = parseInt(params.get("per_page") ?? "20");
+        let invList = [...DEMO_SA_INVOICES];
+        if (search) invList = invList.filter(inv => (inv.organization?.name ?? "").toLowerCase().includes(search));
+        if (status) invList = invList.filter(inv => inv.status === status);
+        const invTotal = invList.length;
+        resolve({
+          data: invList.slice((page - 1) * perPage, page * perPage),
+          meta: { current_page: page, last_page: Math.max(1, Math.ceil(invTotal / perPage)), per_page: perPage, total: invTotal },
+          summary: DEMO_SA_INVOICE_SUMMARY,
+        } as T);
       } else if (path.startsWith("/v1/teacher/dashboard")) {
         resolve(DEMO_TEACHER_DASHBOARD as T);
       } else if (path.startsWith("/v1/admin/dashboard")) {
