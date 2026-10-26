@@ -414,6 +414,32 @@ export const DEMO_TEACHER_DASHBOARD = {
 
 export type TeacherDashboardData = typeof DEMO_TEACHER_DASHBOARD;
 
+// ── Attendance localStorage helpers (demo-only) ───────────────────────────────
+
+export type AttendanceStatus = "present" | "absent";
+
+const DEMO_ATTENDANCE_KEY_PREFIX = "kiddo_demo_att_";
+
+export function getDemoAttendance(date: string): Record<number, AttendanceStatus> | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = localStorage.getItem(DEMO_ATTENDANCE_KEY_PREFIX + date);
+    return raw ? (JSON.parse(raw) as Record<number, AttendanceStatus>) : null;
+  } catch {
+    return null;
+  }
+}
+
+export function saveDemoAttendance(date: string, statuses: Record<number, AttendanceStatus>): void {
+  if (typeof window === "undefined") return;
+  localStorage.setItem(DEMO_ATTENDANCE_KEY_PREFIX + date, JSON.stringify(statuses));
+}
+
+export function clearDemoAttendance(date: string): void {
+  if (typeof window === "undefined") return;
+  localStorage.removeItem(DEMO_ATTENDANCE_KEY_PREFIX + date);
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 
 type RequestOptions = { method?: string };
