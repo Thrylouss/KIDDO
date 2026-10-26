@@ -2,7 +2,7 @@
 
 import React, { createContext, useCallback, useContext, useEffect, useState } from "react";
 import { api } from "@/lib/api";
-import { IS_DEMO, DEMO_USER } from "@/lib/demo-data";
+import { IS_DEMO, DEMO_USER, getDemoUser, clearDemoRole } from "@/lib/demo-data";
 import type { User } from "@/types";
 
 interface AuthState {
@@ -20,7 +20,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const fetchMe = useCallback(async () => {
     if (IS_DEMO) {
-      setUser(DEMO_USER);
+      setUser(getDemoUser());
       setLoading(false);
       return;
     }
@@ -40,8 +40,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const login = useCallback(async (phone: string, password: string): Promise<User> => {
     if (IS_DEMO) {
-      setUser(DEMO_USER);
-      return DEMO_USER;
+      const demoUser = getDemoUser() ?? DEMO_USER;
+      setUser(demoUser);
+      return demoUser;
     }
     const res = await api.post<{ user: User }>("/v1/login", { phone, password });
     setUser(res.user);
@@ -50,6 +51,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = useCallback(async () => {
     if (IS_DEMO) {
+      clearDemoRole();
       setUser(null);
       return;
     }

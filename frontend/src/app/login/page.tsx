@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
-import { IS_DEMO } from "@/lib/demo-data";
+import { IS_DEMO, setDemoRole } from "@/lib/demo-data";
 import type { Role } from "@/types";
 import uz from "@/i18n/uz";
 
@@ -43,7 +43,8 @@ export default function LoginPage() {
   const [error, setError]               = useState("");
   const [loading, setLoading]           = useState(false);
 
-  async function handleDemoLogin() {
+  async function handleDemoLogin(role: "admin" | "super_admin") {
+    setDemoRole(role);
     setError("");
     setLoading(true);
     try {
@@ -158,21 +159,38 @@ export default function LoginPage() {
               <p className="text-xs text-[#B45309] mb-3">
                 Bu namoyish versiyasi. Haqiqiy ma&apos;lumotlar ishlatilmaydi.
               </p>
-              <button
-                type="button"
-                onClick={handleDemoLogin}
-                disabled={loading}
-                className="w-full h-10 bg-[#F59E0B] hover:bg-[#D97706] disabled:opacity-60 disabled:cursor-not-allowed text-white font-semibold rounded-xl transition-all duration-150 active:scale-[0.99] flex items-center justify-center gap-2 text-sm"
-              >
-                {loading ? (
-                  <span className="h-4 w-4 rounded-full border-2 border-white border-t-transparent animate-spin" />
-                ) : (
-                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 0 1 0 1.972l-11.54 6.347a1.125 1.125 0 0 1-1.667-.986V5.653Z" />
-                  </svg>
-                )}
-                Demo kirish — bosing
-              </button>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => handleDemoLogin("admin")}
+                  disabled={loading}
+                  className="h-10 bg-[#F59E0B] hover:bg-[#D97706] disabled:opacity-60 disabled:cursor-not-allowed text-white font-semibold rounded-xl transition-all duration-150 active:scale-[0.99] flex items-center justify-center gap-1.5 text-xs px-3"
+                >
+                  {loading ? (
+                    <span className="h-3.5 w-3.5 rounded-full border-2 border-white border-t-transparent animate-spin" />
+                  ) : (
+                    <svg className="h-3.5 w-3.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+                    </svg>
+                  )}
+                  Bog'cha egasi
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleDemoLogin("super_admin")}
+                  disabled={loading}
+                  className="h-10 bg-[#8E315D] hover:bg-[#742548] disabled:opacity-60 disabled:cursor-not-allowed text-white font-semibold rounded-xl transition-all duration-150 active:scale-[0.99] flex items-center justify-center gap-1.5 text-xs px-3"
+                >
+                  {loading ? (
+                    <span className="h-3.5 w-3.5 rounded-full border-2 border-white border-t-transparent animate-spin" />
+                  ) : (
+                    <svg className="h-3.5 w-3.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+                    </svg>
+                  )}
+                  Super Admin
+                </button>
+              </div>
             </div>
           )}
 

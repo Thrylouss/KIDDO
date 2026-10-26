@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import SuperAdminSidebar from "@/components/SuperAdminSidebar";
 import Topbar from "@/components/Topbar";
+import DemoBanner from "@/components/DemoBanner";
+import { IS_DEMO } from "@/lib/demo-data";
 
 function SuperAdminGuard({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
@@ -31,31 +33,35 @@ function SuperAdminGuard({ children }: { children: React.ReactNode }) {
   if (!user || user.role !== "super_admin") return null;
 
   return (
-    <div className="flex h-screen bg-[var(--bg)] overflow-hidden">
-      {/* Desktop sidebar */}
-      <div className="hidden lg:flex flex-shrink-0">
-        <SuperAdminSidebar />
-      </div>
+    <div className="flex flex-col h-screen bg-[var(--bg)] overflow-hidden">
+      {IS_DEMO && <DemoBanner />}
 
-      {/* Mobile sidebar overlay */}
-      {sidebarOpen && (
-        <div className="fixed inset-0 z-40 lg:hidden">
-          <div
-            className="absolute inset-0 bg-black/40 backdrop-blur-sm animate-fade-in"
-            onClick={() => setSidebarOpen(false)}
-          />
-          <div className="absolute left-0 top-0 h-full z-50 animate-slide-up">
-            <SuperAdminSidebar onClose={() => setSidebarOpen(false)} />
-          </div>
+      <div className="flex flex-1 min-h-0 overflow-hidden">
+        {/* Desktop sidebar */}
+        <div className="hidden lg:flex flex-shrink-0">
+          <SuperAdminSidebar />
         </div>
-      )}
 
-      {/* Main area */}
-      <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
-        <Topbar onMenuClick={() => setSidebarOpen(true)} />
-        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
-          {children}
-        </main>
+        {/* Mobile sidebar overlay */}
+        {sidebarOpen && (
+          <div className="fixed inset-0 z-40 lg:hidden">
+            <div
+              className="absolute inset-0 bg-black/40 backdrop-blur-sm animate-fade-in"
+              onClick={() => setSidebarOpen(false)}
+            />
+            <div className="absolute left-0 top-0 h-full z-50 animate-slide-up">
+              <SuperAdminSidebar onClose={() => setSidebarOpen(false)} />
+            </div>
+          </div>
+        )}
+
+        {/* Main area */}
+        <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
+          <Topbar onMenuClick={() => setSidebarOpen(true)} />
+          <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+            {children}
+          </main>
+        </div>
       </div>
     </div>
   );
