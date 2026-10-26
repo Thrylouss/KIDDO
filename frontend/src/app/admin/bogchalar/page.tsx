@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { api, impersonation } from "@/lib/api";
+import { IS_DEMO } from "@/lib/demo-data";
 import Badge from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
@@ -88,6 +89,7 @@ export default function BogchalarPage() {
       const res = await api.get<{ data: OrganizationSummary[]; meta: Meta }>(
         `/v1/super-admin/organizations?${qs}`
       );
+      if (!res) { setOrgs([]); setMeta(null); return; }
       setOrgs(res.data);
       setMeta(res.meta);
     } catch {
@@ -491,6 +493,11 @@ export default function BogchalarPage() {
         }
       >
         <form id="org-form" onSubmit={handleCreate} className="space-y-5">
+          {IS_DEMO && (
+            <div className="bg-[#FFF9F5] border border-[#EDE3E8] text-[#766B73] text-sm px-4 py-3 rounded-xl">
+              {uz.super_admin.demo_modal_xabar}
+            </div>
+          )}
           {saveError && (
             <div className="bg-[#FEF2F2] border border-[#FECACA] text-[#B91C1C] text-sm px-4 py-3 rounded-xl">
               {saveError}

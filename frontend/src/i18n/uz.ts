@@ -485,6 +485,7 @@ const uz = {
     boshlanish_sanasi_f:      "Boshlanish",
     tugash_sanasi_f:          "Tugash",
     filtrlash_btn:            "Filtrlash",
+    demo_modal_xabar:         "Demo rejimi — ma'lumotlar saqlanmaydi, amallar simulyatsiya qilinadi.",
   },
 
   foydalanuvchilar: {

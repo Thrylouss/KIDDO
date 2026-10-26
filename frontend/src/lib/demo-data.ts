@@ -4,6 +4,8 @@ import type {
   DashboardSummaryEnhanced,
   DashboardRecent,
   DashboardExpiring,
+  OrganizationSummary,
+  Plan,
   ReportRevenue,
   ReportSubscriptions,
   Group,
@@ -278,6 +280,40 @@ const _SA_BOGCHALAR = [
   { id: 5, name: "Mehr bog'chasi",     phone: "+998711001005", is_active: true, created_at: "2025-05-01T09:00:00Z", subscription: { status: "active", ends_at: "2026-12-15", plan: "Premium" } },
 ];
 
+export const DEMO_SA_PLANS: Plan[] = [
+  {
+    id: 1, name: "Asosiy", slug: "asosiy",
+    description: "Kichik va o'rta bog'chalar uchun",
+    price_monthly: "800000", price_yearly: "8000000", currency: "UZS",
+    trial_days: 14, max_children: 50, max_teachers: 10, max_groups: 5,
+    features: ["Bolalar ro'yxati", "Davomat", "Ota-onalar"],
+    is_active: true, sort_order: 1, subscriptions_count: 7,
+  },
+  {
+    id: 2, name: "Premium", slug: "premium",
+    description: "Katta bog'chalar uchun to'liq paket",
+    price_monthly: "1200000", price_yearly: "12000000", currency: "UZS",
+    trial_days: 14, max_children: null, max_teachers: null, max_groups: null,
+    features: ["Bolalar ro'yxati", "Davomat", "Ota-onalar", "Hisobot", "Rasm yuklash"],
+    is_active: true, sort_order: 2, subscriptions_count: 5,
+  },
+];
+
+export const DEMO_SA_ORGANIZATIONS: OrganizationSummary[] = [
+  { id: 1,  name: "Yulduz bog'chasi",   phone: "+998711001001", address: "Toshkent, Yunusobod t.",        is_active: true,  created_at: "2025-01-15T09:00:00Z", admin: { id: 101, name: "Alisher Karimov",   phone: "+998901110001" }, subscription: { id: 1,  status: "active",   ends_at: "2026-12-31", trial_ends_at: null, days_remaining: 65, plan: { id: 2, name: "Premium" } } },
+  { id: 2,  name: "Nilufar bog'chasi",  phone: "+998711001002", address: "Toshkent, Mirzo Ulug'bek t.",  is_active: true,  created_at: "2025-02-10T09:00:00Z", admin: { id: 102, name: "Mohira Yusupova",   phone: "+998901110002" }, subscription: { id: 2,  status: "active",   ends_at: "2026-11-30", trial_ends_at: null, days_remaining: 34, plan: { id: 1, name: "Asosiy"  } } },
+  { id: 3,  name: "Bahor bog'chasi",    phone: "+998711001003", address: "Samarqand, Registon ko'ch.",   is_active: true,  created_at: "2025-03-05T09:00:00Z", admin: { id: 103, name: "Sarvarbek Toshmatov", phone: "+998901110003" }, subscription: { id: 3,  status: "active",   ends_at: "2026-11-05", trial_ends_at: null, days_remaining: 9,  plan: { id: 1, name: "Asosiy"  } } },
+  { id: 4,  name: "Kamalak bog'chasi",  phone: "+998711001004", address: "Buxoro, Markaziy ko'ch.",      is_active: true,  created_at: "2025-04-20T09:00:00Z", admin: { id: 104, name: "Umida Nazarova",    phone: "+998901110004" }, subscription: { id: 4,  status: "trial",    ends_at: "2026-11-10", trial_ends_at: "2026-11-10", days_remaining: 14, plan: { id: 1, name: "Asosiy"  } } },
+  { id: 5,  name: "Mehr bog'chasi",     phone: "+998711001005", address: "Toshkent, Sergeli t.",         is_active: true,  created_at: "2025-05-01T09:00:00Z", admin: { id: 105, name: "Bobur Xasanov",     phone: "+998901110005" }, subscription: { id: 5,  status: "active",   ends_at: "2026-12-15", trial_ends_at: null, days_remaining: 49, plan: { id: 2, name: "Premium" } } },
+  { id: 6,  name: "Gulbahor bog'chasi", phone: "+998711001006", address: "Andijon, Navbahor ko'ch.",     is_active: true,  created_at: "2025-06-12T09:00:00Z", admin: { id: 106, name: "Kamola Ergasheva",  phone: "+998901110006" }, subscription: { id: 6,  status: "active",   ends_at: "2026-11-12", trial_ends_at: null, days_remaining: 16, plan: { id: 2, name: "Premium" } } },
+  { id: 7,  name: "Navruz bog'chasi",   phone: "+998711001007", address: "Namangan, Navruz ko'ch.",      is_active: true,  created_at: "2025-07-08T09:00:00Z", admin: { id: 107, name: "Dilnoza Mirzayeva", phone: "+998901110007" }, subscription: { id: 7,  status: "active",   ends_at: "2026-12-20", trial_ends_at: null, days_remaining: 54, plan: { id: 1, name: "Asosiy"  } } },
+  { id: 8,  name: "Oftob bog'chasi",    phone: "+998711001008", address: "Farg'ona, Mustaqillik ko'ch.", is_active: true,  created_at: "2025-08-15T09:00:00Z", admin: { id: 108, name: "Jasur Rahimov",     phone: "+998901110008" }, subscription: { id: 8,  status: "active",   ends_at: "2027-01-31", trial_ends_at: null, days_remaining: 96, plan: { id: 1, name: "Asosiy"  } } },
+  { id: 9,  name: "Sharq bog'chasi",    phone: "+998711001009", address: "Qo'qon, Sharq ko'ch.",         is_active: true,  created_at: "2025-09-01T09:00:00Z", admin: null,                                                           subscription: { id: 9,  status: "past_due", ends_at: "2026-10-15", trial_ends_at: null, days_remaining: 0,  plan: { id: 1, name: "Asosiy"  } } },
+  { id: 10, name: "G'uncha bog'chasi",  phone: "+998711001010", address: "Toshkent, Shayxontohur t.",    is_active: true,  created_at: "2025-09-20T09:00:00Z", admin: { id: 110, name: "Nozima Qodirova",   phone: "+998901110010" }, subscription: { id: 10, status: "active",   ends_at: "2026-12-05", trial_ends_at: null, days_remaining: 39, plan: { id: 1, name: "Asosiy"  } } },
+  { id: 11, name: "Armon bog'chasi",    phone: "+998711001011", address: "Jizzax, Rashidov ko'ch.",      is_active: false, created_at: "2025-10-05T09:00:00Z", admin: { id: 111, name: "Husayn Tursunov",   phone: "+998901110011" }, subscription: { id: 11, status: "expired",  ends_at: "2026-09-01", trial_ends_at: null, days_remaining: 0,  plan: { id: 1, name: "Asosiy"  } } },
+  { id: 12, name: "Baxt bog'chasi",     phone: "+998711001012", address: "Qarshi, Baxt ko'ch.",          is_active: true,  created_at: "2025-10-15T09:00:00Z", admin: { id: 112, name: "Lola Ismoilova",    phone: "+998901110012" }, subscription: { id: 12, status: "trial",    ends_at: "2026-11-20", trial_ends_at: "2026-11-20", days_remaining: 24, plan: { id: 2, name: "Premium" } } },
+];
+
 export const DEMO_SA_DASHBOARD: DashboardSummaryEnhanced = {
   period: { from: "2026-10-01", to: "2026-10-27" },
   jami_bogchalar: 12,
@@ -468,6 +504,45 @@ export function handleDemoRequest<T>(path: string, options: RequestOptions): Pro
         resolve(DEMO_SA_REVENUE as T);
       } else if (path.startsWith("/v1/super-admin/reports/subscriptions")) {
         resolve(DEMO_SA_SUBSCRIPTIONS as T);
+      } else if (path.startsWith("/v1/super-admin/organizations")) {
+        const qsIdx = path.indexOf("?");
+        const params = qsIdx >= 0 ? new URLSearchParams(path.slice(qsIdx + 1)) : new URLSearchParams();
+        const search  = (params.get("search") ?? "").toLowerCase();
+        const status  = params.get("status") ?? "";
+        const sort    = params.get("sort") ?? "newest";
+        const page    = Math.max(1, parseInt(params.get("page") ?? "1"));
+        const perPage = 15;
+
+        let list = [...DEMO_SA_ORGANIZATIONS];
+
+        if (search) {
+          list = list.filter(o =>
+            o.name.toLowerCase().includes(search) ||
+            (o.phone ?? "").includes(search) ||
+            (o.admin?.name ?? "").toLowerCase().includes(search)
+          );
+        }
+
+        if      (status === "active")          list = list.filter(o => o.is_active && o.subscription?.status === "active");
+        else if (status === "inactive")        list = list.filter(o => !o.is_active);
+        else if (status === "trial")           list = list.filter(o => o.subscription?.status === "trial");
+        else if (status === "paid")            list = list.filter(o => o.subscription?.status === "active");
+        else if (status === "payment_overdue") list = list.filter(o => o.subscription?.status === "past_due");
+        else if (status === "expired")         list = list.filter(o => o.subscription?.status === "expired");
+        else if (status === "cancelled")       list = list.filter(o => o.subscription?.status === "cancelled");
+
+        if      (sort === "newest")              list = [...list].reverse();
+        else if (sort === "name")                list = [...list].sort((a, b) => a.name.localeCompare(b.name));
+        else if (sort === "subscription_expiry") list = [...list].sort((a, b) => (a.subscription?.days_remaining ?? 9999) - (b.subscription?.days_remaining ?? 9999));
+        // "oldest" = default insertion order (already oldest-first)
+
+        const total = list.length;
+        resolve({
+          data: list.slice((page - 1) * perPage, page * perPage),
+          meta: { current_page: page, last_page: Math.max(1, Math.ceil(total / perPage)), per_page: perPage, total },
+        } as T);
+      } else if (path.startsWith("/v1/super-admin/plans")) {
+        resolve({ data: DEMO_SA_PLANS } as T);
       } else if (path.startsWith("/v1/teacher/dashboard")) {
         resolve(DEMO_TEACHER_DASHBOARD as T);
       } else if (path.startsWith("/v1/admin/dashboard")) {

@@ -58,13 +58,14 @@ beforeEach(() => {
   vi.mocked(getDemoAttendance).mockReturnValue(null); // no saved data by default
 });
 
-// Helper: wait until data is loaded AND statuses are initialized from the second useEffect.
-// Checking toggle text guarantees statuses are populated (not just that data arrived).
+// Helper: wait until the initialization useEffect has completed.
+// IMPORTANT: toggle buttons use `statuses[id] ?? child.status`, so they show the correct
+// text even before statuses are initialized. stat-present is derived solely from statuses,
+// so "2" only appears after setStatuses({1:"present",2:"present",3:"absent"}) runs.
 async function renderAndWait() {
   render(<TarbiyachiDashboardPage />);
   await waitFor(() => {
-    expect(screen.getByTestId("toggle-1")).toHaveTextContent("Keldi");
-    expect(screen.getByTestId("toggle-3")).toHaveTextContent("Kelmadi");
+    expect(screen.getByTestId("stat-present")).toHaveTextContent("2");
   });
 }
 
