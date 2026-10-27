@@ -14,6 +14,8 @@ import type {
   PaymentSummaryFull,
   InvoiceRecord,
   InvoiceSummary,
+  ActivityLogEntry,
+  Notification,
   Group,
   ParentProfile,
   TeacherProfile,
@@ -567,6 +569,39 @@ export function clearDemoAttendance(date: string): void {
   localStorage.removeItem(DEMO_ATTENDANCE_KEY_PREFIX + date);
 }
 
+// ── SA Activity Logs ───────────────────────────────────────────────────────────
+
+export const DEMO_SA_ACTIVITY_LOGS: ActivityLogEntry[] = [
+  { id: 15, action: "subscription.renewed",    description: "Armon bog'chasi — obuna yangilandi (Premium, 12 oy)",   ip_address: "10.0.0.5",  created_at: "2026-10-27T11:20:00Z", user: { id: 99, name: "Super Admin" }, organization: { id: 11, name: "Armon bog'chasi" } },
+  { id: 14, action: "invoice.sent",            description: "INV-2026-011 hisob-faktura yuborildi — Nilufar bog'chasi", ip_address: "10.0.0.5", created_at: "2026-10-26T15:45:00Z", user: { id: 99, name: "Super Admin" }, organization: { id: 9,  name: "Nilufar bog'chasi" } },
+  { id: 13, action: "organization.created",    description: "Yangi bog'cha ro'yxatdan o'tdi — Orzular bog'chasi",   ip_address: "185.0.1.12", created_at: "2026-10-25T09:10:00Z", user: { id: 99, name: "Super Admin" }, organization: { id: 12, name: "Orzular bog'chasi" } },
+  { id: 12, action: "subscription.entered",    description: "Yangi obuna boshlandi — Orzular bog'chasi (Asosiy, sinov)", ip_address: "185.0.1.12", created_at: "2026-10-25T09:12:00Z", user: { id: 99, name: "Super Admin" }, organization: { id: 12, name: "Orzular bog'chasi" } },
+  { id: 11, action: "payment.received",        description: "To'lov qabul qilindi — Yulduz bog'chasi 1 200 000 UZS", ip_address: "10.0.0.5",  created_at: "2026-10-25T10:30:00Z", user: { id: 99, name: "Super Admin" }, organization: { id: 1,  name: "Yulduz bog'chasi" } },
+  { id: 10, action: "user.created",            description: "Admin foydalanuvchi yaratildi — Gulnora Rashidova",    ip_address: "10.0.0.5",  created_at: "2026-10-24T14:00:00Z", user: { id: 99, name: "Super Admin" }, organization: { id: 12, name: "Orzular bog'chasi" } },
+  { id: 9,  action: "subscription.cancelled",  description: "Obuna bekor qilindi — Bahor bog'chasi (to'lov muammosi)", ip_address: "10.0.0.5", created_at: "2026-10-23T16:20:00Z", user: { id: 99, name: "Super Admin" }, organization: { id: 3,  name: "Bahor bog'chasi" } },
+  { id: 8,  action: "organization.deactivated","description": "Bog'cha faolsizlantirildi — Samarqand bog'chasi",   ip_address: "10.0.0.5",  created_at: "2026-10-22T11:05:00Z", user: { id: 99, name: "Super Admin" }, organization: { id: 8,  name: "Samarqand bog'chasi" } },
+  { id: 7,  action: "plan.created",            description: "Yangi tarif yaratildi — Enterprise (2 400 000 UZS/oy)", ip_address: "10.0.0.5", created_at: "2026-10-21T10:00:00Z", user: { id: 99, name: "Super Admin" }, organization: null },
+  { id: 6,  action: "subscription.renewed",    description: "Obuna yangilandi — Kamalak bog'chasi (Asosiy, 6 oy)", ip_address: "10.0.0.5",  created_at: "2026-10-20T09:30:00Z", user: { id: 99, name: "Super Admin" }, organization: { id: 4,  name: "Kamalak bog'chasi" } },
+  { id: 5,  action: "invoice.sent",            description: "INV-2026-008 hisob-faktura yuborildi — Mehr bog'chasi", ip_address: "10.0.0.5", created_at: "2026-10-19T14:50:00Z", user: { id: 99, name: "Super Admin" }, organization: { id: 6,  name: "Mehr bog'chasi" } },
+  { id: 4,  action: "organization.created",    description: "Yangi bog'cha ro'yxatdan o'tdi — Mehr bog'chasi",     ip_address: "198.0.2.44", created_at: "2026-10-15T08:00:00Z", user: { id: 99, name: "Super Admin" }, organization: { id: 6,  name: "Mehr bog'chasi" } },
+  { id: 3,  action: "user.created",            description: "Admin foydalanuvchi yaratildi — Aziz Karimov",        ip_address: "10.0.0.5",  created_at: "2026-10-10T13:20:00Z", user: { id: 99, name: "Super Admin" }, organization: { id: 5,  name: "Gulbahor bog'chasi" } },
+  { id: 2,  action: "subscription.entered",    description: "Yangi obuna boshlandi — Mehr bog'chasi (Premium, sinov)", ip_address: "198.0.2.44", created_at: "2026-10-15T08:05:00Z", user: { id: 99, name: "Super Admin" }, organization: { id: 6,  name: "Mehr bog'chasi" } },
+  { id: 1,  action: "organization.created",    description: "Tizim ishga tushirildi — birinchi bog'cha qo'shildi", ip_address: "10.0.0.1",  created_at: "2026-09-01T07:00:00Z", user: { id: 99, name: "Super Admin" }, organization: { id: 1,  name: "Yulduz bog'chasi" } },
+];
+
+// ── SA Notifications ───────────────────────────────────────────────────────────
+
+export const DEMO_SA_NOTIFICATIONS: Notification[] = [
+  { id: 8, title: "Yangi bog'cha ro'yxatdan o'tdi",      message: "Orzular bog'chasi platformaga qo'shildi va sinov obunasi boshlandi.",      type: "info",    is_read: false, created_at: "2026-10-25T09:12:00Z" },
+  { id: 7, title: "To'lov muvaffaqiyatli qabul qilindi", message: "Yulduz bog'chasi — 1 200 000 UZS Premium tarif uchun to'lov amalga oshdi.", type: "payment", is_read: false, created_at: "2026-10-25T10:30:00Z" },
+  { id: 6, title: "Obuna muddati tugashiga yaqin",       message: "Kamalak bog'chasi obunasi 14 kun ichida tugaydi. Yangilash tavsiya etiladi.", type: "warning", is_read: false, created_at: "2026-10-24T08:00:00Z" },
+  { id: 5, title: "To'lov muvaffaqiyatsiz",              message: "Bahor bog'chasi — INV-2026-005 hisob-faktura uchun to'lov amalga oshmadi.",  type: "alert",   is_read: true,  created_at: "2026-10-23T16:25:00Z" },
+  { id: 4, title: "Obuna bekor qilindi",                 message: "Bahor bog'chasi obunasi to'lov muammosi sababli bekor qilindi.",             type: "alert",   is_read: true,  created_at: "2026-10-23T16:30:00Z" },
+  { id: 3, title: "Oylik daromad hisoboti",              message: "Oktyabr 2026: 6 800 000 UZS yig'ildi. O'tgan oyga nisbatan +12%.",          type: "info",    is_read: true,  created_at: "2026-10-20T09:00:00Z" },
+  { id: 2, title: "Yangi tarif qo'shildi",               message: "Enterprise tarifi (2 400 000 UZS/oy) muvaffaqiyatli yaratildi.",            type: "info",    is_read: true,  created_at: "2026-10-21T10:05:00Z" },
+  { id: 1, title: "Obuna yangilandi",                    message: "Armon bog'chasi — Premium tarif 12 oyga muvaffaqiyatli yangilandi.",         type: "payment", is_read: true,  created_at: "2026-10-19T11:00:00Z" },
+];
+
 // ─────────────────────────────────────────────────────────────────────────────
 
 type RequestOptions = { method?: string };
@@ -696,6 +731,26 @@ export function handleDemoRequest<T>(path: string, options: RequestOptions): Pro
           meta: { current_page: page, last_page: Math.max(1, Math.ceil(invTotal / perPage)), per_page: perPage, total: invTotal },
           summary: DEMO_SA_INVOICE_SUMMARY,
         } as T);
+      } else if (path.startsWith("/v1/super-admin/activity-logs")) {
+        const qsIdx = path.indexOf("?");
+        const params  = qsIdx >= 0 ? new URLSearchParams(path.slice(qsIdx + 1)) : new URLSearchParams();
+        const orgId   = params.get("organization_id") ?? "";
+        const page    = Math.max(1, parseInt(params.get("page") ?? "1"));
+        const perPage = parseInt(params.get("per_page") ?? "30");
+        let logList = [...DEMO_SA_ACTIVITY_LOGS];
+        if (orgId) logList = logList.filter(l => String(l.organization?.id) === orgId);
+        const logTotal = logList.length;
+        resolve({
+          data: logList.slice((page - 1) * perPage, page * perPage),
+          meta: { current_page: page, last_page: Math.max(1, Math.ceil(logTotal / perPage)), per_page: perPage, total: logTotal },
+        } as T);
+      } else if (/^\/v1\/super-admin\/notifications\/\d+\/read/.test(path)) {
+        resolve(undefined as T);
+      } else if (path.startsWith("/v1/super-admin/notifications/read-all")) {
+        resolve(undefined as T);
+      } else if (path.startsWith("/v1/super-admin/notifications")) {
+        const unread = DEMO_SA_NOTIFICATIONS.filter(n => !n.is_read).length;
+        resolve({ data: DEMO_SA_NOTIFICATIONS, unread_count: unread } as T);
       } else if (path.startsWith("/v1/teacher/dashboard")) {
         resolve(DEMO_TEACHER_DASHBOARD as T);
       } else if (path.startsWith("/v1/admin/dashboard")) {

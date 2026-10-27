@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { api } from "@/lib/api";
+import { IS_DEMO } from "@/lib/demo-data";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import Select from "@/components/ui/Select";
@@ -232,6 +233,13 @@ export default function XabarlarPage() {
           </Button>
         </div>
       </div>
+
+      {IS_DEMO && (
+        <div data-testid="demo-banner" className="flex items-center gap-2.5 rounded-xl bg-[#FDF2F6] border border-[#EDE3E8] px-4 py-3 text-sm text-[#742548]">
+          <svg className="h-4 w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+          <span><strong>Demo rejimi</strong> — xabarlar saqlanmaydi, yuborish simulyatsiya qilinadi.</span>
+        </div>
+      )}
 
       {/* List */}
       <div className="bg-white rounded-xl border border-[#EDE3E8] overflow-hidden">
