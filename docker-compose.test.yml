@@ -1,0 +1,46 @@
+# Disposable test stack. Use only with: docker compose -f docker-compose.test.yml -p kiddo-test ...
+name: kiddo-test
+services:
+  postgres-test:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: kiddo_test
+      POSTGRES_USER: kiddo_test
+      POSTGRES_PASSWORD: kiddo_test        # test-only, never used elsewhere
+    tmpfs:
+      - /var/lib/postgresql/data           # data lives in RAM, gone on stop
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U kiddo_test -d kiddo_test"]
+      interval: 2s
+      retries: 15
+    # no ports: unreachable from the host or the dev stack
+
+  php-test:
+    build:
+      context: ./docker/php
+    user: root                             # writes only to tmpfs/volume below
+    working_dir: /var/www/html
+    volumes:
+      - ./backend:/var/www/html
+      - kiddo_test_vendor:/var/www/html/vendor
+    tmpfs:
+      - /var/www/html/storage
+      - /var/www/html/bootstrap/cache
+    environment:
+      APP_ENV: testing
+      APP_DEBUG: "true"                    # test-only: SentryMonitoringTest expects debug mode
+      FRONTEND_URL: http://localhost:3000  # lokal frontend va API bir xil hostname'da (localhost)
+      DB_CONNECTION: pgsql
+      DB_HOST: postgres-test
+      DB_PORT: "5432"
+      DB_DATABASE: kiddo_test
+      DB_USERNAME: kiddo_test
+      DB_PASSWORD: kiddo_test
+      SENTRY_LARAVEL_DSN: ""
+    entrypoint: ["sh", "-c", "mkdir -p storage/framework/cache storage/framework/sessions storage/framework/views storage/logs && exec \"$$@\"", "--"]
+    depends_on:
+      postgres-test:
+        condition: service_healthy
+
+volumes:
+  kiddo_test_vendor:

@@ -1,18 +1,19 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { IS_DEMO, setDemoRole } from "@/lib/demo-data";
-import type { Role } from "@/types";
+import { landingFor } from "@/lib/roles";
 import uz from "@/i18n/uz";
 
-const ROLE_ROUTES: Record<Role, string> = {
-  super_admin: "/admin",
-  admin:       "/bogcha",
-  teacher:     "/tarbiyachi",
-  parent:      "/ota-ona",
-};
+// Faqat maslahat uchun: so'rov baribir yuboriladi, nostandart raqamli akkauntlar bloklanmaydi
+const UZ_PHONE = /^\+998\d{9}$/;
+// Raqam yoki «+» bilan boshlansa — telefon raqami (aks holda foydalanuvchi nomi); backend bilan bir xil qoida
+const looksLikePhone = (v: string) => /^[+\d]/.test(v.trim());
+
+/** Vaqtinchalik parol bilan kirgan foydalanuvchi avval parolni almashtiradi. */
+const landing = landingFor;
 
 function EyeIcon({ open }: { open: boolean }) {
   return open ? (
@@ -34,10 +35,15 @@ const benefits = [
 ];
 
 export default function LoginPage() {
-  const { login } = useAuth();
+  const { login, user, loading: authLoading } = useAuth();
   const router = useRouter();
 
-  const [phone, setPhone]               = useState("");
+  // Allaqachon tizimga kirgan foydalanuvchi o'z paneliga yo'naltiriladi
+  useEffect(() => {
+    if (!authLoading && user) router.push(landing(user));
+  }, [authLoading, user, router]);
+
+  const [loginValue, setLoginValue]     = useState("");
   const [password, setPassword]         = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError]               = useState("");
@@ -49,7 +55,7 @@ export default function LoginPage() {
     setLoading(true);
     try {
       const user = await login("", "");
-      router.push(ROLE_ROUTES[user.role] ?? "/");
+      router.push(landing(user));
     } finally {
       setLoading(false);
     }
@@ -60,15 +66,19 @@ export default function LoginPage() {
     setError("");
     setLoading(true);
     try {
-      const user = await login(phone, password);
-      router.push(ROLE_ROUTES[user.role] ?? "/");
+      const user = await login(loginValue, password);
+      router.push(landing(user));
     } catch (err: unknown) {
       const status = (err as { status?: number })?.status;
       if (process.env.NODE_ENV === "development") {
         console.error("[LOGIN]", status ?? "network error", err);
       }
-      if      (status === 401 || status === 422) setError(uz.auth.xato_kirish);
-      else if (status === 500)                  setError(uz.auth.server_xatosi);
+      const code = (err as { data?: { code?: string } })?.data?.code;
+      // Ota-ona: web sessiya yaratilmaydi — mobil ilova haqidagi axborot sahifasiga o'tkaziladi
+      if      (status === 403 && code === "parent_mobile_only") router.push("/ota-ona");
+      else if (status === 401 || status === 422) setError(looksLikePhone(loginValue) && !UZ_PHONE.test(loginValue.trim()) ? uz.auth.xato_telefon_format : uz.auth.xato_kirish);
+      else if (status === 429)                  setError(uz.auth.juda_kop_urinish);
+      else if (status !== undefined)            setError(uz.auth.server_xatosi);
       else                                      setError(uz.auth.tarmoq_xatosi);
     } finally {
       setLoading(false);
@@ -219,28 +229,37 @@ export default function LoginPage() {
             <p className="text-[#766B73] mt-1.5 text-sm">{uz.auth.xush_kelibsiz_tavsif}</p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          {/* name atributlari ataylab yo'q va method="post": JS yuklanmasdan oldin bosilsa ham
+              login/parol URL'ga (brauzer tarixi, server loglari) tushmaydi */}
+          <form method="post" onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-[#3D3240] mb-1.5">
-                {uz.auth.telefon}
+              <label htmlFor="login" className="block text-sm font-medium text-[#3D3240] mb-1.5">
+                {uz.auth.login_maydon}
               </label>
               <input
-                type="tel"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                placeholder="+998901234567"
+                id="login"
+                type="text"
+                value={loginValue}
+                onChange={(e) => setLoginValue(e.target.value)}
+                placeholder={uz.auth.login_placeholder}
                 required
                 autoComplete="username"
+                autoCapitalize="none"
+                autoCorrect="off"
+                spellCheck={false}
+                aria-describedby="login-hint"
                 className={inputBase}
               />
+              <p id="login-hint" className="mt-1.5 text-xs text-[#B8AAB2]">{uz.auth.login_izoh}</p>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-[#3D3240] mb-1.5">
+              <label htmlFor="password" className="block text-sm font-medium text-[#3D3240] mb-1.5">
                 {uz.auth.parol}
               </label>
               <div className="relative">
                 <input
+                  id="password"
                   type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -260,7 +279,7 @@ export default function LoginPage() {
             </div>
 
             {error && (
-              <div className="flex items-start gap-2.5 bg-[#FEF2F2] border border-[#FECACA] text-[#B91C1C] text-sm px-4 py-3 rounded-xl">
+              <div role="alert" className="flex items-start gap-2.5 bg-[#FEF2F2] border border-[#FECACA] text-[#B91C1C] text-sm px-4 py-3 rounded-xl">
                 <svg className="h-4 w-4 flex-shrink-0 mt-0.5" viewBox="0 0 20 20" fill="currentColor">
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clipRule="evenodd" />
                 </svg>

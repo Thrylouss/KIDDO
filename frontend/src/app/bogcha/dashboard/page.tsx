@@ -8,6 +8,7 @@ import StatCard from "@/components/ui/StatCard";
 import EmptyState from "@/components/ui/EmptyState";
 import { SkeletonCards } from "@/components/ui/Skeleton";
 import uz from "@/i18n/uz";
+import { DIRECTION_LABELS } from "@/components/daily/dailyRules";
 import type { ApiResponse, DashboardSummary, Group } from "@/types";
 
 const UZ_MONTHS = [
@@ -100,13 +101,48 @@ export default function BogchaDashboardPage() {
 
   return (
     <div className="max-w-6xl mx-auto space-y-8">
-      {/* Greeting */}
-      <div>
-        <h1 className="text-2xl font-bold text-[#29232A]">
-          {uz.dashboard.salom}, {firstName}!
-        </h1>
-        <p className="text-[#B8AAB2] mt-1 text-sm">{todayLabel()} · {uz.dashboard.bugungi_holat}</p>
+      {/* Greeting + kindergarten profile */}
+      <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+        <div className="min-w-0">
+          <h1 className="text-2xl font-bold text-[#29232A]">
+            {uz.dashboard.salom}, {firstName}!
+          </h1>
+          <p className="text-[#B8AAB2] mt-1 text-sm">{todayLabel()} · {uz.dashboard.bugungi_holat}</p>
+        </div>
+        {summary?.bogcha && (
+          <div data-testid="bogcha-profile" className="flex items-center gap-3 bg-white rounded-xl border border-[#EDE3E8] px-4 py-3 min-w-0">
+            <div className="h-9 w-9 rounded-lg bg-[#FDF2F6] flex items-center justify-center text-[#8E315D] font-bold flex-shrink-0">
+              {summary.bogcha.name.charAt(0).toUpperCase()}
+            </div>
+            <div className="min-w-0">
+              <p className="text-sm font-semibold text-[#29232A] truncate">{summary.bogcha.name}</p>
+              <p className="text-xs text-[#B8AAB2] truncate">
+                {[summary.bogcha.address, summary.bogcha.phone].filter(Boolean).join(" · ") || "—"}
+              </p>
+            </div>
+          </div>
+        )}
       </div>
+
+      {/* Quick actions */}
+      <nav aria-label={uz.bogcha_panel.tez_amallar} className="flex flex-wrap gap-2">
+        {[
+          { href: "/bogcha/davomat",       label: uz.bogcha_panel.davomat },
+          { href: "/bogcha/bolalar",       label: uz.bogcha_panel.bola_qoshish },
+          { href: "/bogcha/guruhlar",      label: uz.bogcha_panel.guruhlar },
+          { href: "/bogcha/tarbiyachilar", label: uz.bogcha_panel.tarbiyachilar },
+          { href: "/bogcha/kundalik",      label: uz.bogcha_panel.kundalik },
+          { href: "/bogcha/xabarlar",      label: uz.bogcha_panel.xabarlar },
+        ].map((a) => (
+          <Link
+            key={a.href}
+            href={a.href}
+            className="px-3.5 py-2 rounded-lg border border-[#EDE3E8] bg-white text-sm font-medium text-[#3D3240] hover:border-[#8E315D] hover:bg-[#FDF2F6] hover:text-[#8E315D] transition-colors"
+          >
+            {a.label}
+          </Link>
+        ))}
+      </nav>
 
       {/* Stats */}
       {loading ? (
@@ -128,7 +164,9 @@ export default function BogchaDashboardPage() {
           <StatCard
             title={uz.dashboard.bolalar}
             value={summary?.bolalar_soni ?? 0}
-            subtitle={uz.dashboard.jami_bolalar}
+            subtitle={summary?.faol_bolalar_soni !== undefined
+              ? `${uz.dashboard.jami_bolalar} · ${uz.dashboard.faol_bolalar}: ${summary.faol_bolalar_soni}`
+              : uz.dashboard.jami_bolalar}
             icon={
               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -177,7 +215,7 @@ export default function BogchaDashboardPage() {
               href="/bogcha/guruhlar"
               className="text-sm text-[#8E315D] hover:text-[#742548] font-medium transition-colors"
             >
-              Barchasini ko&apos;rish
+              {uz.dashboard.barchasini_korish}
             </Link>
           </div>
           {groups.length === 0 ? (
@@ -202,11 +240,33 @@ export default function BogchaDashboardPage() {
         </div>
       )}
 
-      {/* Attendance placeholder */}
+      {/* Bugungi davomat — real API (demo ma'lumotda bugungi_davomat yo'q) */}
+      {!loading && !error && (
       <div className="bg-white rounded-xl border border-[#EDE3E8] overflow-hidden">
-        <div className="px-6 py-4 border-b border-[#EDE3E8]">
+        <div className="px-6 py-4 border-b border-[#EDE3E8] flex items-center justify-between">
           <h2 className="text-base font-semibold text-[#29232A]">{uz.dashboard.bugungi_davomat}</h2>
+          {summary?.bugungi_davomat && (
+            <Link href="/bogcha/davomat" className="text-sm text-[#8E315D] hover:text-[#742548] font-medium transition-colors">
+              {uz.dashboard.davomat_ochish}
+            </Link>
+          )}
         </div>
+        {summary?.bugungi_davomat ? (
+          <div data-testid="today-attendance" className="grid grid-cols-2 sm:grid-cols-5 gap-px bg-[#EDE3E8]">
+            {[
+              { label: uz.davomat.jami,          value: summary.bugungi_davomat.jami,          cls: "text-[#29232A]" },
+              { label: uz.davomat.keldi,         value: summary.bugungi_davomat.keldi,         cls: "text-[#166534]" },
+              { label: uz.davomat.kelmadi,       value: summary.bugungi_davomat.kelmadi,       cls: "text-[#991B1B]" },
+              { label: uz.davomat.sababli,       value: summary.bugungi_davomat.sababli,       cls: "text-[#92400E]" },
+              { label: uz.davomat.belgilanmagan, value: summary.bugungi_davomat.belgilanmagan, cls: "text-[#766B73]" },
+            ].map((s) => (
+              <div key={s.label} className="bg-white px-5 py-4">
+                <p className="text-xs text-[#B8AAB2] font-medium uppercase tracking-wide">{s.label}</p>
+                <p className={`text-2xl font-bold leading-tight ${s.cls}`}>{s.value}</p>
+              </div>
+            ))}
+          </div>
+        ) : (
         <EmptyState
           title={uz.dashboard.davomat_yoq}
           description={uz.dashboard.davomat_yoq_tavsif}
@@ -216,7 +276,66 @@ export default function BogchaDashboardPage() {
             </svg>
           }
         />
+        )}
       </div>
+      )}
+
+      {/* So'nggi faoliyatlar — shu bog'chaning oxirgi kundalik mashg'ulotlari (real API) */}
+      {!loading && !error && summary?.songgi_faoliyatlar && (
+        <div data-testid="recent-activities" className="bg-white rounded-xl border border-[#EDE3E8] overflow-hidden">
+          <div className="px-6 py-4 border-b border-[#EDE3E8] flex items-center justify-between gap-3">
+            <h2 className="text-base font-semibold text-[#29232A]">{uz.dashboard.songgi_faoliyatlar}</h2>
+            <Link href="/bogcha/kundalik" className="text-sm text-[#8E315D] hover:text-[#742548] font-medium transition-colors">
+              {uz.dashboard.kundalikni_ochish}
+            </Link>
+          </div>
+          {summary.songgi_faoliyatlar.length === 0 ? (
+            <EmptyState
+              title={uz.dashboard.faoliyat_yoq}
+              description={uz.dashboard.faoliyat_yoq_tavsif}
+              icon={
+                <svg className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
+                </svg>
+              }
+            />
+          ) : (
+            <ul className="divide-y divide-[#F2ECF0]">
+              {summary.songgi_faoliyatlar.map((a) => (
+                <li key={a.id} className="px-6 py-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 min-w-0">
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-[#29232A] truncate">{a.title}</p>
+                    <p className="text-xs text-[#B8AAB2] truncate">
+                      {[a.group?.name, a.direction ? (DIRECTION_LABELS[a.direction as keyof typeof DIRECTION_LABELS] ?? null) : null].filter(Boolean).join(" · ")}
+                    </p>
+                  </div>
+                  <span className="text-xs text-[#766B73] flex-shrink-0">{a.date}{a.starts_at ? ` · ${a.starts_at}` : ""}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
+
+      {/* Joriy oy to'lov holati — real API (demo ma'lumotda yo'q) */}
+      {summary?.tolovlar && (
+        <Link href="/bogcha/tolovlar" data-testid="payments-card"
+          className="block bg-white rounded-xl border border-[#EDE3E8] px-6 py-4 hover:border-[#D9C9D1] hover:shadow-sm transition">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <p className="text-base font-semibold text-[#29232A]">{uz.tolov.dashboard} · {summary.tolovlar.oy}</p>
+              <p className="text-sm text-[#766B73] mt-0.5">
+                {uz.tolov.tolagan}: <strong className="text-[#166534]">{summary.tolovlar.tolagan}</strong> · {uz.tolov.tolanmagan}:{" "}
+                <strong className="text-[#92400E]">{summary.tolovlar.tolanmagan}</strong>
+              </p>
+            </div>
+            <span className="text-sm font-medium text-[#8E315D]">{uz.tolov.sarlavha} →</span>
+          </div>
+          <div className="mt-3 h-2 rounded-full bg-[#F2ECF0] overflow-hidden">
+            <div className="h-full bg-[#8E315D]" style={{ width: `${summary.tolovlar.jami ? Math.round((summary.tolovlar.tolagan / summary.tolovlar.jami) * 100) : 0}%` }} />
+          </div>
+        </Link>
+      )}
     </div>
   );
 }

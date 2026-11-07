@@ -45,3 +45,25 @@ backend/.phpunit.cache
 
 # Laravel runtime storage
 backend/storage/*
+
+# Import uchun haqiqiy ma'lumotlar (shaxsiy ma'lumotlar) — repoga kiritilmaydi
+storage/imports/
+.env.dev
+
+# Barcha env variantlari (.env.staging, .env.testing, .env.backup, ...) — repoga faqat *.example namunalar kiradi
+.env.*
+!.env*.example
+
+# Kalitlar, sertifikatlar, baza nusxalari va zaxiralar
+*.pem
+*.key
+*.p12
+*.pfx
+*.sql
+*.sql.gz
+*.dump
+*.bak
+*.sqlite
+
+# Test qamrovi natijalari
+coverage/

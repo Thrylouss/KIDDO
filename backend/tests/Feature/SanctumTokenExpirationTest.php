@@ -160,8 +160,10 @@ class SanctumTokenExpirationTest extends TestCase
 
     public function test_sanctum_prune_expired_command_is_scheduled(): void
     {
+        // sanctum:prune-expired o'rniga tokens:prune-expired — 30 kunlik mobil refresh
+        // tokenlarni created_at bo'yicha muddatidan oldin o'chirmaydi (MobileSessionTest)
         $this->artisan('schedule:list')
-             ->expectsOutputToContain('sanctum:prune-expired')
+             ->expectsOutputToContain('tokens:prune-expired')
              ->assertExitCode(0);
     }
 

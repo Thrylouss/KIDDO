@@ -1,12 +1,14 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { api } from "@/lib/api";
+import { api, fetchAllPages } from "@/lib/api";
+import { errorMessage } from "@/lib/apiErrors";
 import { IS_DEMO } from "@/lib/demo-data";
 import Select from "@/components/ui/Select";
 import EmptyState from "@/components/ui/EmptyState";
+import Pagination from "@/components/ui/Pagination";
 import uz from "@/i18n/uz";
-import type { ActivityLogEntry, OrganizationSummary, ApiResponse, PaginatedResponse } from "@/types";
+import type { ActivityLogEntry, OrganizationSummary, PaginatedResponse } from "@/types";
 
 // ── Helpers ────────────────────────────────────────────────────────────────
 
@@ -28,53 +30,6 @@ function actionColor(action: string): string {
   return "bg-[#F2ECF0] text-[#3D3240]";
 }
 
-// ── Pagination ─────────────────────────────────────────────────────────────
-
-function Pagination({
-  meta,
-  onPage,
-}: {
-  meta: { current_page: number; last_page: number; total: number };
-  onPage: (page: number) => void;
-}) {
-  if (meta.last_page <= 1) return null;
-  const pages = Array.from({ length: Math.min(5, meta.last_page) }, (_, i) => i + 1);
-  return (
-    <div className="flex items-center justify-between px-5 py-3.5 border-t border-[#EDE3E8]">
-      <p className="text-sm text-[#766B73]">Jami {meta.total} ta</p>
-      <div className="flex items-center gap-1">
-        <button
-          onClick={() => onPage(meta.current_page - 1)}
-          disabled={meta.current_page === 1}
-          className="px-3 py-1.5 text-sm rounded-lg border border-[#EDE3E8] text-[#3D3240] disabled:opacity-40 hover:bg-[#FFF9F5] transition-colors"
-        >
-          Oldingi
-        </button>
-        {pages.map((p) => (
-          <button
-            key={p}
-            onClick={() => onPage(p)}
-            className={`px-3 py-1.5 text-sm rounded-lg transition-colors ${
-              p === meta.current_page
-                ? "bg-[#8E315D] text-white"
-                : "border border-[#EDE3E8] text-[#3D3240] hover:bg-[#FFF9F5]"
-            }`}
-          >
-            {p}
-          </button>
-        ))}
-        <button
-          onClick={() => onPage(meta.current_page + 1)}
-          disabled={meta.current_page === meta.last_page}
-          className="px-3 py-1.5 text-sm rounded-lg border border-[#EDE3E8] text-[#3D3240] disabled:opacity-40 hover:bg-[#FFF9F5] transition-colors"
-        >
-          Keyingi
-        </button>
-      </div>
-    </div>
-  );
-}
-
 // ── Page ───────────────────────────────────────────────────────────────────
 
 export default function FaollikPage() {
@@ -82,29 +37,35 @@ export default function FaollikPage() {
   const [orgs,    setOrgs]    = useState<OrganizationSummary[]>([]);
   const [meta,    setMeta]    = useState({ current_page: 1, last_page: 1, total: 0, per_page: 30 });
   const [loading, setLoading] = useState(true);
+  const [error,   setError]   = useState("");
+  const [orgsError, setOrgsError] = useState(false);
 
   const [filterOrg, setFilterOrg] = useState("");
   const [page,      setPage]      = useState(1);
 
+  // Filtr uchun barcha bog'chalar (sahifalab, per_page=100) — bir marta
+  useEffect(() => {
+    fetchAllPages<OrganizationSummary>("/v1/super-admin/organizations?sort=name")
+      .then(setOrgs)
+      .catch(() => setOrgsError(true));
+  }, []);
+
   const load = useCallback(async () => {
     setLoading(true);
+    setError("");
     try {
       const params = new URLSearchParams({ page: String(page), per_page: "30" });
       if (filterOrg) params.set("organization_id", filterOrg);
 
-      const [logRes, orgRes] = await Promise.all([
-        api.get<PaginatedResponse<ActivityLogEntry>>(`/v1/super-admin/activity-logs?${params}`),
-        orgs.length === 0
-          ? api.get<ApiResponse<OrganizationSummary[]>>("/v1/super-admin/organizations")
-          : Promise.resolve(null),
-      ]);
-      setLogs(logRes.data);
-      setMeta(logRes.meta);
-      if (orgRes) setOrgs((orgRes as ApiResponse<OrganizationSummary[]>).data);
+      const logRes = await api.get<PaginatedResponse<ActivityLogEntry>>(`/v1/super-admin/activity-logs?${params}`);
+      setLogs(logRes?.data ?? []);
+      if (logRes?.meta) setMeta(logRes.meta);
+    } catch (err) {
+      setLogs([]);
+      setError(errorMessage(err));
     } finally {
       setLoading(false);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, filterOrg]);
 
   useEffect(() => { load(); }, [load]);
@@ -154,6 +115,7 @@ export default function FaollikPage() {
             </button>
           )}
         </div>
+        {orgsError && <p role="alert" className="mt-2 text-xs text-[#B45309]">{uz.common.bogchalar_yuklanmadi}</p>}
       </div>
 
       {/* Table */}
@@ -167,6 +129,13 @@ export default function FaollikPage() {
                 <div className="h-4 w-24 bg-[#F2ECF0] rounded ml-auto" />
               </div>
             ))}
+          </div>
+        ) : error ? (
+          <div role="alert" data-testid="faollik-error" className="py-12 px-5 text-center">
+            <p className="text-sm text-[#B91C1C]">{error}</p>
+            <button onClick={load} className="mt-3 px-4 py-2 text-sm font-medium text-[#8E315D] border border-[#EDE3E8] rounded-lg hover:bg-[#FFF9F5] transition-colors">
+              {uz.common.qayta_urinish}
+            </button>
           </div>
         ) : logs.length === 0 ? (
           <div className="py-16">

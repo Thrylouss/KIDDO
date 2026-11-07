@@ -6,22 +6,15 @@ import { api } from "@/lib/api";
 import Badge from "@/components/ui/Badge";
 import uz from "@/i18n/uz";
 import type {
+  AttendanceTotals,
   DashboardSummaryEnhanced,
-  DashboardRecent,
-  DashboardExpiring,
-  ReportRevenue,
-  ReportSubscriptions,
+  OrganizationSummary,
+  PaginatedResponse,
 } from "@/types";
 
+const t = uz.platforma;
+
 // ── Utility ──────────────────────────────────────────────────────────────────
-
-function fmt(n: number, currency = "UZS"): string {
-  return `${Number(n).toLocaleString("uz-UZ")} ${currency}`;
-}
-
-function fmtStr(s: string, currency = "UZS"): string {
-  return fmt(parseFloat(s), currency);
-}
 
 function fmtDate(iso: string): string {
   return new Date(iso).toLocaleDateString("uz-UZ", {
@@ -29,49 +22,8 @@ function fmtDate(iso: string): string {
   });
 }
 
-function fmtTime(iso: string): string {
-  return new Date(iso).toLocaleString("uz-UZ", {
-    day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit",
-  });
-}
-
-// ── Date presets ─────────────────────────────────────────────────────────────
-
-type Preset = { label: string; key: string };
-const PRESETS: Preset[] = [
-  { label: uz.super_admin.date_shu_hafta, key: "week" },
-  { label: uz.super_admin.date_shu_oy,   key: "month" },
-  { label: uz.super_admin.date_otgan_oy, key: "last_month" },
-  { label: uz.super_admin.shu_yil,       key: "year" },
-  { label: uz.super_admin.date_maxsus,   key: "custom" },
-];
-
-function getPresetRange(key: string): { from: string; to: string } {
-  const today = new Date();
-  const pad = (n: number) => String(n).padStart(2, "0");
-  const fmt2 = (d: Date) =>
-    `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
-
-  if (key === "week") {
-    const mon = new Date(today);
-    mon.setDate(today.getDate() - ((today.getDay() + 6) % 7));
-    return { from: fmt2(mon), to: fmt2(today) };
-  }
-  if (key === "month") {
-    return {
-      from: `${today.getFullYear()}-${pad(today.getMonth() + 1)}-01`,
-      to: fmt2(today),
-    };
-  }
-  if (key === "last_month") {
-    const first = new Date(today.getFullYear(), today.getMonth() - 1, 1);
-    const last  = new Date(today.getFullYear(), today.getMonth(), 0);
-    return { from: fmt2(first), to: fmt2(last) };
-  }
-  if (key === "year") {
-    return { from: `${today.getFullYear()}-01-01`, to: fmt2(today) };
-  }
-  return { from: fmt2(today), to: fmt2(today) };
+function num(n: number | null | undefined): string {
+  return n === null || n === undefined ? "—" : Number(n).toLocaleString("uz-UZ");
 }
 
 // ── Skeleton ─────────────────────────────────────────────────────────────────
@@ -102,67 +54,28 @@ function KpiCard({
   title,
   value,
   sub,
-  trend,
   accent,
 }: {
   title: string;
   value: string | number;
   sub?: string;
-  trend?: { value: number; label: string };
-  accent?: "green" | "blue" | "yellow" | "red" | "purple";
+  accent: "green" | "red" | "purple";
 }) {
-  const accentMap = {
-    green:  "bg-[#DCFCE7] text-[#166534]",
-    blue:   "bg-[#FCE8F0] text-[#8E315D]",
-    yellow: "bg-[#FEF9C3] text-[#854D0E]",
-    red:    "bg-[#FEE2E2] text-[#991B1B]",
-    purple: "bg-[#FDF2F6] text-[#8E315D]",
-  };
-  const dot = accentMap[accent ?? "purple"];
+  const dot = {
+    green:  "bg-[#22C55E]",
+    red:    "bg-[#EF4444]",
+    purple: "bg-[#8E315D]",
+  }[accent];
 
   return (
-    <div className="bg-white rounded-xl border border-[#EDE3E8] p-5 flex flex-col gap-2">
-      <p className="text-xs text-[#B8AAB2] font-medium uppercase tracking-wide">{title}</p>
+    <div className="bg-white rounded-xl border border-[#EDE3E8] p-5 flex flex-col gap-2 min-w-0">
+      <div className="flex items-center gap-2">
+        <span className={`inline-block w-2 h-2 rounded-full flex-shrink-0 ${dot}`} />
+        <p className="text-xs text-[#B8AAB2] font-medium uppercase tracking-wide truncate">{title}</p>
+      </div>
       <p className="text-2xl font-bold text-[#29232A] leading-none">{value}</p>
       {sub && <p className="text-xs text-[#766B73]">{sub}</p>}
-      {trend && (
-        <span
-          className={`inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full w-fit ${
-            trend.value >= 0 ? "bg-[#DCFCE7] text-[#166534]" : "bg-[#FEE2E2] text-[#991B1B]"
-          }`}
-        >
-          {trend.value >= 0 ? "↑" : "↓"} {Math.abs(trend.value).toFixed(1)}% {trend.label}
-        </span>
-      )}
-      {!trend && accent && <span className={`inline-block w-2 h-2 rounded-full ${dot}`} />}
     </div>
-  );
-}
-
-// ── Bar chart (SVG) ───────────────────────────────────────────────────────────
-
-function BarChart({ series }: { series: { label: string; total: number }[] }) {
-  const max = Math.max(...series.map((s) => s.total), 1);
-  return (
-    <svg viewBox={`0 0 ${series.length * 14} 60`} className="w-full h-24" preserveAspectRatio="none">
-      {series.map((item, i) => {
-        const h = Math.max((item.total / max) * 52, item.total > 0 ? 2 : 0);
-        return (
-          <rect
-            key={i}
-            x={i * 14 + 1}
-            y={60 - h - 4}
-            width={12}
-            height={h}
-            rx={2}
-            fill="#8E315D"
-            opacity={0.8}
-          >
-            <title>{`${item.label}: ${fmt(item.total)}`}</title>
-          </rect>
-        );
-      })}
-    </svg>
   );
 }
 
@@ -170,10 +83,10 @@ function BarChart({ series }: { series: { label: string; total: number }[] }) {
 
 function DistBar({ items }: { items: { label: string; count: number; color: string }[] }) {
   const total = items.reduce((s, i) => s + i.count, 0);
-  if (total === 0) return <p className="text-sm text-[#B8AAB2]">—</p>;
+  if (total === 0) return <p className="text-sm text-[#B8AAB2]">{uz.common.malumot_yoq}</p>;
   return (
-    <div className="space-y-2">
-      <div className="flex h-3 rounded-full overflow-hidden gap-px">
+    <div className="space-y-3">
+      <div className="flex h-3 rounded-full overflow-hidden gap-px bg-[#F2ECF0]">
         {items.map((item) => (
           <div
             key={item.label}
@@ -183,11 +96,11 @@ function DistBar({ items }: { items: { label: string; count: number; color: stri
           />
         ))}
       </div>
-      <div className="grid grid-cols-2 gap-1">
+      <div className="flex flex-wrap gap-x-5 gap-y-1">
         {items.map((item) => (
           <div key={item.label} className="flex items-center gap-1.5">
             <span className={`w-2 h-2 rounded-full flex-shrink-0 ${item.color}`} />
-            <span className="text-xs text-[#766B73] truncate">
+            <span className="text-xs text-[#766B73]">
               {item.label} <span className="font-semibold text-[#3D3240]">{item.count}</span>
             </span>
           </div>
@@ -197,387 +110,64 @@ function DistBar({ items }: { items: { label: string; count: number; color: stri
   );
 }
 
-// ── Payment / invoice status badge ───────────────────────────────────────────
-
-function PayStatusBadge({ status }: { status: string }) {
-  const map: Record<string, { label: string; variant: "success" | "warning" | "error" | "neutral" | "info" }> = {
-    paid:      { label: uz.super_admin.to_langan,        variant: "success" },
-    pending:   { label: uz.super_admin.kutilmoqda_pay,   variant: "warning" },
-    failed:    { label: uz.super_admin.muvaffaqiyatsiz,  variant: "error" },
-    refunded:  { label: uz.super_admin.qaytarilgan,      variant: "neutral" },
-    draft:     { label: uz.super_admin.invoice_draft,    variant: "neutral" },
-    overdue:   { label: uz.super_admin.invoice_overdue,  variant: "error" },
-    cancelled: { label: uz.super_admin.bekor,            variant: "neutral" },
-  };
-  const info = map[status] ?? { label: status, variant: "neutral" as const };
-  return <Badge variant={info.variant}>{info.label}</Badge>;
+function StatusBadge({ active }: { active: boolean }) {
+  return <Badge variant={active ? "success" : "neutral"}>{active ? t.faol : t.nofaol}</Badge>;
 }
 
-function SubStatusBadge({ status }: { status: string }) {
-  const map: Record<string, { label: string; variant: "success" | "warning" | "error" | "neutral" | "info" }> = {
-    active:    { label: uz.super_admin.faol,            variant: "success" },
-    trial:     { label: uz.super_admin.sinov,           variant: "info" },
-    past_due:  { label: uz.super_admin.past_due,        variant: "warning" },
-    expired:   { label: uz.super_admin.muddati_tugagan, variant: "error" },
-    cancelled: { label: uz.super_admin.bekor,           variant: "neutral" },
-  };
-  const info = map[status] ?? { label: status, variant: "neutral" as const };
-  return <Badge variant={info.variant}>{info.label}</Badge>;
+function OrgAvatar({ name }: { name: string }) {
+  return (
+    <div className="h-8 w-8 rounded-lg bg-[#FDF2F6] flex items-center justify-center text-[#8E315D] font-semibold text-xs flex-shrink-0">
+      {name.charAt(0).toUpperCase()}
+    </div>
+  );
 }
 
-// ── Sections ──────────────────────────────────────────────────────────────────
+// ── Today's attendance (aggregate only) ──────────────────────────────────────
 
-function KpiSection({
-  dateFrom, dateTo,
-}: { dateFrom: string; dateTo: string }) {
-  const [data, setData] = useState<DashboardSummaryEnhanced | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
-
-  const load = useCallback(async () => {
-    setError(false);
-    setLoading(true);
-    try {
-      const res = await api.get<DashboardSummaryEnhanced>(
-        `/v1/super-admin/dashboard?date_from=${dateFrom}&date_to=${dateTo}`
-      );
-      setData(res);
-    } catch {
-      setError(true);
-    } finally {
-      setLoading(false);
-    }
-  }, [dateFrom, dateTo]);
-
-  useEffect(() => { load(); }, [load]);
-
-  if (loading) {
-    return (
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        {Array.from({ length: 8 }).map((_, i) => (
-          <Skeleton key={i} className="h-28" />
-        ))}
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="bg-white rounded-xl border border-[#EDE3E8]">
-        <ErrorBlock onRetry={load} />
-      </div>
-    );
-  }
-
-  if (!data) return null;
-
-  const trendVal =
-    data.billing.prev_period_paid > 0
-      ? ((data.billing.period_paid - data.billing.prev_period_paid) /
-          data.billing.prev_period_paid) *
-        100
-      : null;
+function AttendanceCard({ data }: { data: AttendanceTotals }) {
+  const marked = data.keldi + data.kelmadi + data.sababli;
+  const pct    = marked > 0 ? Math.round((data.keldi / marked) * 100) : null;
 
   return (
-    <div className="space-y-4">
-      {/* Row 1: org + sub KPIs */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <KpiCard
-          title={uz.super_admin.jami_bogchalar}
-          value={data.jami_bogchalar}
-          sub={`${data.nofaol_bogchalar} nofaol`}
-          accent="purple"
-        />
-        <KpiCard
-          title={uz.super_admin.faol_bogchalar}
-          value={data.faol_bogchalar}
-          accent="green"
-        />
-        <KpiCard
-          title={uz.super_admin.faol_obunalar}
-          value={data.obuna_holati.active}
-          sub={`${data.obuna_holati.trial} ${uz.super_admin.sinov}`}
-          accent="blue"
-        />
-        <KpiCard
-          title={uz.super_admin.muddati_yaqin}
-          value={data.muddati_yaqin}
-          sub="14 kun ichida"
-          accent="yellow"
-        />
+    <div className="bg-white rounded-xl border border-[#EDE3E8] p-5">
+      <div className="flex items-center justify-between mb-4 gap-2">
+        <h2 className="text-sm font-semibold text-[#29232A]">{t.bugungi_davomat}</h2>
+        <span className="text-xs text-[#B8AAB2]">{fmtDate(data.sana)}</span>
       </div>
-
-      {/* Row 2: revenue + users KPIs */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <KpiCard
-          title={uz.super_admin.jami_foydalanuvchilar_kpi}
-          value={data.jami_foydalanuvchilar}
-          accent="purple"
-        />
-        <KpiCard
-          title={uz.super_admin.yangi_bogchalar_davr}
-          value={data.yangi_bogchalar}
-          accent="green"
-        />
-        <KpiCard
-          title={uz.super_admin.davr_tushum_kpi}
-          value={fmt(data.billing.period_paid)}
-          trend={
-            trendVal !== null
-              ? {
-                  value: trendVal,
-                  label: uz.super_admin.oldingi_davr,
-                }
-              : undefined
-          }
-          accent="blue"
-        />
-        <KpiCard
-          title={uz.super_admin.mrr}
-          value={fmt(data.billing.mrr)}
-          sub={`ARR: ${fmt(data.billing.arr)}`}
-          accent="purple"
-        />
-      </div>
-
-      {/* Subscription status distribution */}
-      <div className="bg-white rounded-xl border border-[#EDE3E8] p-5">
-        <h2 className="text-sm font-semibold text-[#29232A] mb-4">{uz.super_admin.obuna_holati}</h2>
-        <DistBar
-          items={[
-            { label: uz.super_admin.faol,            count: data.obuna_holati.active,    color: "bg-green-400" },
-            { label: uz.super_admin.sinov,            count: data.obuna_holati.trial,     color: "bg-blue-400" },
-            { label: uz.super_admin.past_due,         count: data.obuna_holati.past_due,  color: "bg-yellow-400" },
-            { label: uz.super_admin.muddati_tugagan,  count: data.obuna_holati.expired,   color: "bg-red-400" },
-            { label: uz.super_admin.bekor,            count: data.obuna_holati.cancelled, color: "bg-gray-300" },
-          ]}
-        />
-      </div>
-
-      {/* Billing summary row */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div data-testid="platform-attendance" className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
-          { label: uz.super_admin.gross_tushum,      value: fmt(data.billing.total_paid) },
-          { label: uz.super_admin.net_tushum,        value: fmt(data.billing.total_paid - data.billing.total_refunded) },
-          { label: uz.super_admin.kutilayotgan_tushum, value: fmt(data.billing.pending_revenue) },
-          { label: uz.super_admin.qaytarilgan_summa, value: fmt(data.billing.total_refunded) },
-        ].map(({ label, value }) => (
-          <div key={label} className="bg-white rounded-xl border border-[#EDE3E8] p-4">
-            <p className="text-xs text-[#B8AAB2] uppercase tracking-wide mb-1">{label}</p>
-            <p className="text-lg font-bold text-[#29232A]">{value}</p>
+          { label: uz.davomat.keldi,         value: data.keldi,         cls: "text-[#166534]" },
+          { label: uz.davomat.kelmadi,       value: data.kelmadi,       cls: "text-[#991B1B]" },
+          { label: uz.davomat.sababli,       value: data.sababli,       cls: "text-[#92400E]" },
+          { label: uz.davomat.belgilanmagan, value: data.belgilanmagan, cls: "text-[#766B73]" },
+        ].map((s) => (
+          <div key={s.label} className="rounded-lg bg-[#FAF5F8] px-3 py-2.5">
+            <p className="text-[11px] text-[#B8AAB2] font-medium uppercase tracking-wide">{s.label}</p>
+            <p className={`text-xl font-bold leading-tight ${s.cls}`}>{num(s.value)}</p>
           </div>
         ))}
       </div>
-
-      {/* Recent orgs table */}
-      <div>
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="text-sm font-semibold text-[#29232A]">{uz.super_admin.oxirgi_bogchalar}</h2>
-          <Link href="/admin/bogchalar" className="text-xs text-[#8E315D] hover:text-[#742548] font-medium">
-            {uz.super_admin.barchasini_korish}
-          </Link>
-        </div>
-        <div className="bg-white rounded-xl border border-[#EDE3E8] overflow-hidden">
-          {data.oxirgi_bogchalar.length === 0 ? (
-            <p className="text-sm text-[#B8AAB2] text-center py-8">
-              {uz.common.malumot_yoq}
-            </p>
-          ) : (
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-[#EDE3E8] bg-[#FAF5F8]">
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-[#766B73] uppercase tracking-wide">
-                    {uz.super_admin.bogchalar}
-                  </th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-[#766B73] uppercase tracking-wide hidden sm:table-cell">
-                    {uz.super_admin.obuna}
-                  </th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-[#766B73] uppercase tracking-wide hidden md:table-cell">
-                    {uz.super_admin.tarif}
-                  </th>
-                  <th className="px-4 py-3" />
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[#F2ECF0]">
-                {data.oxirgi_bogchalar.map((org) => (
-                  <tr key={org.id} className="hover:bg-[#FAF5F8] transition-colors">
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-2">
-                        <div className="h-7 w-7 rounded-lg bg-[#FDF2F6] flex items-center justify-center text-[#8E315D] font-semibold text-xs flex-shrink-0">
-                          {org.name.charAt(0).toUpperCase()}
-                        </div>
-                        <div>
-                          <p className="font-medium text-[#29232A] text-sm">{org.name}</p>
-                          <p className="text-xs text-[#B8AAB2]">{org.phone ?? "—"}</p>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-4 py-3 hidden sm:table-cell">
-                      {org.subscription ? (
-                        <SubStatusBadge status={org.subscription.status} />
-                      ) : (
-                        <span className="text-[#D9C9D1] text-sm">—</span>
-                      )}
-                    </td>
-                    <td className="px-4 py-3 hidden md:table-cell text-sm text-[#766B73]">
-                      {org.subscription?.plan ?? "—"}
-                    </td>
-                    <td className="px-4 py-3">
-                      <Link
-                        href={`/admin/bogchalar/${org.id}`}
-                        className="text-xs text-[#8E315D] hover:text-[#742548] font-medium"
-                      >
-                        {uz.super_admin.batafsil}
-                      </Link>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function RevenueTrendSection({ dateFrom, dateTo }: { dateFrom: string; dateTo: string }) {
-  const [data, setData] = useState<ReportRevenue | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
-
-  const load = useCallback(async () => {
-    setError(false);
-    setLoading(true);
-    try {
-      const res = await api.get<ReportRevenue>(
-        `/v1/super-admin/reports/revenue?date_from=${dateFrom}&date_to=${dateTo}`
-      );
-      setData(res);
-    } catch {
-      setError(true);
-    } finally {
-      setLoading(false);
-    }
-  }, [dateFrom, dateTo]);
-
-  useEffect(() => { load(); }, [load]);
-
-  return (
-    <div className="bg-white rounded-xl border border-[#EDE3E8] p-5">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-sm font-semibold text-[#29232A]">{uz.super_admin.daromad_dinamikasi}</h2>
-        {data && (
-          <span className="text-xs text-[#766B73]">
-            {uz.super_admin.jami}: <strong>{fmt(data.total)}</strong>
-          </span>
-        )}
-      </div>
-      {loading ? (
-        <Skeleton className="h-28" />
-      ) : error ? (
-        <ErrorBlock onRetry={load} />
-      ) : !data || data.series.length === 0 ? (
-        <p className="text-sm text-[#B8AAB2] text-center py-6">{uz.super_admin.hech_daromad_yoq}</p>
-      ) : (
-        <div className="space-y-4">
-          <BarChart series={data.series.map((s) => ({ label: s.label, total: s.total }))} />
-          {data.by_plan.length > 0 && (
-            <div className="space-y-1">
-              <p className="text-xs font-semibold text-[#766B73] uppercase tracking-wide">
-                {uz.super_admin.tarif_boyicha}
-              </p>
-              {data.by_plan.map((p) => (
-                <div key={p.plan_name} className="flex justify-between text-sm">
-                  <span className="text-[#3D3240]">{p.plan_name}</span>
-                  <span className="font-medium text-[#29232A]">{fmt(p.total)}</span>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+      {pct !== null && (
+        <p className="text-xs text-[#766B73] mt-3">
+          {t.davomat_ulushi}: <span className="font-semibold text-[#29232A]">{pct}%</span>
+        </p>
       )}
     </div>
   );
 }
 
-function SubsDistSection({ dateFrom, dateTo }: { dateFrom: string; dateTo: string }) {
-  const [data, setData] = useState<ReportSubscriptions | null>(null);
+// ── Summary section ──────────────────────────────────────────────────────────
+
+function SummarySection() {
+  const [data, setData]       = useState<DashboardSummaryEnhanced | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
+  const [error, setError]     = useState(false);
 
   const load = useCallback(async () => {
     setError(false);
     setLoading(true);
     try {
-      const res = await api.get<ReportSubscriptions>(
-        `/v1/super-admin/reports/subscriptions?date_from=${dateFrom}&date_to=${dateTo}`
-      );
-      setData(res);
-    } catch {
-      setError(true);
-    } finally {
-      setLoading(false);
-    }
-  }, [dateFrom, dateTo]);
-
-  useEffect(() => { load(); }, [load]);
-
-  return (
-    <div className="bg-white rounded-xl border border-[#EDE3E8] p-5">
-      <h2 className="text-sm font-semibold text-[#29232A] mb-4">{uz.super_admin.tarif_taqsimoti}</h2>
-      {loading ? (
-        <Skeleton className="h-28" />
-      ) : error ? (
-        <ErrorBlock onRetry={load} />
-      ) : !data ? null : (
-        <div className="space-y-4">
-          <DistBar
-            items={[
-              { label: uz.super_admin.faol,           count: data.status_distribution.active,    color: "bg-green-400" },
-              { label: uz.super_admin.sinov,           count: data.status_distribution.trial,     color: "bg-blue-400" },
-              { label: uz.super_admin.past_due,        count: data.status_distribution.past_due,  color: "bg-yellow-400" },
-              { label: uz.super_admin.muddati_tugagan, count: data.status_distribution.expired,   color: "bg-red-400" },
-              { label: uz.super_admin.bekor,           count: data.status_distribution.cancelled, color: "bg-gray-300" },
-            ]}
-          />
-          {data.plan_distribution.length > 0 && (
-            <div className="space-y-1 pt-2 border-t border-[#F2ECF0]">
-              {data.plan_distribution.map((p) => (
-                <div key={p.plan_id} className="flex justify-between text-sm">
-                  <span className="text-[#3D3240]">{p.plan_name}</span>
-                  <span className="font-medium text-[#29232A]">{p.count}</span>
-                </div>
-              ))}
-            </div>
-          )}
-          <div className="grid grid-cols-2 gap-2 pt-1 border-t border-[#F2ECF0]">
-            <div>
-              <p className="text-xs text-[#B8AAB2]">{uz.super_admin.yangi_obunalar}</p>
-              <p className="font-semibold text-[#29232A]">{data.new_in_period}</p>
-            </div>
-            <div>
-              <p className="text-xs text-[#B8AAB2]">{uz.super_admin.yaqin_tugaydi}</p>
-              <p className="font-semibold text-[#29232A]">{data.expiring_soon}</p>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-function RecentSection() {
-  const [data, setData] = useState<DashboardRecent | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
-
-  const load = useCallback(async () => {
-    setError(false);
-    setLoading(true);
-    try {
-      const res = await api.get<DashboardRecent>("/v1/super-admin/dashboard/recent");
-      setData(res);
+      setData(await api.get<DashboardSummaryEnhanced>("/v1/super-admin/dashboard"));
     } catch {
       setError(true);
     } finally {
@@ -589,14 +179,15 @@ function RecentSection() {
 
   if (loading) {
     return (
-      <div className="grid lg:grid-cols-2 gap-6">
-        <Skeleton className="h-64" />
-        <Skeleton className="h-64" />
+      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <Skeleton key={i} className="h-24" />
+        ))}
       </div>
     );
   }
 
-  if (error) {
+  if (error || !data) {
     return (
       <div className="bg-white rounded-xl border border-[#EDE3E8]">
         <ErrorBlock onRetry={load} />
@@ -604,363 +195,236 @@ function RecentSection() {
     );
   }
 
-  if (!data) return null;
+  const p = data.platforma;
+  const activePct = data.jami_bogchalar > 0
+    ? Math.round((data.faol_bogchalar / data.jami_bogchalar) * 100)
+    : 0;
 
   return (
     <div className="space-y-6">
-      {/* Payments + Invoices */}
-      <div className="grid lg:grid-cols-2 gap-6">
-        {/* Recent payments */}
-        <div className="bg-white rounded-xl border border-[#EDE3E8] overflow-hidden">
-          <div className="flex items-center justify-between px-5 py-4 border-b border-[#EDE3E8]">
-            <h2 className="text-sm font-semibold text-[#29232A]">{uz.super_admin.oxirgi_tolovlar}</h2>
-            <Link href="/admin/tolovlar" className="text-xs text-[#8E315D] hover:text-[#742548] font-medium">
-              {uz.super_admin.barchasini_korish}
-            </Link>
-          </div>
-          {data.payments.length === 0 ? (
-            <p className="text-sm text-[#B8AAB2] text-center py-8">{uz.super_admin.hech_tolov_yoq}</p>
-          ) : (
-            <div className="divide-y divide-[#F2ECF0]">
-              {data.payments.map((p) => (
-                <div key={p.id} className="flex items-center justify-between px-5 py-3">
-                  <div className="min-w-0">
-                    <p className="text-sm font-medium text-[#29232A] truncate">
-                      {p.organization?.name ?? "—"}
-                    </p>
-                    <p className="text-xs text-[#B8AAB2]">{fmtTime(p.created_at)}</p>
-                  </div>
-                  <div className="flex items-center gap-3 flex-shrink-0 ml-2">
-                    <span className="text-sm font-semibold text-[#29232A]">
-                      {fmtStr(p.amount, p.currency)}
-                    </span>
-                    <PayStatusBadge status={p.status} />
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Recent invoices */}
-        <div className="bg-white rounded-xl border border-[#EDE3E8] overflow-hidden">
-          <div className="flex items-center justify-between px-5 py-4 border-b border-[#EDE3E8]">
-            <h2 className="text-sm font-semibold text-[#29232A]">{uz.super_admin.oxirgi_invoicelar}</h2>
-            <Link href="/admin/invoices" className="text-xs text-[#8E315D] hover:text-[#742548] font-medium">
-              {uz.super_admin.barchasini_korish}
-            </Link>
-          </div>
-          {data.invoices.length === 0 ? (
-            <p className="text-sm text-[#B8AAB2] text-center py-8">{uz.super_admin.hech_invoice_yoq}</p>
-          ) : (
-            <div className="divide-y divide-[#F2ECF0]">
-              {data.invoices.map((inv) => (
-                <div key={inv.id} className="flex items-center justify-between px-5 py-3">
-                  <div className="min-w-0">
-                    <p className="text-sm font-medium text-[#29232A] truncate">
-                      {inv.organization?.name ?? "—"}
-                    </p>
-                    <p className="text-xs text-[#B8AAB2]">{inv.invoice_number}</p>
-                  </div>
-                  <div className="flex items-center gap-3 flex-shrink-0 ml-2">
-                    <span className="text-sm font-semibold text-[#29232A]">
-                      {fmtStr(inv.amount, inv.currency)}
-                    </span>
-                    <PayStatusBadge status={inv.status} />
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4">
+        <KpiCard title={t.jami_bogchalar}     value={num(data.jami_bogchalar)}   accent="purple" />
+        <KpiCard title={t.faol_bogchalar}     value={num(data.faol_bogchalar)}   accent="green" />
+        <KpiCard title={t.nofaol_bogchalar}   value={num(data.nofaol_bogchalar)} accent="red"
+          sub={data.toxtatilgan_bogchalar ? `${uz.super_admin.toxtatilgan_soni}: ${data.toxtatilgan_bogchalar}` : undefined} />
+        <KpiCard title={t.jami_bolalar}       value={num(p?.jami_bolalar)}       accent="purple" />
+        <KpiCard title={t.jami_guruhlar}      value={num(p?.jami_guruhlar)}      accent="purple" />
+        <KpiCard title={t.jami_tarbiyachilar} value={num(p?.jami_tarbiyachilar)} accent="purple" />
       </div>
 
-      {/* Recent activity */}
-      <div className="bg-white rounded-xl border border-[#EDE3E8] overflow-hidden">
-        <div className="flex items-center justify-between px-5 py-4 border-b border-[#EDE3E8]">
-          <h2 className="text-sm font-semibold text-[#29232A]">{uz.super_admin.oxirgi_faoliyat_logi}</h2>
-          <Link href="/admin/faollik" className="text-xs text-[#8E315D] hover:text-[#742548] font-medium">
-            {uz.super_admin.barchasini_korish}
-          </Link>
+      {(data.demo_bogchalar ?? 0) > 0 && (
+        <p data-testid="demo-izoh" className="text-xs text-[#92400E]">
+          {data.demo_bogchalar} {uz.super_admin.demo_izoh}
+        </p>
+      )}
+      <p data-testid="hisob-qoidasi" className="text-xs text-[#766B73]">
+        {uz.super_admin.hisob_qoidasi}
+        {(data.arxiv_bogchalar ?? 0) > 0 && <> · <span data-testid="arxiv-izoh">{data.arxiv_bogchalar} {uz.super_admin.arxiv_izoh}</span></>}
+      </p>
+
+      <div className="grid lg:grid-cols-2 gap-6">
+        {/* Status distribution */}
+        <div className="bg-white rounded-xl border border-[#EDE3E8] p-5">
+          <div className="flex items-center justify-between mb-4 gap-2">
+            <h2 className="text-sm font-semibold text-[#29232A]">{t.bogchalar_holati}</h2>
+            {data.jami_bogchalar > 0 && (
+              <span className="text-xs text-[#766B73]">
+                <span className="font-semibold text-[#29232A]">{activePct}%</span> {t.faollik_ulushi}
+              </span>
+            )}
+          </div>
+          <DistBar
+            items={[
+              { label: t.faol,   count: data.faol_bogchalar,   color: "bg-[#22C55E]" },
+              { label: t.nofaol, count: data.nofaol_bogchalar, color: "bg-[#D9C9D1]" },
+            ]}
+          />
         </div>
-        {data.activity.length === 0 ? (
-          <p className="text-sm text-[#B8AAB2] text-center py-8">{uz.super_admin.faollik_yoq}</p>
+
+        {p ? (
+          <AttendanceCard data={p.bugungi_davomat} />
         ) : (
-          <div className="divide-y divide-[#F2ECF0]">
-            {data.activity.map((log) => (
-              <div key={log.id} className="flex items-start justify-between px-5 py-3 gap-3">
-                <div className="flex items-start gap-3 min-w-0">
-                  <div className="h-6 w-6 rounded-full bg-[#FDF2F6] flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <span className="text-[#8E315D] text-xs font-bold">
-                      {(log.user?.name ?? log.organization?.name ?? "?").charAt(0).toUpperCase()}
-                    </span>
-                  </div>
+          <div className="bg-white rounded-xl border border-[#EDE3E8] p-5">
+            <h2 className="text-sm font-semibold text-[#29232A] mb-4">{t.bugungi_davomat}</h2>
+            <p className="text-sm text-[#B8AAB2]">{uz.common.malumot_yoq}</p>
+          </div>
+        )}
+      </div>
+
+      {/* Recently registered */}
+      <div className="bg-white rounded-xl border border-[#EDE3E8] overflow-hidden">
+        <div className="px-5 py-4 border-b border-[#EDE3E8]">
+          <h2 className="text-sm font-semibold text-[#29232A]">{t.oxirgi_qoshilgan}</h2>
+        </div>
+        {data.oxirgi_bogchalar.length === 0 ? (
+          <p className="text-sm text-[#B8AAB2] text-center py-8">{t.bogcha_yoq}</p>
+        ) : (
+          <ul className="divide-y divide-[#F2ECF0]">
+            {data.oxirgi_bogchalar.slice(0, 5).map((org) => (
+              <li key={org.id} className="flex items-center justify-between gap-3 px-5 py-3">
+                <div className="flex items-center gap-3 min-w-0">
+                  <OrgAvatar name={org.name} />
                   <div className="min-w-0">
-                    <p className="text-sm text-[#29232A] truncate">{log.description}</p>
+                    <p className="text-sm font-medium text-[#29232A] truncate">{org.name}</p>
                     <p className="text-xs text-[#B8AAB2]">
-                      {log.user?.name ?? "—"}
-                      {log.organization && ` · ${log.organization.name}`}
+                      {t.qoshilgan}: {fmtDate(org.created_at)}
                     </p>
                   </div>
                 </div>
-                <p className="text-xs text-[#B8AAB2] flex-shrink-0">{fmtTime(log.created_at)}</p>
-              </div>
+                <div className="flex items-center gap-3 flex-shrink-0">
+                  <StatusBadge active={org.is_active} />
+                  <Link
+                    href={`/admin/bogchalar/${org.id}`}
+                    className="text-xs text-[#8E315D] hover:text-[#742548] font-medium"
+                  >
+                    {t.batafsil}
+                  </Link>
+                </div>
+              </li>
             ))}
-          </div>
+          </ul>
         )}
       </div>
     </div>
   );
 }
 
-function QuickActions() {
-  const actions = [
-    { label: uz.super_admin.bogchalarni_boshqarish,       href: "/admin/bogchalar",   icon: "🏫" },
-    { label: uz.super_admin.obunalarni_boshqarish,        href: "/admin/obunalar",    icon: "📋" },
-    { label: uz.super_admin.tolovlarni_boshqarish,        href: "/admin/tolovlar",    icon: "💳" },
-    { label: uz.super_admin.invoicelarni_boshqarish,      href: "/admin/invoices",    icon: "🧾" },
-    { label: uz.super_admin.foydalanuvchilarni_boshqarish, href: "/admin/foydalanuvchilar", icon: "👤" },
-    { label: uz.super_admin.hisobotlarni_korish,          href: "/admin/hisobotlar",  icon: "📊" },
-  ];
+// ── Kindergarten list with search and status filter ──────────────────────────
 
-  return (
-    <div className="bg-white rounded-xl border border-[#EDE3E8] p-5">
-      <h2 className="text-sm font-semibold text-[#29232A] mb-4">{uz.super_admin.tez_amallar}</h2>
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-        {actions.map((a) => (
-          <Link
-            key={a.href}
-            href={a.href}
-            className="flex items-center gap-2 px-3 py-2.5 rounded-lg border border-[#EDE3E8] hover:border-[#8E315D] hover:bg-[#FDF2F6] transition-colors group"
-          >
-            <span className="text-base">{a.icon}</span>
-            <span className="text-sm text-[#3D3240] group-hover:text-[#8E315D] font-medium">{a.label}</span>
-          </Link>
-        ))}
-      </div>
-    </div>
-  );
-}
+type StatusFilter = "" | "active" | "inactive";
 
-// ── Expiring subscriptions ────────────────────────────────────────────────────
-
-function ExpiringSubscriptionsSection() {
-  const [data, setData] = useState<DashboardExpiring | null>(null);
+function OrganizationsSection() {
+  const [search, setSearch]   = useState("");
+  const [query, setQuery]     = useState("");
+  const [status, setStatus]   = useState<StatusFilter>("");
+  const [rows, setRows]       = useState<OrganizationSummary[]>([]);
+  const [total, setTotal]     = useState(0);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
+  const [error, setError]     = useState(false);
+
+  // Qidiruvni yozib bo'lgach so'rov yuboriladi
+  useEffect(() => {
+    const id = setTimeout(() => setQuery(search.trim()), 300);
+    return () => clearTimeout(id);
+  }, [search]);
 
   const load = useCallback(async () => {
     setError(false);
     setLoading(true);
     try {
-      const res = await api.get<DashboardExpiring>(
-        "/v1/super-admin/dashboard/expiring"
-      );
-      setData(res);
+      const qs = new URLSearchParams({ sort: "name", per_page: "100" });
+      if (query)  qs.set("search", query);
+      if (status) qs.set("status", status);
+      const res = await api.get<PaginatedResponse<OrganizationSummary>>(`/v1/super-admin/organizations?${qs}`);
+      setRows(res.data);
+      setTotal(res.meta.total);
     } catch {
       setError(true);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [query, status]);
 
   useEffect(() => { load(); }, [load]);
 
-  if (loading) {
-    return (
-      <div className="bg-white rounded-xl border border-[#EDE3E8] p-5">
-        <Skeleton className="h-5 w-48 mb-4" />
-        <div className="space-y-3">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <Skeleton key={i} className="h-10" />
-          ))}
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="bg-white rounded-xl border border-[#EDE3E8]">
-        <ErrorBlock onRetry={load} />
-      </div>
-    );
-  }
-
-  if (!data) return null;
+  const filters: { key: StatusFilter; label: string }[] = [
+    { key: "",         label: t.filter_barchasi },
+    { key: "active",   label: t.filter_faol },
+    { key: "inactive", label: t.filter_nofaol },
+  ];
 
   return (
     <div className="bg-white rounded-xl border border-[#EDE3E8] overflow-hidden">
-      <div className="flex items-center justify-between px-5 py-4 border-b border-[#EDE3E8]">
+      <div className="px-5 py-4 border-b border-[#EDE3E8] flex flex-col md:flex-row md:items-center gap-3">
         <div className="flex items-center gap-2">
-          <h2 className="text-sm font-semibold text-[#29232A]">
-            {uz.super_admin.muddati_yaqin_bolim}
-          </h2>
-          {data.total > 0 && (
-            <span className="inline-flex items-center justify-center h-5 min-w-[20px] px-1.5 rounded-full bg-[#FEF9C3] text-[#854D0E] text-xs font-semibold">
-              {data.total}
-            </span>
+          <h2 className="text-sm font-semibold text-[#29232A]">{t.royxat}</h2>
+          {!loading && !error && (
+            <span className="text-xs text-[#B8AAB2]">{total} {t.jami_topildi}</span>
           )}
         </div>
-        <Link
-          href="/admin/obunalar"
-          className="text-xs text-[#8E315D] hover:text-[#742548] font-medium"
-        >
-          {uz.super_admin.barchasini_korish}
-        </Link>
+        <div className="flex flex-col sm:flex-row gap-2 md:ml-auto">
+          <input
+            type="search"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder={t.qidiruv}
+            aria-label={t.qidiruv}
+            className="w-full sm:w-72 text-sm border border-[#EDE3E8] rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#8E315D]"
+          />
+          <div className="flex gap-1" role="group">
+            {filters.map((f) => (
+              <button
+                key={f.key || "all"}
+                onClick={() => setStatus(f.key)}
+                aria-pressed={status === f.key}
+                className={`px-3 py-2 rounded-lg text-xs font-medium transition-colors ${
+                  status === f.key
+                    ? "bg-[#8E315D] text-white"
+                    : "bg-[#F2ECF0] text-[#3D3240] hover:bg-[#F4C7D7]"
+                }`}
+              >
+                {f.label}
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
 
-      {data.subscriptions.length === 0 ? (
-        <p className="text-sm text-[#B8AAB2] text-center py-8">
-          {uz.super_admin.hech_muddati_yaqin_yoq}
+      {loading ? (
+        <div className="p-5 space-y-3">
+          {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-10" />)}
+        </div>
+      ) : error ? (
+        <ErrorBlock onRetry={load} />
+      ) : rows.length === 0 ? (
+        <p className="text-sm text-[#B8AAB2] text-center py-10">
+          {query || status ? t.topilmadi : t.bogcha_yoq}
         </p>
       ) : (
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-[#EDE3E8] bg-[#FAF5F8]">
-              <th className="text-left px-4 py-3 text-xs font-semibold text-[#766B73] uppercase tracking-wide">
-                {uz.super_admin.bogchalar}
-              </th>
-              <th className="text-left px-4 py-3 text-xs font-semibold text-[#766B73] uppercase tracking-wide hidden sm:table-cell">
-                {uz.super_admin.tarif}
-              </th>
-              <th className="text-left px-4 py-3 text-xs font-semibold text-[#766B73] uppercase tracking-wide hidden md:table-cell">
-                {uz.super_admin.tugash}
-              </th>
-              <th className="text-left px-4 py-3 text-xs font-semibold text-[#766B73] uppercase tracking-wide">
-                {uz.super_admin.qolgan}
-              </th>
-              <th className="text-left px-4 py-3 text-xs font-semibold text-[#766B73] uppercase tracking-wide hidden sm:table-cell">
-                {uz.super_admin.holat}
-              </th>
-              <th className="px-4 py-3" />
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-[#F2ECF0]">
-            {data.subscriptions.map((sub) => {
-              const urgency =
-                sub.days_remaining <= 3
-                  ? "text-[#991B1B] bg-[#FEE2E2]"
-                  : sub.days_remaining <= 7
-                  ? "text-[#854D0E] bg-[#FEF9C3]"
-                  : "text-[#3D3240] bg-[#F2ECF0]";
-              return (
-                <tr key={sub.id} className="hover:bg-[#FAF5F8] transition-colors">
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-[#EDE3E8] bg-[#FAF5F8]">
+                <th className="text-left px-4 py-3 text-xs font-semibold text-[#766B73] uppercase tracking-wide">{t.bogcha}</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-[#766B73] uppercase tracking-wide">{uz.super_admin.holat}</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-[#766B73] uppercase tracking-wide hidden lg:table-cell">{t.manzil}</th>
+                <th className="text-right px-4 py-3 text-xs font-semibold text-[#766B73] uppercase tracking-wide">{t.bolalar}</th>
+                <th className="text-right px-4 py-3 text-xs font-semibold text-[#766B73] uppercase tracking-wide hidden sm:table-cell">{t.guruhlar}</th>
+                <th className="text-right px-4 py-3 text-xs font-semibold text-[#766B73] uppercase tracking-wide hidden sm:table-cell">{t.tarbiyachilar}</th>
+                <th className="px-4 py-3" />
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-[#F2ECF0]">
+              {rows.map((org) => (
+                <tr key={org.id} className="hover:bg-[#FAF5F8] transition-colors">
                   <td className="px-4 py-3">
-                    <div className="flex items-center gap-2">
-                      <div className="h-7 w-7 rounded-lg bg-[#FDF2F6] flex items-center justify-center text-[#8E315D] font-semibold text-xs flex-shrink-0">
-                        {(sub.organization?.name ?? "?").charAt(0).toUpperCase()}
+                    <div className="flex items-center gap-2 min-w-0">
+                      <OrgAvatar name={org.name} />
+                      <div className="min-w-0">
+                        <p className="font-medium text-[#29232A] truncate">{org.name}</p>
+                        <p className="text-xs text-[#B8AAB2]">{org.phone ?? "—"}</p>
                       </div>
-                      <span className="font-medium text-[#29232A] text-sm">
-                        {sub.organization?.name ?? "—"}
-                      </span>
                     </div>
                   </td>
-                  <td className="px-4 py-3 text-[#766B73] hidden sm:table-cell">
-                    {sub.plan ?? "—"}
-                  </td>
-                  <td className="px-4 py-3 text-[#766B73] hidden md:table-cell">
-                    {sub.ends_at ? fmtDate(sub.ends_at) : "—"}
-                  </td>
-                  <td className="px-4 py-3">
-                    <span
-                      className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold ${urgency}`}
-                    >
-                      {sub.days_remaining} {uz.super_admin.qolgan_kun}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 hidden sm:table-cell">
-                    <SubStatusBadge status={sub.status} />
-                  </td>
-                  <td className="px-4 py-3">
+                  <td className="px-4 py-3"><StatusBadge active={org.is_active} /></td>
+                  <td className="px-4 py-3 text-[#766B73] hidden lg:table-cell">{org.address ?? "—"}</td>
+                  <td className="px-4 py-3 text-right font-semibold text-[#29232A]">{num(org.children_count)}</td>
+                  <td className="px-4 py-3 text-right text-[#3D3240] hidden sm:table-cell">{num(org.groups_count)}</td>
+                  <td className="px-4 py-3 text-right text-[#3D3240] hidden sm:table-cell">{num(org.teachers_count)}</td>
+                  <td className="px-4 py-3 text-right">
                     <Link
-                      href={`/admin/obunalar?org=${sub.organization?.id ?? ""}`}
-                      className="text-xs text-[#8E315D] hover:text-[#742548] font-medium"
+                      href={`/admin/bogchalar/${org.id}`}
+                      className="text-xs text-[#8E315D] hover:text-[#742548] font-medium whitespace-nowrap"
                     >
-                      {uz.super_admin.batafsil}
+                      {t.batafsil}
                     </Link>
                   </td>
                 </tr>
-              );
-            })}
-          </tbody>
-        </table>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
-    </div>
-  );
-}
-
-// ── Date filter bar ───────────────────────────────────────────────────────────
-
-function DateFilterBar({
-  activePreset,
-  dateFrom,
-  dateTo,
-  customFrom,
-  customTo,
-  onPresetSelect,
-  onCustomFromChange,
-  onCustomToChange,
-  onApply,
-}: {
-  activePreset: string;
-  dateFrom: string;
-  dateTo: string;
-  customFrom: string;
-  customTo: string;
-  onPresetSelect: (key: string) => void;
-  onCustomFromChange: (v: string) => void;
-  onCustomToChange: (v: string) => void;
-  onApply: () => void;
-}) {
-  return (
-    <div className="bg-white rounded-xl border border-[#EDE3E8] px-4 py-3">
-      <div className="flex flex-wrap items-center gap-2">
-        <span className="text-xs font-semibold text-[#766B73] uppercase tracking-wide mr-1">
-          {uz.super_admin.davr_tanlash}
-        </span>
-        {PRESETS.map((p) => (
-          <button
-            key={p.key}
-            onClick={() => onPresetSelect(p.key)}
-            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-              activePreset === p.key
-                ? "bg-[#8E315D] text-white"
-                : "bg-[#F2ECF0] text-[#3D3240] hover:bg-[#F4C7D7]"
-            }`}
-          >
-            {p.label}
-          </button>
-        ))}
-        {activePreset === "custom" && (
-          <div className="flex items-center gap-2 ml-2">
-            <input
-              type="date"
-              value={customFrom}
-              onChange={(e) => onCustomFromChange(e.target.value)}
-              className="text-xs border border-[#EDE3E8] rounded-lg px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-[#8E315D]"
-            />
-            <span className="text-[#B8AAB2] text-xs">—</span>
-            <input
-              type="date"
-              value={customTo}
-              onChange={(e) => onCustomToChange(e.target.value)}
-              className="text-xs border border-[#EDE3E8] rounded-lg px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-[#8E315D]"
-            />
-            <button
-              onClick={onApply}
-              className="px-3 py-1.5 bg-[#8E315D] text-white rounded-lg text-xs font-medium hover:bg-[#742548] transition-colors"
-            >
-              {uz.super_admin.filtrlash_btn}
-            </button>
-          </div>
-        )}
-        {activePreset !== "custom" && (
-          <span className="text-xs text-[#B8AAB2] ml-auto">
-            {fmtDate(dateFrom)} — {fmtDate(dateTo)}
-          </span>
-        )}
-      </div>
     </div>
   );
 }
@@ -968,71 +432,15 @@ function DateFilterBar({
 // ── Page ─────────────────────────────────────────────────────────────────────
 
 export default function SuperAdminDashboardPage() {
-  const defaultRange = getPresetRange("month");
-  const [activePreset, setActivePreset] = useState("month");
-  const [dateFrom, setDateFrom]         = useState(defaultRange.from);
-  const [dateTo, setDateTo]             = useState(defaultRange.to);
-  const [customFrom, setCustomFrom]     = useState(defaultRange.from);
-  const [customTo, setCustomTo]         = useState(defaultRange.to);
-
-  function handlePresetSelect(key: string) {
-    setActivePreset(key);
-    if (key !== "custom") {
-      const range = getPresetRange(key);
-      setDateFrom(range.from);
-      setDateTo(range.to);
-      setCustomFrom(range.from);
-      setCustomTo(range.to);
-    }
-  }
-
-  function handleApplyCustom() {
-    if (customFrom && customTo) {
-      setDateFrom(customFrom);
-      setDateTo(customTo);
-    }
-  }
-
   return (
     <div className="max-w-7xl mx-auto space-y-6">
-      {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-[#29232A]">
-          {uz.super_admin.sarlavha}
-        </h1>
-        <p className="text-[#B8AAB2] mt-1 text-sm">{uz.super_admin.platforma_holati}</p>
+        <h1 className="text-2xl font-bold text-[#29232A]">{t.sarlavha}</h1>
+        <p className="text-[#B8AAB2] mt-1 text-sm">{t.tavsif}</p>
       </div>
 
-      {/* Date filter */}
-      <DateFilterBar
-        activePreset={activePreset}
-        dateFrom={dateFrom}
-        dateTo={dateTo}
-        customFrom={customFrom}
-        customTo={customTo}
-        onPresetSelect={handlePresetSelect}
-        onCustomFromChange={setCustomFrom}
-        onCustomToChange={setCustomTo}
-        onApply={handleApplyCustom}
-      />
-
-      {/* KPIs + recent orgs */}
-      <KpiSection dateFrom={dateFrom} dateTo={dateTo} />
-
-      {/* Expiring subscriptions requiring attention */}
-      <ExpiringSubscriptionsSection />
-
-      {/* Revenue trend + sub distribution */}
-      <div className="grid lg:grid-cols-2 gap-6">
-        <RevenueTrendSection dateFrom={dateFrom} dateTo={dateTo} />
-        <SubsDistSection     dateFrom={dateFrom} dateTo={dateTo} />
-      </div>
-
-      {/* Recent financial activity + audit log */}
-      <RecentSection />
-
-      {/* Quick actions */}
-      <QuickActions />
+      <SummarySection />
+      <OrganizationsSection />
     </div>
   );
 }

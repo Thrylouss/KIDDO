@@ -1,0 +1,16 @@
+# Docker build konteksti: maxfiy va keraksiz fayllar image'ga tushmasin
+.env
+.env.*
+!.env.example
+*.pem
+
+node_modules
+.next
+out
+build
+coverage
+*.tsbuildinfo
+next-env.d.ts
+npm-debug.log*
+.DS_Store
+.git

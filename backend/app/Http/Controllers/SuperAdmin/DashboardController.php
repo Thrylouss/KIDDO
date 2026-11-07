@@ -3,11 +3,16 @@
 namespace App\Http\Controllers\SuperAdmin;
 
 use App\Models\ActivityLog;
+use App\Models\Attendance;
+use App\Models\Child;
+use App\Models\Group;
 use App\Models\Invoice;
 use App\Models\Organization;
 use App\Models\Payment;
 use App\Models\Subscription;
+use App\Models\TeacherProfile;
 use App\Models\User;
+use App\Services\AttendanceService;
 use App\Services\SubscriptionService;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
@@ -38,9 +43,13 @@ class DashboardController extends SuperAdminController
         $prevTo        = $from->copy()->subSecond();
         $prevFrom      = $prevTo->copy()->subSeconds($periodSeconds);
 
-        $totalOrgs      = Organization::count();
-        $activeOrgs     = Organization::where('is_active', true)->count();
-        $newOrgsPeriod  = Organization::whereBetween('created_at', [$from, $to])->count();
+        // Platforma statistikasi faqat haqiqiy tashkilotlardan; test/demo (is_demo) alohida soni bilan
+        // Yagona qoida (Organization::counted): haqiqiy va arxivlanmagan; arxiv — alohida soni bilan
+        $counts         = app(\App\Services\OrganizationService::class)->statusCounts();
+        $totalOrgs      = $counts['total'];
+        $activeOrgs     = $counts['active'];
+        $newOrgsPeriod  = Organization::counted()->whereBetween('created_at', [$from, $to])->count();
+        $demoOrgs       = Organization::demo()->count();
 
         $expiringSoon = Subscription::where('status', Subscription::STATUS_ACTIVE)
             ->where('ends_at', '<=', now()->addDays(14))
@@ -51,11 +60,18 @@ class DashboardController extends SuperAdminController
             ->distinct('organization_id')
             ->count('organization_id');
 
-        $totalUsers = User::count();
+        // Test/demo tashkilotlar foydalanuvchilari hisobga olinmaydi (platforma darajasidagilar — hisobga olinadi)
+        $totalUsers = User::where(fn ($q) => $q->whereNull('organization_id')
+            ->orWhereIn('organization_id', Organization::counted()->select('id')))->count();
 
-        $recentOrgs = Organization::with(['subscriptions' => function ($q) {
+        $recentOrgs = Organization::counted()->with(['subscriptions' => function ($q) {
                 $q->latest()->limit(1)->with('plan');
             }])
+            ->withCount([
+                'children',
+                'groups'          => fn ($q) => $q->active(),
+                'teacherProfiles' => fn ($q) => $q->active(),
+            ])
             ->latest()
             ->limit(8)
             ->get()
@@ -63,8 +79,12 @@ class DashboardController extends SuperAdminController
                 'id'           => $org->id,
                 'name'         => $org->name,
                 'phone'        => $org->phone,
+                'address'      => $org->address,
                 'is_active'    => $org->is_active,
                 'created_at'   => $org->created_at,
+                'children_count' => $org->children_count,
+                'groups_count'   => $org->groups_count,
+                'teachers_count' => $org->teacher_profiles_count,
                 'subscription' => $org->subscriptions->first() ? [
                     'status'  => $org->subscriptions->first()->status,
                     'ends_at' => $org->subscriptions->first()->ends_at,
@@ -104,15 +124,53 @@ class DashboardController extends SuperAdminController
             'period'                  => ['from' => $from->toDateString(), 'to' => $to->toDateString()],
             'jami_bogchalar'          => $totalOrgs,
             'faol_bogchalar'          => $activeOrgs,
-            'nofaol_bogchalar'        => $totalOrgs - $activeOrgs,
+            'nofaol_bogchalar'        => $counts['not_active'],
+            'faol_emas_bogchalar'     => $counts['inactive'],
+            'toxtatilgan_bogchalar'   => $counts['suspended'],
+            'arxiv_bogchalar'         => $counts['archived'],
             'yangi_bogchalar'         => $newOrgsPeriod,
+            'demo_bogchalar'          => $demoOrgs,
             'muddati_yaqin'           => $expiringSoon,
             'tolov_kutilmoqda'        => $pendingPaymentOrgs,
             'jami_foydalanuvchilar'   => $totalUsers,
             'oxirgi_bogchalar'        => $recentOrgs,
             'obuna_holati'            => $subStats,
             'billing'                 => $billing,
+            'platforma'               => $this->platformTotals(),
         ]);
+    }
+
+    /**
+     * Barcha haqiqiy (o'chirilmagan, demo bo'lmagan) bog'chalar bo'yicha agregat sonlar — faqat COUNT so'rovlari,
+     * bola darajasidagi yozuvlar qaytarilmaydi. Raqamlar bog'cha dashboardi bilan bir xil qoida bo'yicha.
+     */
+    private function platformTotals(): array
+    {
+        $orgIds = Organization::counted()->select('id');
+        $today  = AttendanceService::today()->toDateString();
+
+        $attendance = Attendance::whereIn('organization_id', $orgIds)
+            ->whereDate('date', $today)
+            ->whereHas('child', fn ($q) => $q->where('is_active', true))
+            ->selectRaw('status, count(*) as aggregate')
+            ->groupBy('status')
+            ->pluck('aggregate', 'status');
+
+        $activeChildren = Child::whereIn('organization_id', $orgIds)->active()->count();
+
+        return [
+            'jami_bolalar'       => Child::whereIn('organization_id', $orgIds)->count(),
+            'jami_guruhlar'      => Group::whereIn('organization_id', $orgIds)->active()->count(),
+            'jami_tarbiyachilar' => TeacherProfile::whereIn('organization_id', $orgIds)->active()->count(),
+            'bugungi_davomat'    => [
+                'sana'          => $today,
+                'jami'          => $activeChildren,
+                'keldi'         => (int) ($attendance[Attendance::STATUS_PRESENT] ?? 0),
+                'kelmadi'       => (int) ($attendance[Attendance::STATUS_ABSENT] ?? 0),
+                'sababli'       => (int) ($attendance[Attendance::STATUS_EXCUSED] ?? 0),
+                'belgilanmagan' => max(0, $activeChildren - (int) $attendance->sum()),
+            ],
+        ];
     }
 
     public function recent(Request $request): JsonResponse

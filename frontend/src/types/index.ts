@@ -39,23 +39,133 @@ export interface FullSubscription extends Subscription {
   created_at: string;
 }
 
+/** Tashkilot turi (faollik holatidan alohida). */
+export type OrgType = "davlat" | "xususiy";
+/** Faollik holati (SaaS obuna holati — subscription'da, alohida). */
+export type OrgStatus = "active" | "inactive" | "suspended" | "archived";
+
 export interface OrganizationSummary {
   id: number;
   name: string;
+  type?: OrgType | null;
+  type_label?: string | null;
+  official_code?: string | null;
   phone: string | null;
+  email?: string | null;
+  website?: string | null;
+  region?: string | null;
+  street?: string | null;
+  director_email?: string | null;
+  notes?: string | null;
+  status?: OrgStatus;
+  status_label?: string;
+  status_reason?: string | null;
+  suspended_until?: string | null;
+  status_changed_at?: string | null;
   address: string | null;
+  /** DMTT reyestri maydonlari (Excel import) */
+  district?: string | null;
+  number?: string | null;
+  mfy?: string | null;
+  capacity?: number | null;
+  director_name?: string | null;
+  director_phone?: string | null;
+  /** Test/demo tashkilot (DEV TEST MODE) — platforma statistikasiga qo'shilmaydi */
+  is_demo?: boolean;
   is_active: boolean;
   created_at: string;
-  admin: { id: number; name: string; phone: string | null } | null;
+  admin: { id: number; name: string; phone: string | null; username?: string | null } | null;
   subscription: Subscription | null;
+  /** Faqat ro'yxat endpointi qaytaradi (faol guruh/tarbiyachilar). */
+  children_count?: number | null;
+  groups_count?: number | null;
+  teachers_count?: number | null;
+}
+
+/** Bugungi davomat agregati (bola darajasidagi yozuvlarsiz). */
+export interface AttendanceTotals {
+  sana: string;
+  jami: number;
+  keldi: number;
+  kelmadi: number;
+  sababli: number;
+  belgilanmagan: number;
 }
 
 export interface OrganizationDetail extends OrganizationSummary {
-  admins: Pick<User, "id" | "name" | "phone" | "email" | "is_active">[];
+  admins: (Pick<User, "id" | "name" | "phone" | "email" | "is_active"> & {
+    username?: string | null;
+    must_change_password?: boolean;
+    last_login_at?: string | null;
+  })[];
   groups_count: number;
   children_count: number;
   teacher_profiles_count: number;
   parent_profiles_count: number;
+  bugungi_davomat?: AttendanceTotals;
+  status_changed_by?: string | null;
+}
+
+/** Bog'chalar sahifasi statistikasi (haqiqiy ma'lumotlar). */
+export interface OrgStats {
+  total: number;
+  davlat: number;
+  xususiy: number;
+  turi_yoq: number;
+  active: number;
+  inactive: number;
+  suspended: number;
+  archived: number;
+  recent: { id: number; name: string; type: OrgType | null; district: string | null; status: OrgStatus; created_at: string }[];
+}
+
+export interface OrgFilterOptions {
+  districts: string[];
+  regions: string[];
+  mfys: string[];
+  /** directory — tasdiqlangan hududiy ma'lumotnoma; organizations — bazadagi bog'chalar qiymatlari */
+  source?: "directory" | "organizations";
+}
+
+export interface OrgStatusChange {
+  id: number;
+  from_status: OrgStatus | null;
+  to_status: OrgStatus;
+  from_label: string | null;
+  to_label: string;
+  reason: string | null;
+  suspended_until: string | null;
+  changed_by: string | null;
+  created_at: string;
+}
+
+export interface OrgGroupRow {
+  id: number;
+  name: string;
+  age_category: string | null;
+  capacity: number | null;
+  is_active: boolean;
+  children_count: number;
+  teachers: string[];
+}
+
+export interface OrgTeacherRow {
+  id: number;
+  name: string | null;
+  phone: string | null;
+  username: string | null;
+  is_active: boolean;
+  last_login_at: string | null;
+  groups: string[];
+}
+
+export interface OrgChildrenSummary {
+  jami: number;
+  faol: number;
+  nofaol: number;
+  jins: { ogil: number; qiz: number };
+  guruhlar: { group: string; count: number }[];
+  yosh: { age: number | null; count: number }[];
 }
 
 export interface PlatformSummary {
@@ -82,6 +192,10 @@ export interface PlatformSummary {
 export interface User {
   id: number;
   name: string;
+  /** Foydalanuvchi nomi (login); telefon orqali kiradiganlarda null */
+  username?: string | null;
+  /** Vaqtinchalik parol bilan kirgan — avval parolni almashtirishi kerak */
+  must_change_password?: boolean;
   phone: string | null;
   email: string | null;
   role: Role;
@@ -122,16 +236,237 @@ export interface Child {
   group?: Pick<Group, "id" | "name"> | null;
 }
 
+// ── Davomat ─────────────────────────────────────────────────────────────────
+
+export type AttendanceState = "present" | "absent" | "excused";
+
+export type ExcuseReason = "kasallik" | "oilaviy" | "boshqa";
+
+export interface AttendanceChild {
+  id: number;
+  first_name: string;
+  last_name: string;
+  status: AttendanceState | null;
+  /** Faqat «Sababli» uchun (kasallik, oilaviy, boshqa). */
+  excuse_reason?: ExcuseReason | null;
+  note: string | null;
+}
+
+export interface AttendanceSummary {
+  total: number;
+  present: number;
+  absent: number;
+  excused: number;
+  unmarked: number;
+}
+
+/** GET /v1/admin/attendance va GET /v1/teacher/dashboard javobining umumiy qismi. */
+export interface AttendanceDay {
+  groups: Pick<Group, "id" | "name">[];
+  group: (Pick<Group, "id" | "name" | "age_category" | "capacity">) | null;
+  date: string;
+  editable: boolean;
+  editable_from: string;
+  children: AttendanceChild[];
+  summary: AttendanceSummary | null;
+}
+
+// ── Kundalik faoliyat (GET/PUT /v1/{teacher|admin}/daily) ───────────────────
+
+export type MealType = "nonushta" | "ikkinchi_nonushta" | "tushlik" | "peshinlik" | "kechki_ovqat";
+
+export interface DailyMeal {
+  id: number;
+  meal_type: MealType;
+  served_at: string;   // "HH:MM"
+  /** false — bola ovqatlanmagan. */
+  ate: boolean;
+  note: string | null;
+}
+
+export interface DailySleep {
+  id: number;
+  started_at: string;
+  ended_at: string | null;
+  note: string | null;
+  is_sleeping: boolean;
+  status_text: string | null;
+}
+
+export type ActivityDirection = "jismoniy" | "nutq" | "matematika" | "tasviriy" | "musiqa" | "atrof_olam" | "ijtimoiy" | "boshqa";
+
+export interface DailyActivity {
+  id: number;
+  title: string;
+  direction: ActivityDirection | null;
+  description: string | null;
+  result: string | null;
+  starts_at: string | null;
+  ends_at: string | null;
+  duration_minutes: number | null;
+  participants: { id: number; first_name: string; last_name: string }[];
+}
+
+/** GET /v1/teacher/children/{id}/history */
+export interface ChildHistory {
+  from: string;
+  to: string;
+  days: {
+    date: string;
+    attendance: AttendanceState | null;
+    excuse_reason: ExcuseReason | null;
+    note: string | null;
+    meals: { meal_type: MealType; served_at: string; ate: boolean; note: string | null }[];
+    sleep: { started_at: string; ended_at: string | null; note: string | null; is_sleeping: boolean; status_text: string | null } | null;
+    activities: { title: string; starts_at: string | null }[];
+  }[];
+}
+
+// ── Xabarlar (GET/POST /v1/teacher/messages) ────────────────────────────────
+
+export interface SentMessage {
+  id: number;
+  audience: "child" | "group";
+  group: { id: number; name: string } | null;
+  child: { id: number; first_name: string; last_name: string } | null;
+  sender: string | null;
+  subject: string | null;
+  body: string;
+  created_at: string;
+  recipients_count: number;
+  read_count: number;
+  recipients: { name: string | null; child: string | null; read_at: string | null }[];
+}
+
+export interface DailyChild {
+  id: number;
+  first_name: string;
+  last_name: string;
+  attendance: AttendanceState | null;
+  meals: DailyMeal[];
+  sleep: DailySleep | null;
+}
+
+export interface DailyDay {
+  groups: Pick<Group, "id" | "name">[];
+  group: Pick<Group, "id" | "name"> | null;
+  date: string;
+  editable: boolean;
+  editable_from: string;
+  meal_types: MealType[];
+  children: DailyChild[];
+  activities: DailyActivity[];
+  message?: string;
+}
+
+export interface TeacherDashboard extends AttendanceDay {
+  teacher: { id: number; name: string; position: string | null };
+}
+
+export interface AttendanceRecordInput {
+  child_id: number;
+  status: AttendanceState;
+  excuse_reason?: ExcuseReason | null;
+  note: string | null;
+}
+
+// ── Oylik davomat (GET /v1/{teacher|admin}/attendance/monthly) ──────────────
+
+export interface MonthlyAttendanceCell {
+  status: AttendanceState;
+  excuse_reason: ExcuseReason | null;
+  note: string | null;
+}
+
+export interface MonthlyTotals {
+  present: number;
+  absent: number;
+  excused: number;
+  unmarked: number;
+}
+
+export interface MonthlyAttendance {
+  organization: { name: string | null };
+  group: { id: number; name: string };
+  groups: { id: number; name: string }[];
+  month: string;
+  from: string;
+  to: string;
+  days: { date: string; day: number; weekday: number; weekend: boolean; future: boolean }[];
+  children: {
+    id: number;
+    first_name: string;
+    last_name: string;
+    middle_name: string | null;
+    days: Record<string, MonthlyAttendanceCell>;
+    totals: MonthlyTotals;
+  }[];
+  totals: MonthlyTotals & { working_days: number };
+  excused_notes: { date: string; child_id: number; child_name: string; reason: ExcuseReason | null; note: string | null }[];
+}
+
+// ── Tarbiyachi: guruh bolalari (GET /v1/teacher/children) ───────────────────
+
+export interface TeacherChild {
+  id: number;
+  first_name: string;
+  last_name: string;
+  middle_name: string | null;
+  birth_date: string;
+  gender: "erkak" | "ayol";
+  is_active: boolean;
+  photo_url: string | null;
+  group: { id: number; name: string; age_category: string | null } | null;
+  contact: { name: string; phone: string } | null;
+}
+
+export interface TeacherChildProfile extends TeacherChild {
+  admitted_at: string | null;
+  medical_notes: string | null;
+  parents: { id: number; first_name: string; last_name: string; phone: string; relation_type: ParentRelation; is_primary: boolean }[];
+}
+
+/** GET /v1/parent/children/{id}/attendance */
+export interface ParentAttendance {
+  child: { id: number; first_name: string; last_name: string };
+  from: string;
+  to: string;
+  records: { date: string; status: AttendanceState; note: string | null }[];
+  summary: { present: number; absent: number; excused: number };
+}
+
+/** GET /v1/parent/children — ota-onaga bog'langan farzand. */
+export interface ParentChild {
+  id: number;
+  first_name: string;
+  last_name: string;
+  birth_date: string;
+  gender: "erkak" | "ayol";
+  is_active: boolean;
+  relation_type: string;
+  group: Pick<Group, "id" | "name"> | null;
+}
+
 export interface TeacherProfile {
   id: number;
   user_id: number;
   organization_id: number;
   first_name: string;
   last_name: string;
-  phone: string;
+  /** Username bilan kiradigan tarbiyachida null bo'lishi mumkin */
+  phone: string | null;
   position: string;
   is_active: boolean;
   groups?: Pick<Group, "id" | "name">[];
+  user?: { id: number; username?: string | null; must_change_password?: boolean; last_login_at?: string | null } | null;
+}
+
+export type ParentRelation = "ona" | "ota" | "vasiy";
+
+/** child_parent jadvalidagi bog'lanish ma'lumoti (GET /v1/admin/parents → children[].pivot). */
+export interface ParentChildLink {
+  relation_type: ParentRelation;
+  is_primary: boolean;
 }
 
 export interface ParentProfile {
@@ -140,15 +475,38 @@ export interface ParentProfile {
   organization_id: number;
   first_name: string;
   last_name: string;
-  phone: string;
-  children?: Pick<Child, "id" | "first_name" | "last_name">[];
+  /** Username bilan kiradigan ota-onada null bo'lishi mumkin */
+  phone: string | null;
+  relation_type: ParentRelation;
+  children?: (Pick<Child, "id" | "first_name" | "last_name"> & { pivot?: ParentChildLink })[];
+  /** Akkaunt (GET /v1/admin/parents → user): faollik, login va «parolni almashtirishi kerak» holati. */
+  user?: { id: number; is_active: boolean; username?: string | null; must_change_password?: boolean; last_login_at?: string | null } | null;
 }
 
 export interface DashboardSummary {
+  bogcha?: { id: number; name: string; address: string | null; phone: string | null } | null;
+  /** Joriy oy to'lov holati (faqat real API) */
+  tolovlar?: { oy: string; jami: number; tolagan: number; tolanmagan: number; summa: number } | null;
   bolalar_soni: number;
+  /** Faol (arxivlanmagan) bolalar — faqat real API */
+  faol_bolalar_soni?: number;
   guruhlar_soni: number;
   tarbiyachilar_soni: number;
   ota_onalar_soni: number;
+  /** Shu bog'chaning oxirgi 5 ta kundalik mashg'uloti — faqat real API */
+  songgi_faoliyatlar?: {
+    id: number; title: string; direction: string | null; date: string; starts_at: string | null;
+    group: { id: number; name: string } | null;
+  }[];
+  /** Faqat real API qaytaradi (demo ma'lumotda yo'q). */
+  bugungi_davomat?: {
+    sana: string;
+    jami: number;
+    keldi: number;
+    kelmadi: number;
+    sababli: number;
+    belgilanmagan: number;
+  };
 }
 
 export interface OrgPayment {
@@ -469,6 +827,8 @@ export interface ReportOrganizations {
     total: number;
     active: number;
     inactive: number;
+    suspended?: number;
+    archived?: number;
     new_in_period: number;
     with_unpaid_invoices: number;
     with_expired_subs: number;
@@ -496,10 +856,17 @@ export interface ReportUsers {
 
 export interface DashboardSummaryEnhanced {
   period: ReportPeriod;
+  /** Haqiqiy va arxivlanmagan tashkilotlar (arxiv — arxiv_bogchalar) */
   jami_bogchalar: number;
   faol_bogchalar: number;
+  /** Faol emas + vaqtincha to'xtatilgan */
   nofaol_bogchalar: number;
+  faol_emas_bogchalar?: number;
+  toxtatilgan_bogchalar?: number;
+  arxiv_bogchalar?: number;
   yangi_bogchalar: number;
+  /** Test/demo tashkilotlar — yuqoridagi statistikaga qo'shilmagan */
+  demo_bogchalar?: number;
   muddati_yaqin: number;
   tolov_kutilmoqda: number;
   jami_foydalanuvchilar: number;
@@ -509,6 +876,10 @@ export interface DashboardSummaryEnhanced {
     phone: string | null;
     is_active: boolean;
     created_at: string;
+    address?: string | null;
+    children_count?: number;
+    groups_count?: number;
+    teachers_count?: number;
     subscription: { status: string; ends_at: string | null; plan: string | null } | null;
   }[];
   obuna_holati: {
@@ -527,6 +898,13 @@ export interface DashboardSummaryEnhanced {
     prev_period_paid: number;
     total_paid: number;
     total_refunded: number;
+  };
+  /** Barcha bog'chalar bo'yicha agregat sonlar. */
+  platforma?: {
+    jami_bolalar: number;
+    jami_guruhlar: number;
+    jami_tarbiyachilar: number;
+    bugungi_davomat: AttendanceTotals;
   };
 }
 
@@ -575,4 +953,53 @@ export interface DashboardExpiring {
     days_remaining: number;
   }[];
   total: number;
+}
+
+/** Excel importining bitta qatori (backend normallashtirgan). */
+export interface OrganizationImportRow {
+  row: number;
+  name: string | null;
+  number: string | null;
+  address: string | null;
+  mfy: string | null;
+  capacity: number | null;
+  director_name: string | null;
+  director_phone: string | null;
+  /** Fayldagi «Turi» ustuni (bo'sh bo'lsa — import formasidagi tur qo'llanadi) */
+  type?: "davlat" | "xususiy" | null;
+  /** Excel sarlavhasi → katakning asl (o'zgartirilmagan) qiymati */
+  source: Record<string, string>;
+  /** Alohida ustundan emas, boshqa ustundan ajratilgan maydonlar: number → "name", mfy → "address" */
+  derived: Partial<Record<"number" | "mfy", "name" | "address">>;
+  /** Faylda bo'lmagan maydonlar — to'ldirilmaydi */
+  missing: string[];
+  errors: string[];
+  warnings: string[];
+  /** Tuzilgan ro'yxat: daraja, maydon, Excel'dagi ustun nomi va sabab */
+  issues?: OrganizationImportIssue[];
+  official_code?: string | null;
+  status: "ok" | "warning" | "error";
+}
+
+export interface OrganizationImportIssue {
+  level: "error" | "warning";
+  field: string;
+  column: string;
+  message: string;
+}
+
+export interface OrganizationImportColumn {
+  field: string;
+  label: string;
+  required: boolean;
+  /** Faylda topilgan sarlavha; null — faylda yo'q */
+  header: string | null;
+}
+
+export interface OrganizationImportPreview {
+  rows: OrganizationImportRow[];
+  summary: { total: number; ok: number; warning: number; error: number };
+  columns?: OrganizationImportColumn[];
+  /** Faylda xatoli qator bo'lmasa — true */
+  can_import?: boolean;
 }

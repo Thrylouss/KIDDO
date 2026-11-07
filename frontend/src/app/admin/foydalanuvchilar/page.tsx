@@ -8,6 +8,7 @@ import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import Select from "@/components/ui/Select";
 import Modal from "@/components/ui/Modal";
+import TemporaryPasswordModal from "@/components/accounts/TemporaryPasswordModal";
 import EmptyState from "@/components/ui/EmptyState";
 import { SkeletonTable } from "@/components/ui/Skeleton";
 import uz from "@/i18n/uz";
@@ -49,7 +50,6 @@ interface ApiParams {
   page: number;
 }
 
-interface PasswordForm { password: string }
 
 interface EditForm {
   name: string;
@@ -90,7 +90,7 @@ export default function FoydalanuvchilarPage() {
   const [confirmActivate,   setConfirmActivate]   = useState<UserSummary | null>(null);
   const [confirmDeactivate, setConfirmDeactivate] = useState<UserSummary | null>(null);
   const [resetTarget,       setResetTarget]       = useState<UserSummary | null>(null);
-  const [passwordForm,      setPasswordForm]      = useState<PasswordForm>({ password: "" });
+  const [credentials,       setCredentials]       = useState<{ login: string; password: string } | null>(null);
   const [actionLoading,     setActionLoading]     = useState(false);
   const [actionError,       setActionError]       = useState("");
 
@@ -228,9 +228,12 @@ export default function FoydalanuvchilarPage() {
     if (!resetTarget) return;
     setActionLoading(true); setActionError("");
     try {
-      await api.post(`/v1/super-admin/users/${resetTarget.id}/reset-password`, passwordForm);
+      // Parol yuborilmaydi — tizim vaqtinchalik parol yaratadi va u faqat bir marta ko'rsatiladi
+      const res = await api.post<{ data?: { login?: string; temporary_password?: string } }>(`/v1/super-admin/users/${resetTarget.id}/reset-password`, {});
+      if (res?.data?.temporary_password) {
+        setCredentials({ login: res.data.login ?? resetTarget.phone ?? "", password: res.data.temporary_password });
+      }
       setResetTarget(null);
-      setPasswordForm({ password: "" });
     } catch (e: unknown) {
       const err = e as { data?: { message?: string } };
       setActionError(err?.data?.message ?? uz.xatolar.server_xato);
@@ -434,7 +437,7 @@ export default function FoydalanuvchilarPage() {
                             )}
                             <button
                               className="w-full text-left px-4 py-2 text-sm text-[#3D3240] hover:bg-[#F2ECF0]"
-                              onClick={() => { setResetTarget(u); setPasswordForm({ password: "" }); }}
+                              onClick={() => setResetTarget(u)}
                             >
                               {uz.foydalanuvchilar.parol_yangilash}
                             </button>
@@ -651,39 +654,25 @@ export default function FoydalanuvchilarPage() {
       {/* ── Reset Password Modal ───────────────────────────────── */}
       <Modal
         open={!!resetTarget}
-        onClose={() => { setResetTarget(null); setActionError(""); setPasswordForm({ password: "" }); }}
+        onClose={() => { setResetTarget(null); setActionError(""); }}
         title={uz.foydalanuvchilar.parol_yangilash}
       >
         {resetTarget && (
-          <p className="text-sm text-[#766B73] mb-4">{resetTarget.name}</p>
+          <p className="text-sm text-[#766B73] mb-2">{resetTarget.name}</p>
         )}
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-[#3D3240] mb-1">
-            {uz.foydalanuvchilar.yangi_parol}
-          </label>
-          <Input
-            type="password"
-            value={passwordForm.password}
-            onChange={e => setPasswordForm({ password: e.target.value })}
-            placeholder="Kamida 8 ta belgi"
-          />
-        </div>
+        <p className="text-sm text-[#29232A] mb-4">{uz.akkaunt.parol_yangilash_tasdiq}</p>
         {actionError && <p className="text-sm text-[#EF4444] mb-3">{actionError}</p>}
         <div className="flex gap-3 justify-end">
-          <Button
-            variant="secondary"
-            onClick={() => { setResetTarget(null); setActionError(""); setPasswordForm({ password: "" }); }}
-          >
+          <Button variant="secondary" onClick={() => { setResetTarget(null); setActionError(""); }}>
             {uz.common.bekor_qilish}
           </Button>
-          <Button
-            onClick={doResetPassword}
-            disabled={actionLoading || passwordForm.password.length < 8}
-          >
-            {actionLoading ? uz.common.yuklanmoqda : uz.common.saqlash}
+          <Button onClick={doResetPassword} disabled={actionLoading}>
+            {actionLoading ? uz.common.yuklanmoqda : uz.akkaunt.parol_yangilash}
           </Button>
         </div>
       </Modal>
+
+      <TemporaryPasswordModal credentials={credentials} onClose={() => setCredentials(null)} />
 
       {/* Close dropdown on outside click */}
       {openMenuId !== null && (

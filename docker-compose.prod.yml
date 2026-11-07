@@ -1,4 +1,37 @@
+# KIDDO — production (VPS): https://kiddo.uz (frontend) va https://api.kiddo.uz (API). Yo'riqnoma: DEPLOYMENT.md
+#
+# Qiymatlar (parol, domenga bog'liq build sozlamalari) repoda emas — serverdagi root `.env` faylidan
+# (namuna: .env.production.example). Laravel'ning qolgan sozlamalari — backend/.env (namuna: backend/.env.production.example).
+
+# Baza ulanishi — yagona manba root `.env`: postgres servisi ham, Laravel (php, scheduler) ham shu qiymatlarni oladi.
+# Konteyner env'i backend/.env dagi DB_* qiymatlaridan ustun turadi (Laravel .env ni haqiqiy env ustiga yozmaydi).
+x-db-env: &db-env
+  DB_CONNECTION: pgsql
+  DB_HOST: ${DB_HOST:-postgres}
+  DB_PORT: ${DB_PORT:-5432}
+  DB_DATABASE: ${DB_DATABASE:-kiddo}
+  DB_USERNAME: ${DB_USERNAME:-kiddo}
+  DB_PASSWORD: ${DB_PASSWORD:?root .env faylida DB_PASSWORD berilmagan}
+
 services:
+  # ─── PostgreSQL 16 ────────────────────────────────────────────
+  # Port tashqariga ochilmaydi. Ma'lumotlar `kiddo_pgdata` volume'da — zaxira nusxasi DEPLOYMENT.md da.
+  # Alohida (boshqariladigan) baza ishlatilsa: root .env da DB_HOST ni o'zgartiring va bu servisni ishga tushirmang.
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_DATABASE:-kiddo}
+      POSTGRES_USER: ${DB_USERNAME:-kiddo}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?root .env faylida DB_PASSWORD berilmagan}
+    volumes:
+      - kiddo_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
   # ─── PHP-FPM (Laravel API) ────────────────────────────────────
   php:
     build:
@@ -7,11 +40,50 @@ services:
     restart: unless-stopped
     volumes:
       - ./backend:/var/www/html:ro
-      - ./docker/php/opcache.ini:/usr/local/etc/php/conf.d/opcache.ini
+      # Kod faqat o'qish uchun; yoziladigan joylar alohida (rasmlar storage/app da, config/route keshi bootstrap/cache da).
+      # Hostda egasi konteyner foydalanuvchisi bo'lsin: chown -R 1000:1000 backend/storage backend/bootstrap/cache
+      - ./backend/storage:/var/www/html/storage
+      - ./backend/bootstrap/cache:/var/www/html/bootstrap/cache
+      - ./docker/php/opcache.ini:/usr/local/etc/php/conf.d/opcache.ini:ro
+      - ./docker/php/production.ini:/usr/local/etc/php/conf.d/zz-production.ini:ro
     environment:
-      - APP_ENV=production
+      APP_ENV: production
+      <<: *db-env
+    depends_on:
+      postgres:
+        condition: service_healthy
+        required: false
+
+  # ─── Laravel scheduler ────────────────────────────────────────
+  # bootstrap/app.php → withSchedule: Telegram'ga qayta yuborish (15 daqiqada), eskirgan tokenlarni tozalash,
+  # obuna muddati (faqat BILLING_ENABLED=true). Bitta jarayon: `schedule:work` har daqiqada schedule:run qiladi.
+  # Takroriy ishga tushishdan himoya: servisni replicas/scale bilan ko'paytirmang; vazifalar qo'shimcha ravishda
+  # withoutOverlapping()->onOneServer() (cache lock, CACHE_STORE=database) bilan himoyalangan.
+  # Queue worker kerak emas: kodda navbatga qo'yiladigan (ShouldQueue) vazifa yo'q.
+  scheduler:
+    build:
+      context: ./docker/php
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    command: ["php", "artisan", "schedule:work"]
+    stop_grace_period: 60s
+    volumes:
+      - ./backend:/var/www/html:ro
+      # Kod faqat o'qish uchun; yoziladigan joylar alohida (rasmlar storage/app da, config/route keshi bootstrap/cache da).
+      # Hostda egasi konteyner foydalanuvchisi bo'lsin: chown -R 1000:1000 backend/storage backend/bootstrap/cache
+      - ./backend/storage:/var/www/html/storage
+      - ./backend/bootstrap/cache:/var/www/html/bootstrap/cache
+      - ./docker/php/opcache.ini:/usr/local/etc/php/conf.d/opcache.ini:ro
+      - ./docker/php/production.ini:/usr/local/etc/php/conf.d/zz-production.ini:ro
+    environment:
+      APP_ENV: production
+      <<: *db-env
+    depends_on:
+      - php
 
   # ─── Nginx (HTTPS) ────────────────────────────────────────────
+  # Internetga faqat 80 (Let's Encrypt + HTTPS'ga yo'naltirish) va 443 ochiq. php:9000, frontend:3000, postgres:5432 — ichki.
+  # Sertifikatlar hostdagi /etc/letsencrypt dan faqat o'qish uchun (repoga kiritilmaydi).
   nginx:
     image: nginx:1.25-alpine
     restart: unless-stopped
@@ -28,14 +100,29 @@ services:
       - frontend
 
   # ─── Next.js Frontend (production build) ──────────────────────
+  # NEXT_PUBLIC_* qiymatlari build vaqtida JavaScript'ga yoziladi — o'zgartirilsa, image qayta build qilinadi.
   frontend:
     build:
       context: ./frontend
       dockerfile: ../docker/frontend/Dockerfile
       args:
-        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-https://api.yourdomain.com/api}
+        # Kod yo'llarni `${NEXT_PUBLIC_API_URL}/v1/...` ko'rinishida quradi — oxirida /api bo'lishi shart
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-https://api.kiddo.uz/api}
+        # Production'da demo rejim doim o'chiq
+        NEXT_PUBLIC_DEMO_MODE: "false"
+        NEXT_PUBLIC_CONTACT_EMAIL: ${NEXT_PUBLIC_CONTACT_EMAIL:-}
+        NEXT_PUBLIC_CONTACT_PHONE: ${NEXT_PUBLIC_CONTACT_PHONE:-}
+        NEXT_PUBLIC_CONTACT_TELEGRAM: ${NEXT_PUBLIC_CONTACT_TELEGRAM:-}
+        NEXT_PUBLIC_CONTACT_ADDRESS: ${NEXT_PUBLIC_CONTACT_ADDRESS:-}
+        # Faqat haqiqiy do'kon havolalari (https://apps.apple.com/..., https://play.google.com/...); bo'sh — ko'rsatilmaydi
+        NEXT_PUBLIC_APP_STORE_URL: ${NEXT_PUBLIC_APP_STORE_URL:-}
+        NEXT_PUBLIC_GOOGLE_PLAY_URL: ${NEXT_PUBLIC_GOOGLE_PLAY_URL:-}
     restart: unless-stopped
-    ports:
-      - "3000:3000"
+    # Port internetga ochilmaydi — faqat nginx (Docker ichki tarmog'i) orqali: https://kiddo.uz
+    expose:
+      - "3000"
     environment:
       - NODE_ENV=production
+
+volumes:
+  kiddo_pgdata:

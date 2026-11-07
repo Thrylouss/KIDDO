@@ -48,6 +48,7 @@ class SuperAdminOrganizationTest extends TestCase
         $res = $this->actingAs($this->superAdmin(), 'sanctum')
             ->postJson('/api/v1/super-admin/organizations', [
                 'name'  => "Yangi Bog'cha",
+                'type'  => 'xususiy',
                 'phone' => '+998712345679',
             ]);
         $res->assertStatus(201);
@@ -61,6 +62,7 @@ class SuperAdminOrganizationTest extends TestCase
         $res = $this->actingAs($this->superAdmin(), 'sanctum')
             ->postJson('/api/v1/super-admin/organizations', [
                 'name'                => 'Tenant Bog\'cha',
+                'type'                => 'xususiy',
                 'phone'               => '+998991234560',
                 'admin_name'          => 'Test Admin',
                 'admin_phone'         => '+998991234561',
@@ -163,7 +165,7 @@ class SuperAdminOrganizationTest extends TestCase
     {
         $sa = $this->superAdmin();
         $this->actingAs($sa, 'sanctum')
-            ->postJson('/api/v1/super-admin/organizations', ['name' => "Audit Log Test Org"])
+            ->postJson('/api/v1/super-admin/organizations', ['name' => "Audit Log Test Org", 'type' => 'davlat'])
             ->assertStatus(201);
 
         $this->assertDatabaseHas('activity_logs', [

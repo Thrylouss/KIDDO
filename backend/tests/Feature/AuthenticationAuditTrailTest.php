@@ -29,6 +29,7 @@ use Tests\TestCase;
  *   AuthController::login()  — ActivityLog::record('user.login', ...) added.
  *   AuthController::logout() — ActivityLog::record('user.logout', ...) added.
  */
+/** Web login auditi — foydalanuvchilar tarbiyachi rolida (ota-onalar web'ga kirmaydi, ular mobil ilovadan). */
 class AuthenticationAuditTrailTest extends TestCase
 {
     use RefreshDatabase;
@@ -37,7 +38,7 @@ class AuthenticationAuditTrailTest extends TestCase
 
     public function test_login_updates_last_login_at_in_database(): void
     {
-        $user = User::factory()->create([
+        $user = User::factory()->teacher()->create([
             'phone'        => '+998901110001',
             'password'     => Hash::make('Password1'),
             'is_active'    => true,
@@ -59,7 +60,7 @@ class AuthenticationAuditTrailTest extends TestCase
 
     public function test_failed_login_does_not_update_last_login_at(): void
     {
-        $user = User::factory()->create([
+        $user = User::factory()->teacher()->create([
             'phone'        => '+998901110002',
             'password'     => Hash::make('Password1'),
             'is_active'    => true,
@@ -79,7 +80,7 @@ class AuthenticationAuditTrailTest extends TestCase
 
     public function test_successful_login_creates_activity_log_entry(): void
     {
-        $user = User::factory()->create([
+        $user = User::factory()->teacher()->create([
             'phone'     => '+998901110003',
             'password'  => Hash::make('Password1'),
             'is_active' => true,
@@ -98,7 +99,7 @@ class AuthenticationAuditTrailTest extends TestCase
 
     public function test_login_activity_log_contains_correct_user_id_and_role(): void
     {
-        $user = User::factory()->create([
+        $user = User::factory()->teacher()->create([
             'phone'     => '+998901110004',
             'password'  => Hash::make('Password1'),
             'role'      => User::ROLE_ADMIN,
@@ -122,7 +123,7 @@ class AuthenticationAuditTrailTest extends TestCase
     public function test_org_admin_login_logs_organization_id(): void
     {
         $org  = Organization::factory()->create(['is_active' => true]);
-        $user = User::factory()->create([
+        $user = User::factory()->teacher()->create([
             'phone'           => '+998901110005',
             'password'        => Hash::make('Password1'),
             'role'            => User::ROLE_ADMIN,
@@ -144,7 +145,7 @@ class AuthenticationAuditTrailTest extends TestCase
 
     public function test_super_admin_login_logs_null_organization_id(): void
     {
-        $sa = User::factory()->create([
+        $sa = User::factory()->teacher()->create([
             'phone'           => '+998901110006',
             'password'        => Hash::make('Password1'),
             'role'            => User::ROLE_SUPER_ADMIN,
@@ -167,7 +168,7 @@ class AuthenticationAuditTrailTest extends TestCase
 
     public function test_failed_login_does_not_create_activity_log_entry(): void
     {
-        $user = User::factory()->create([
+        $user = User::factory()->teacher()->create([
             'phone'     => '+998901110007',
             'password'  => Hash::make('Password1'),
             'is_active' => true,
@@ -188,7 +189,7 @@ class AuthenticationAuditTrailTest extends TestCase
 
     public function test_logout_creates_activity_log_entry(): void
     {
-        $user = User::factory()->create(['is_active' => true]);
+        $user = User::factory()->teacher()->create(['is_active' => true]);
 
         $this->actingAs($user, 'sanctum')
              ->postJson('/api/v1/logout')
@@ -203,7 +204,7 @@ class AuthenticationAuditTrailTest extends TestCase
     public function test_logout_activity_log_contains_correct_user_and_org(): void
     {
         $org  = Organization::factory()->create(['is_active' => true]);
-        $user = User::factory()->create([
+        $user = User::factory()->teacher()->create([
             'role'            => User::ROLE_TEACHER,
             'organization_id' => $org->id,
             'is_active'       => true,
@@ -224,7 +225,7 @@ class AuthenticationAuditTrailTest extends TestCase
 
     public function test_each_login_produces_a_separate_audit_entry(): void
     {
-        $user = User::factory()->create([
+        $user = User::factory()->teacher()->create([
             'phone'     => '+998901110008',
             'password'  => Hash::make('Password1'),
             'is_active' => true,

@@ -3,44 +3,43 @@
 namespace App\Http\Controllers;
 
 use App\Models\ActivityLog;
-use App\Models\Organization;
-use App\Models\User;
+use App\Services\AuthService;
+use App\Services\MobileSessionService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
+use Laravel\Sanctum\PersonalAccessToken;
 
 class AuthController extends Controller
 {
+    public function __construct(private AuthService $auth, private MobileSessionService $mobile) {}
+
     public function login(Request $request): JsonResponse
     {
+        // «login» — telefon yoki username (web). «phone» — eski klientlar uchun (orqaga moslik).
         $request->validate([
-            'phone'    => ['required', 'string'],
+            'login'    => ['required_without:phone', 'nullable', 'string', 'max:64'],
+            'phone'    => ['required_without:login', 'nullable', 'string', 'max:64'],
             'password' => ['required', 'string'],
         ]);
+        $field = $request->filled('login') ? 'login' : 'phone';
 
-        $user = User::where('phone', $request->phone)
-                    ->where('is_active', true)
-                    ->first();
-
-        if (! $user || ! Hash::check($request->password, $user->password)) {
+        // Faol bo'lmagan foydalanuvchi yoki bog'cha uchun ham bir xil umumiy xato
+        $user = $this->auth->attempt((string) $request->input($field), $request->password);
+        if (! $user) {
             throw ValidationException::withMessages([
-                'phone' => ['Telefon raqami yoki parol noto\'g\'ri.'],
+                $field => [$field === 'login' ? 'Login yoki parol noto\'g\'ri.' : 'Telefon raqami yoki parol noto\'g\'ri.'],
             ]);
         }
 
-        // Reject login for users belonging to a deactivated organization.
-        // Generic error prevents org-status enumeration by attackers.
-        if ($user->organization_id !== null) {
-            $orgActive = Organization::where('id', $user->organization_id)
-                                     ->where('is_active', true)
-                                     ->exists();
-            if (! $orgActive) {
-                throw ValidationException::withMessages([
-                    'phone' => ['Telefon raqami yoki parol noto\'g\'ri.'],
-                ]);
-            }
+        // Ota-onalar uchun web panel yo'q — ular KIDDO mobil ilovasidan (/v1/mobile/login) foydalanadi.
+        // Parol to'g'ri bo'lsa ham web sessiya (cookie token) yaratilmaydi.
+        if ($user->isParent()) {
+            return response()->json([
+                'message' => "Ota-onalar KIDDO mobil ilovasidan foydalanadi. Ilovaga shu login va parol bilan kiring.",
+                'code'    => 'parent_mobile_only',
+            ], 403);
         }
 
         $user->update(['last_login_at' => now()]);
@@ -54,13 +53,13 @@ class AuthController extends Controller
             $request->ip()
         );
 
-        // Revoke previous tokens on new login (one session per user for MVP)
-        $user->tokens()->delete();
+        // Web: bitta faol sessiya. Mobil qurilma sessiyalari mustaqil — ularga tegilmaydi.
+        $this->mobile->webTokens($user)->delete();
 
         $token = $user->createToken('kiddo-app', [$user->role])->plainTextToken;
 
         return response()->json([
-            'user' => $this->userResource($user),
+            'user' => $this->auth->userResource($user),
         ])->cookie(
             'kiddo_token',
             $token,
@@ -79,8 +78,11 @@ class AuthController extends Controller
         $user  = $request->user();
         $token = $user->currentAccessToken();
 
-        // currentAccessToken() returns a transient object in tests (no DB token)
-        if ($token && method_exists($token, 'delete')) {
+        if ($token instanceof PersonalAccessToken && MobileSessionService::isAccessToken($token)) {
+            // Mobil access token bilan chiqish butun qurilma sessiyasini (refresh token bilan) bekor qiladi
+            $this->mobile->revoke($user, MobileSessionService::sessionId($token));
+        } elseif ($token && method_exists($token, 'delete')) {
+            // currentAccessToken() returns a transient object in tests (no DB token)
             $token->delete();
         }
 
@@ -97,23 +99,39 @@ class AuthController extends Controller
             ->withoutCookie('kiddo_token');
     }
 
-    public function me(Request $request): JsonResponse
+    /**
+     * O'z parolini almashtirish (vaqtinchalik paroldan keyin majburiy). Joriy sessiya saqlanadi,
+     * boshqa qurilmalardagi sessiyalar bekor qilinadi.
+     */
+    public function changePassword(Request $request): JsonResponse
     {
+        $user = $request->user();
+
+        $data = $request->validate([
+            'current_password' => ['required', 'string'],
+            'password'         => ['required', 'string', 'min:8', 'max:128', 'confirmed', 'different:current_password'],
+        ], [
+            'password.min'       => "Yangi parol kamida 8 belgidan iborat bo'lsin.",
+            'password.confirmed' => "Yangi parol va uning takrori mos kelmadi.",
+            'password.different' => "Yangi parol joriy paroldan farq qilishi kerak.",
+        ]);
+
+        if (! Hash::check($data['current_password'], $user->password)) {
+            throw ValidationException::withMessages(['current_password' => ["Joriy parol noto'g'ri."]]);
+        }
+
+        $this->auth->changePassword($user, $data['password'], $request->ip());
+
         return response()->json([
-            'user' => $this->userResource($request->user()),
+            'message' => "Parol muvaffaqiyatli almashtirildi.",
+            'user'    => $this->auth->userResource($user->fresh()),
         ]);
     }
 
-    private function userResource(User $user): array
+    public function me(Request $request): JsonResponse
     {
-        return [
-            'id'              => $user->id,
-            'name'            => $user->name,
-            'phone'           => $user->phone,
-            'email'           => $user->email,
-            'role'            => $user->role,
-            'organization_id' => $user->organization_id,
-            'is_active'       => $user->is_active,
-        ];
+        return response()->json([
+            'user' => $this->auth->userResource($request->user()),
+        ]);
     }
 }

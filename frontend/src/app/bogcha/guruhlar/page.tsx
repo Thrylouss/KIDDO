@@ -2,6 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
+import { errorMessage, fieldErrors } from "@/lib/apiErrors";
+import { IS_DEMO } from "@/lib/demo-data";
+import ConfirmDialog from "@/components/ConfirmDialog";
 import Badge from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
@@ -10,6 +13,7 @@ import EmptyState from "@/components/ui/EmptyState";
 import PageHeader from "@/components/ui/PageHeader";
 import type { ApiResponse, Group } from "@/types";
 import uz from "@/i18n/uz";
+import { useReadOnly } from "@/lib/readOnly";
 
 interface GroupForm {
   name:         string;
@@ -25,7 +29,14 @@ const groupIcon = (
   </svg>
 );
 
-function GroupCard({ group }: { group: Group }) {
+interface GroupCardProps {
+  group:    Group;
+  /** Berilmasa (faqat ko'rish rejimi) — tugma ko'rsatilmaydi */
+  onEdit?:   () => void;
+  onDelete?: () => void;
+}
+
+function GroupCard({ group, onEdit, onDelete }: GroupCardProps) {
   const count    = group.children_count ?? 0;
   const capacity = group.capacity;
   const pct      = capacity ? Math.min(100, Math.round((count / capacity) * 100)) : null;
@@ -50,7 +61,7 @@ function GroupCard({ group }: { group: Group }) {
             {group.age_category ? (
               <p className="text-xs text-[#B8AAB2] mt-0.5">{group.age_category}</p>
             ) : (
-              <p className="text-xs text-[#D9C9D1] mt-0.5">— yosh oralig&apos;i ko&apos;rsatilmagan</p>
+              <p className="text-xs text-[#D9C9D1] mt-0.5">{uz.guruhlar.yosh_korsatilmagan}</p>
             )}
           </div>
         </div>
@@ -89,6 +100,12 @@ function GroupCard({ group }: { group: Group }) {
           <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
         </svg>
         {group.teacher_profiles_count ?? 0} {uz.dashboard.tarbiyachi}
+        {(onEdit || onDelete) && (
+          <div className="ml-auto flex gap-1.5">
+            {onEdit && <Button size="sm" variant="ghost" onClick={onEdit} aria-label={`${uz.common.tahrirlash}: ${group.name}`}>{uz.common.tahrirlash}</Button>}
+            {onDelete && <Button size="sm" variant="ghost" onClick={onDelete} aria-label={`${uz.common.ochirish}: ${group.name}`}>{uz.common.ochirish}</Button>}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -113,6 +130,7 @@ function SkeletonCard() {
 }
 
 export default function GuruhlarPage() {
+  const readOnly = useReadOnly();
   const [groups,  setGroups]  = useState<Group[]>([]);
   const [loading, setLoading] = useState(true);
   const [error,   setError]   = useState(false);
@@ -121,6 +139,10 @@ export default function GuruhlarPage() {
   const [form,       setForm]       = useState<GroupForm>(emptyForm);
   const [saving,     setSaving]     = useState(false);
   const [formErrors, setFormErrors] = useState<Record<string, string[]>>({});
+  const [formError,  setFormError]  = useState("");
+  const [editing,    setEditing]    = useState<Group | null>(null);
+  const [deleting,   setDeleting]   = useState<Group | null>(null);
+  const [success,    setSuccess]    = useState("");
 
   async function load() {
     setError(false);
@@ -137,30 +159,67 @@ export default function GuruhlarPage() {
 
   useEffect(() => { load(); }, []);
 
+  function openCreate() {
+    setSuccess("");
+    setEditing(null);
+    setForm(emptyForm);
+    setShowModal(true);
+  }
+
+  function openEdit(group: Group) {
+    setSuccess("");
+    setEditing(group);
+    setForm({
+      name:         group.name,
+      age_category: group.age_category ?? "",
+      capacity:     group.capacity ? String(group.capacity) : "",
+    });
+    setShowModal(true);
+  }
+
   function closeModal() {
     setShowModal(false);
+    setEditing(null);
     setForm(emptyForm);
     setFormErrors({});
+    setFormError("");
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (saving) return;
     setFormErrors({});
+    setFormError("");
     setSaving(true);
+    const body = {
+      name:         form.name,
+      age_category: form.age_category || null,
+      capacity:     form.capacity ? parseInt(form.capacity) : null,
+    };
     try {
-      await api.post("/v1/admin/groups", {
-        name:         form.name,
-        age_category: form.age_category || null,
-        capacity:     form.capacity ? parseInt(form.capacity) : null,
-      });
+      if (editing) {
+        if (IS_DEMO) return;
+        await api.put(`/v1/admin/groups/${editing.id}`, body);
+        setSuccess(uz.guruhlar.yangilandi);
+      } else {
+        await api.post("/v1/admin/groups", body);
+      }
       closeModal();
       await load();
     } catch (err: unknown) {
-      const e = err as { data?: { errors?: Record<string, string[]> } };
-      if (e?.data?.errors) setFormErrors(e.data.errors);
+      setFormErrors(fieldErrors(err));
+      setFormError(errorMessage(err));
     } finally {
       setSaving(false);
     }
+  }
+
+  async function confirmDelete() {
+    if (!deleting) return;
+    await api.delete(`/v1/admin/groups/${deleting.id}`);
+    setDeleting(null);
+    setSuccess(uz.guruhlar.ochirildi);
+    await load();
   }
 
   return (
@@ -168,8 +227,8 @@ export default function GuruhlarPage() {
       <PageHeader
         title={uz.guruhlar.sarlavha}
         description="Bog'chadagi barcha guruhlar"
-        action={
-          <Button onClick={() => setShowModal(true)} icon={
+        action={readOnly ? undefined :
+          <Button onClick={openCreate} icon={
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
             </svg>
@@ -178,6 +237,10 @@ export default function GuruhlarPage() {
           </Button>
         }
       />
+
+      {success && (
+        <p role="status" className="mb-4 rounded-lg bg-[var(--success-bg)] text-[var(--success)] text-sm px-4 py-2.5">{success}</p>
+      )}
 
       {loading ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -193,13 +256,18 @@ export default function GuruhlarPage() {
             icon={groupIcon}
             title={uz.guruhlar.bosh_sarlavha}
             description={uz.guruhlar.bosh_tavsif}
-            action={{ label: `+ ${uz.guruhlar.qoshish}`, onClick: () => setShowModal(true) }}
+            action={readOnly ? undefined : { label: `+ ${uz.guruhlar.qoshish}`, onClick: openCreate }}
           />
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {groups.map((g) => (
-            <GroupCard key={g.id} group={g} />
+            <GroupCard
+              key={g.id}
+              group={g}
+              onEdit={readOnly ? undefined : () => openEdit(g)}
+              onDelete={readOnly ? undefined : () => { setSuccess(""); setDeleting(g); }}
+            />
           ))}
         </div>
       )}
@@ -207,16 +275,19 @@ export default function GuruhlarPage() {
       <Modal
         open={showModal}
         onClose={closeModal}
-        title={uz.guruhlar.qoshish}
+        title={editing ? uz.guruhlar.tahrirlash : uz.guruhlar.qoshish}
         size="sm"
         footer={
           <>
             <Button variant="secondary" onClick={closeModal}>{uz.common.bekor_qilish}</Button>
-            <Button form="group-form" type="submit" loading={saving}>{uz.common.saqlash}</Button>
+            <Button form="group-form" type="submit" loading={saving} disabled={!!editing && IS_DEMO}>{uz.common.saqlash}</Button>
           </>
         }
       >
         <form id="group-form" onSubmit={handleSubmit} className="space-y-4">
+          {editing && IS_DEMO && (
+            <p role="note" className="rounded-lg bg-[#FFFBEB] border border-[#FDE68A] text-[#92400E] text-sm px-3 py-2">{uz.common.demo_saqlanmaydi}</p>
+          )}
           <Input
             label={uz.guruhlar.nomi}
             value={form.name}
@@ -241,8 +312,19 @@ export default function GuruhlarPage() {
             placeholder="20"
             error={formErrors.capacity?.[0]}
           />
+          {formError && <p role="alert" className="text-sm text-[#B91C1C]">{formError}</p>}
         </form>
       </Modal>
+
+      <ConfirmDialog
+        open={!!deleting}
+        title={`${uz.guruhlar.ochirish}: ${deleting?.name ?? ""}`}
+        message={`${uz.guruhlar.ochirish_tasdiqi} ${uz.guruhlar.ochirish_izoh}`}
+        confirmLabel={uz.common.ochirish}
+        danger
+        onConfirm={confirmDelete}
+        onClose={() => setDeleting(null)}
+      />
     </div>
   );
 }

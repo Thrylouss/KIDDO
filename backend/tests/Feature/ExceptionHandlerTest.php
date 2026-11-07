@@ -134,4 +134,46 @@ class ExceptionHandlerTest extends TestCase
         $this->assertArrayNotHasKey('exception', $json);
         $this->assertArrayNotHasKey('trace', $json);
     }
+
+    public function test_abort_403_response_does_not_expose_exception_class_or_trace(): void
+    {
+        // AdminController::orgId() — super-admin X-Impersonated-Org sarlavhasisiz → abort(403)
+        $superAdmin = User::factory()->create(['role' => User::ROLE_SUPER_ADMIN, 'organization_id' => null]);
+
+        $response = $this->actingAs($superAdmin, 'sanctum')->getJson('/api/v1/admin/children');
+
+        $response->assertForbidden()->assertExactJson(['message' => "Bog'cha ID noto'g'ri."]);
+    }
+
+    public function test_policy_403_response_does_not_expose_exception_class_or_trace(): void
+    {
+        // AttendancePolicy::mark — Gate::authorize() AuthorizationException tashlaydi
+        $org     = \App\Models\Organization::factory()->create();
+        $teacher = User::factory()->teacher()->create(['organization_id' => $org->id]);
+        $profile = \App\Models\TeacherProfile::factory()->create(['user_id' => $teacher->id, 'organization_id' => $org->id]);
+        $group   = \App\Models\Group::factory()->create(['organization_id' => $org->id]);
+        $profile->groups()->attach($group->id, ['assigned_at' => now()->toDateString()]);
+        $child   = \App\Models\Child::factory()->inGroup($group)->create();
+
+        $response = $this->actingAs($teacher, 'sanctum')->putJson('/api/v1/teacher/attendance', [
+            'date'     => now('Asia/Tashkent')->subDays(10)->toDateString(),
+            'group_id' => $group->id,
+            'records'  => [['child_id' => $child->id, 'status' => 'present']],
+        ]);
+
+        $response->assertForbidden()
+                 ->assertExactJson(['message' => "Bu sana uchun davomatni o'zgartirish muddati tugagan."]);
+    }
+
+    public function test_accept_sarlavhasisiz_autentifikatsiyasiz_sorov_500_emas_401(): void
+    {
+        // Ilgari Authenticate middleware route('login') ga yo'naltirmoqchi bo'lib 500 berardi
+        foreach (['/api/v1/me', '/api/v1/admin/children', '/api/v1/parent/children', '/api/v1/teacher/daily'] as $url) {
+            $this->get($url)
+                 ->assertStatus(401)
+                 ->assertExactJson(['message' => 'Tizimga kirishingiz kerak.']);
+        }
+
+        $this->withHeaders(['Authorization' => 'Bearer 1|notogri'])->get('/api/v1/me')->assertStatus(401);
+    }
 }

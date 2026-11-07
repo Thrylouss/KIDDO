@@ -36,7 +36,7 @@ vi.mock("next/link", () => ({
 // ── Fixtures ───────────────────────────────────────────────────────────────────
 
 const MOCK_ORGS = [
-  { id: 12, name: "Baxt bog'chasi",     phone: "+998711001012", address: "Qarshi",   is_active: true,  created_at: "2025-10-15T09:00:00Z", admin: { id: 112, name: "Lola Ismoilova", phone: "+998901110012" }, subscription: { id: 12, status: "trial",  ends_at: "2026-11-20", trial_ends_at: "2026-11-20", days_remaining: 24, plan: { id: 2, name: "Premium" } } },
+  { id: 12, name: "Baxt bog'chasi",     phone: "+998711001012", address: "Qarshi",   is_active: true,  created_at: "2025-10-15T09:00:00Z", admin: { id: 112, name: "Lola Ismoilova", phone: "+998901110012" }, children_count: 37, groups_count: 3, teachers_count: 4, subscription: { id: 12, status: "trial",  ends_at: "2026-11-20", trial_ends_at: "2026-11-20", days_remaining: 24, plan: { id: 2, name: "Premium" } } },
   { id: 11, name: "Armon bog'chasi",    phone: "+998711001011", address: "Jizzax",   is_active: false, created_at: "2025-10-05T09:00:00Z", admin: { id: 111, name: "Husayn Tursunov", phone: "+998901110011" }, subscription: { id: 11, status: "expired", ends_at: "2026-09-01", trial_ends_at: null, days_remaining: 0,  plan: { id: 1, name: "Asosiy" } } },
   { id: 3,  name: "Bahor bog'chasi",    phone: "+998711001003", address: "Samarqand",is_active: true,  created_at: "2025-03-05T09:00:00Z", admin: { id: 103, name: "Sarvarbek Toshmatov", phone: "+998901110003" }, subscription: { id: 3,  status: "active",  ends_at: "2026-11-05", trial_ends_at: null, days_remaining: 9,  plan: { id: 1, name: "Asosiy" } } },
 ];
@@ -65,6 +65,13 @@ beforeEach(() => {
   vi.mocked(api.delete).mockResolvedValue(undefined);
 });
 
+// Wizard: majburiy maydonlar (nomi, turi) → oxirgi qadamgacha «Keyingi»
+function fillAndGoToLastStep() {
+  fireEvent.change(screen.getByLabelText(/Nomi \*/i), { target: { value: "Test bog'chasi" } });
+  fireEvent.click(screen.getByLabelText("Davlat"));
+  for (let i = 0; i < 4; i++) fireEvent.submit(document.getElementById("org-form")!);
+}
+
 // Helper: render va bog'chalar ko'ringuncha kut
 // Sahifa mobile (sm:hidden) va desktop (hidden sm:block) ikkalasini render qiladi,
 // shuning uchun har bir ism DOM da ikki marta uchraydi — getAllByText ishlatiladi.
@@ -92,10 +99,10 @@ describe("BogchalarPage — Demo rejimi (IS_DEMO=true)", () => {
       expect(calls.some(p => p.startsWith("/v1/super-admin/organizations"))).toBe(true);
     });
 
-    it("api.get plans endpointi bilan ham chaqiriladi", async () => {
+    it("taqdimot doirasida tariflar endpointi chaqirilmaydi (BILLING_ENABLED=false)", async () => {
       await renderAndWait();
       const calls = vi.mocked(api.get).mock.calls.map(c => c[0] as string);
-      expect(calls.some(p => p.startsWith("/v1/super-admin/plans"))).toBe(true);
+      expect(calls.some(p => p.startsWith("/v1/super-admin/plans"))).toBe(false);
     });
 
     it("sahifa yuklanganda hech qanday write operatsiya bajarilmaydi", async () => {
@@ -112,10 +119,13 @@ describe("BogchalarPage — Demo rejimi (IS_DEMO=true)", () => {
       expect(screen.getAllByText("Sarvarbek Toshmatov").length).toBeGreaterThan(0);
     });
 
-    it("obuna holat badge larini ko'rsatadi", async () => {
+    it("obuna badge lari o'rniga bolalar/guruhlar/tarbiyachilar sonini ko'rsatadi", async () => {
       await renderAndWait();
-      expect(screen.getAllByText("Sinov").length).toBeGreaterThan(0);
-      expect(screen.getAllByText("Muddati tugagan").length).toBeGreaterThan(0);
+      expect(screen.queryByText("Sinov")).toBeNull();
+      expect(screen.queryByText("Muddati tugagan")).toBeNull();
+      expect(screen.getByRole("columnheader", { name: "Bolalar" })).toBeTruthy();
+      expect(screen.getByRole("columnheader", { name: "Tarbiyachilar" })).toBeTruthy();
+      expect(screen.getAllByText("37").length).toBeGreaterThan(0);
     });
   });
 
@@ -130,8 +140,9 @@ describe("BogchalarPage — Demo rejimi (IS_DEMO=true)", () => {
       await renderAndWait();
       fireEvent.click(screen.getByText("Bog'cha qo'shish"));
       await waitFor(() => expect(screen.getByText("Demo rejimi — ma'lumotlar saqlanmaydi, amallar simulyatsiya qilinadi.")).toBeTruthy());
-      // Saqlash tugmasi ko'rinishi kerak
-      expect(screen.getByRole("button", { name: /saqlash/i })).toBeTruthy();
+      // Bosqichma-bosqich forma: oxirgi qadamda «Bog'chani yaratish» tugmasi
+      fillAndGoToLastStep();
+      expect(screen.getByRole("button", { name: /Bog'chani yaratish/i })).toBeTruthy();
     });
 
     it("form yuborilganda api.post chaqiriladi", async () => {
@@ -140,7 +151,7 @@ describe("BogchalarPage — Demo rejimi (IS_DEMO=true)", () => {
       await waitFor(() => screen.getByText("Demo rejimi — ma'lumotlar saqlanmaydi, amallar simulyatsiya qilinadi."));
 
       // Majburiy "Nomi" maydonini to'ldirish
-      fireEvent.change(screen.getByLabelText(/Nomi \*/i), { target: { value: "Test bog'chasi" } });
+      fillAndGoToLastStep();
       fireEvent.submit(document.getElementById("org-form")!);
 
       await waitFor(() => expect(vi.mocked(api.post)).toHaveBeenCalledOnce());
@@ -155,7 +166,7 @@ describe("BogchalarPage — Demo rejimi (IS_DEMO=true)", () => {
       fireEvent.click(screen.getByText("Bog'cha qo'shish"));
       await waitFor(() => screen.getByText("Demo rejimi — ma'lumotlar saqlanmaydi, amallar simulyatsiya qilinadi."));
 
-      fireEvent.change(screen.getByLabelText(/Nomi \*/i), { target: { value: "Test bog'chasi" } });
+      fillAndGoToLastStep();
       fireEvent.submit(document.getElementById("org-form")!);
 
       await waitFor(() => expect(vi.mocked(api.post)).toHaveBeenCalled());
@@ -163,12 +174,11 @@ describe("BogchalarPage — Demo rejimi (IS_DEMO=true)", () => {
       expect(screen.queryByText(/server xato|server_xato/i)).toBeNull();
     });
 
-    it("tarif qo'shish formida plan tanlovlari ko'rinadi", async () => {
+    it("bog'cha qo'shish formida obuna/tarif bo'limi yashirilgan", async () => {
       await renderAndWait();
       fireEvent.click(screen.getByText("Bog'cha qo'shish"));
       await waitFor(() => screen.getByText("Demo rejimi — ma'lumotlar saqlanmaydi, amallar simulyatsiya qilinadi."));
-      // Plans dropdown bo'lishi kerak
-      expect(screen.getByText("— Tarif tanlang —")).toBeTruthy();
+      expect(screen.queryByText("— Tarif tanlang —")).toBeNull();
     });
   });
 

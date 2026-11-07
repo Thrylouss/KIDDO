@@ -5,6 +5,7 @@ namespace App\Http\Controllers\SuperAdmin;
 use App\Models\ActivityLog;
 use App\Models\Organization;
 use App\Models\User;
+use App\Services\AccountProvisioningService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -179,27 +180,42 @@ class UserController extends SuperAdminController
         ]);
     }
 
-    public function resetPassword(Request $request, int $id): JsonResponse
+    /**
+     * Parol berilsa — o'sha (eski klientlar); berilmasa tizim vaqtinchalik parol yaratadi (javobda bir marta),
+     * foydalanuvchi keyingi kirishda uni almashtiradi. Ikkala holatda ham barcha sessiyalar bekor qilinadi.
+     */
+    public function resetPassword(Request $request, int $id, AccountProvisioningService $accounts): JsonResponse
     {
         $user = User::findOrFail($id);
 
         $data = $request->validate([
-            'password' => 'required|string|min:8',
+            'password' => 'nullable|string|min:8',
         ]);
 
-        $user->update(['password' => Hash::make($data['password'])]);
-        $user->tokens()->delete();
+        if (! empty($data['password'])) {
+            $user->update(['password' => Hash::make($data['password'])]);
+            $user->tokens()->delete();
 
-        ActivityLog::record(
-            'user.password_reset',
-            "Foydalanuvchi paroli yangilandi: #{$user->id} {$user->name}",
-            $request->user()->id,
-            $user->organization_id,
-            ['target_user_id' => $user->id],
-            $request->ip()
-        );
+            ActivityLog::record(
+                'user.password_reset',
+                "Foydalanuvchi paroli yangilandi: #{$user->id} {$user->name}",
+                $request->user()->id,
+                $user->organization_id,
+                ['target_user_id' => $user->id],
+                $request->ip()
+            );
+            $temporary = null;
+        } else {
+            $temporary = $accounts->resetPassword($user, null, $request->user(), $request->ip());
+        }
 
-        return response()->json(['message' => 'Parol muvaffaqiyatli yangilandi.']);
+        return response()->json([
+            'message' => 'Parol muvaffaqiyatli yangilandi.',
+            'data'    => array_filter([
+                'login'              => $user->username ?? $user->phone ?? $user->email,
+                'temporary_password' => $temporary,
+            ]),
+        ]);
     }
 
     private function formatUser(User $user): array
@@ -207,6 +223,7 @@ class UserController extends SuperAdminController
         return [
             'id'            => $user->id,
             'name'          => $user->name,
+            'username'      => $user->username,
             'phone'         => $user->phone,
             'email'         => $user->email,
             'role'          => $user->role,

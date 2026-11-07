@@ -92,6 +92,8 @@ class TeacherTest extends TestCase
         $this->actingAs($admin, 'sanctum')
              ->postJson('/api/v1/admin/teachers', [])
              ->assertUnprocessable()
-             ->assertJsonValidationErrors(['first_name', 'last_name', 'phone', 'password']);
+             // Parol majburiy emas — berilmasa tizim vaqtinchalik parol yaratadi; login (username yoki telefon) majburiy
+             ->assertJsonValidationErrors(['first_name', 'last_name', 'phone'])
+             ->assertJsonMissingValidationErrors(['password']);
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -18,11 +19,16 @@ class User extends Authenticatable
     const ROLE_TEACHER     = 'teacher';
     const ROLE_PARENT      = 'parent';
 
+    /** Username: lotin harfi bilan boshlanadi — telefon raqami bilan hech qachon chalkashmaydi. */
+    public const USERNAME_PATTERN = '/^[a-z][a-z0-9._-]{1,31}$/';
+
     protected $fillable = [
         'name',
+        'username',
         'phone',
         'email',
         'password',
+        'must_change_password',
         'role',
         'organization_id',
         'is_active',
@@ -40,8 +46,15 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'last_login_at'     => 'datetime',
             'password'          => 'hashed',
+            'must_change_password' => 'boolean',
             'is_active'         => 'boolean',
         ];
+    }
+
+    /** Username kichik harflarda saqlanadi (kirishda katta-kichik harf farqi yo'q). */
+    protected function username(): Attribute
+    {
+        return Attribute::make(set: fn (?string $v) => $v === null ? null : mb_strtolower(trim($v)));
     }
 
     // ── Relationships ──────────────────────────────────────────────
@@ -81,5 +94,16 @@ class User extends Authenticatable
     public function isParent(): bool
     {
         return $this->role === self::ROLE_PARENT;
+    }
+
+    /** Foydalanuvchi va (bo'lsa) uning bog'chasi faol — login va har bir token so'rovida tekshiriladi. */
+    public function canAuthenticate(): bool
+    {
+        if (! $this->is_active) {
+            return false;
+        }
+
+        return $this->organization_id === null
+            || Organization::whereKey($this->organization_id)->where('is_active', true)->exists();
     }
 }

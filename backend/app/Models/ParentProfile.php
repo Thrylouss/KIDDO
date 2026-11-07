@@ -11,6 +11,8 @@ class ParentProfile extends Model
 {
     use HasFactory;
 
+    const RELATION_TYPES = ['ona', 'ota', 'vasiy'];
+
     protected $fillable = [
         'user_id',
         'organization_id',

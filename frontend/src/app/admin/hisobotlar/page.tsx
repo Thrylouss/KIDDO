@@ -2,6 +2,8 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { api } from "@/lib/api";
+import { formatUzDate, localIsoDate } from "@/lib/dates";
+import { BILLING_ENABLED } from "@/lib/features";
 import Badge from "@/components/ui/Badge";
 import uz from "@/i18n/uz";
 import type {
@@ -19,14 +21,16 @@ function fmt(amount: number, currency = "UZS"): string {
   return `${Number(amount).toLocaleString("uz-UZ")} ${currency}`;
 }
 
+// Mahalliy sana va o'zbekcha format (toLocaleDateString("uz-UZ") brauzerda «2026 M11 5» ko'rinishini berardi)
 function fmtDate(iso: string | null): string {
   if (!iso) return "—";
-  return new Date(iso).toLocaleDateString("uz-UZ", { year: "numeric", month: "short", day: "numeric" });
+  return formatUzDate(/^\d{4}-\d{2}-\d{2}$/.test(iso) ? iso : localIsoDate(new Date(iso)));
 }
 
 function getPresetRange(preset: string): [string, string] {
   const now = new Date();
-  const pad = (d: Date) => d.toISOString().split("T")[0];
+  // UTC emas — mahalliy sana (Toshkentda oy boshi oldingi kunga siljimasin)
+  const pad = (d: Date) => localIsoDate(d);
   switch (preset) {
     case "bugun":      return [pad(now), pad(now)];
     case "shu_hafta": {
@@ -499,7 +503,7 @@ function OrganizationsTab({ dateFrom, dateTo, plans }: { dateFrom: string; dateT
   return (
     <div className="space-y-6">
       {/* Plan filter */}
-      <div className="flex items-center gap-3">
+      {BILLING_ENABLED && <div className="flex items-center gap-3">
         <label className="text-sm text-[#766B73]">{uz.super_admin.filter_plan}:</label>
         <select
           value={planFilter}
@@ -509,20 +513,26 @@ function OrganizationsTab({ dateFrom, dateTo, plans }: { dateFrom: string; dateT
           <option value="">{uz.common.hammasi}</option>
           {plans.map((p) => <option key={p.id} value={String(p.id)}>{p.name}</option>)}
         </select>
-      </div>
+      </div>}
 
       {/* KPIs */}
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
         <KpiCard title={uz.super_admin.jami_bogchalar}           value={counts.total}                sub="Jami ro'yxatda" />
         <KpiCard title={uz.super_admin.faol_bogchalar}           value={counts.active}               sub="Faol" accent />
-        <KpiCard title={uz.super_admin.nofaol_bogchalar}         value={counts.inactive}             />
+        <KpiCard title={uz.super_admin.nofaol_bogchalar}         value={counts.inactive}
+          sub={counts.suspended ? `${uz.super_admin.toxtatilgan_soni}: ${counts.suspended}` : undefined} />
         <KpiCard title={uz.super_admin.yangi_bogchalar}          value={counts.new_in_period}        sub="Tanlangan davrda" />
-        <KpiCard title={uz.super_admin.tollanmagan_invoice_bor}  value={counts.with_unpaid_invoices} />
-        <KpiCard title={uz.super_admin.tugagan_obuna_bor}        value={counts.with_expired_subs}    />
+        {BILLING_ENABLED && <KpiCard title={uz.super_admin.tollanmagan_invoice_bor}  value={counts.with_unpaid_invoices} />}
+        {BILLING_ENABLED && <KpiCard title={uz.super_admin.tugagan_obuna_bor}        value={counts.with_expired_subs}    />}
       </div>
 
+      <p data-testid="hisob-qoidasi" className="text-xs text-[#766B73]">
+        {uz.super_admin.hisob_qoidasi}
+        {(counts.archived ?? 0) > 0 && <> · {counts.archived} {uz.super_admin.arxiv_izoh}</>}
+      </p>
+
       {/* Plan distribution */}
-      {data.plan_distribution.length > 0 && (
+      {BILLING_ENABLED && data.plan_distribution.length > 0 && (
         <div className="bg-white rounded-xl border border-[#EDE3E8] p-5">
           <p className="text-sm font-semibold text-[#29232A] mb-4">{uz.super_admin.tarif_taqsimoti}</p>
           <div className="space-y-3">
@@ -675,7 +685,8 @@ const PRESETS = [
 type Tab = "umumiy" | "daromad" | "obunalar" | "tashkilotlar" | "foydalanuvchilar";
 
 export default function HisobotlarPage() {
-  const [activeTab, setActiveTab]         = useState<Tab>("umumiy");
+  // Billing o'chiq bo'lsa (MVP) — faqat tashkilotlar va foydalanuvchilar hisobotlari
+  const [activeTab, setActiveTab]         = useState<Tab>(BILLING_ENABLED ? "umumiy" : "tashkilotlar");
   const [preset, setPreset]               = useState("shu_oy");
   const [dateFrom, setDateFrom]           = useState(() => getPresetRange("shu_oy")[0]);
   const [dateTo, setDateTo]               = useState(() => getPresetRange("shu_oy")[1]);
@@ -686,6 +697,7 @@ export default function HisobotlarPage() {
   const [appliedTo, setAppliedTo]         = useState(dateTo);
 
   useEffect(() => {
+    if (!BILLING_ENABLED) return;
     api.get<{ data: Plan[] }>("/v1/super-admin/plans")
       .then((res) => setPlans(res.data ?? []))
       .catch(() => {});
@@ -710,13 +722,14 @@ export default function HisobotlarPage() {
     setDateTo(customTo);
   }
 
-  const TABS: { key: Tab; label: string }[] = [
-    { key: "umumiy",          label: uz.super_admin.umumiy },
-    { key: "daromad",         label: uz.super_admin.daromad_hisoboti },
-    { key: "obunalar",        label: uz.super_admin.obuna_hisoboti },
+  const ALL_TABS: { key: Tab; label: string; billing?: true }[] = [
+    { key: "umumiy",          label: uz.super_admin.umumiy, billing: true },
+    { key: "daromad",         label: uz.super_admin.daromad_hisoboti, billing: true },
+    { key: "obunalar",        label: uz.super_admin.obuna_hisoboti, billing: true },
     { key: "tashkilotlar",    label: uz.super_admin.tashkilot_hisoboti },
     { key: "foydalanuvchilar",label: uz.super_admin.foydalanuvchi_hisoboti },
   ];
+  const TABS = ALL_TABS.filter((t) => BILLING_ENABLED || !t.billing);
 
   return (
     <div className="max-w-6xl mx-auto space-y-6">

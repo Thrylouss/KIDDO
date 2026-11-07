@@ -115,3 +115,33 @@ body {
   -webkit-box-shadow: 0 0 0px 1000px #fff inset;
   transition: background-color 9999s ease-in-out 0s;
 }
+
+/* ── Landing (public sahifa) ───────────────────────────────────────────── */
+@keyframes landing-rise {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes landing-float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-10px); }
+}
+@keyframes landing-drift {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50%      { transform: translate(24px, -18px) scale(1.06); }
+}
+.landing-rise   { animation: landing-rise 0.9s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.landing-float  { animation: landing-float 7s ease-in-out infinite; }
+.landing-drift  { animation: landing-drift 16s ease-in-out infinite; }
+.landing-text-gradient {
+  background: linear-gradient(120deg, #8F3158 0%, #D95F87 55%, #8F3158 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+@media (prefers-reduced-motion: reduce) {
+  .landing-rise, .landing-float, .landing-drift { animation: none; }
+}
+html:has(.kiddo-landing) { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) {
+  html:has(.kiddo-landing) { scroll-behavior: auto; }
+}

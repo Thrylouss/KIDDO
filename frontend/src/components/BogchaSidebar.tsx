@@ -1,9 +1,11 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { impersonation } from "@/lib/api";
+import { roleLabel } from "@/lib/roles";
 import Avatar from "@/components/ui/Avatar";
 import uz from "@/i18n/uz";
 
@@ -92,8 +94,8 @@ const sections: NavSection[] = [
     label: uz.sidebar.kunlik_faoliyat,
     items: [
       {
+        href: "/bogcha/davomat",
         label: uz.nav.davomat,
-        disabled: true,
         icon: (
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
             <path strokeLinecap="round" strokeLinejoin="round"
@@ -102,32 +104,13 @@ const sections: NavSection[] = [
         ),
       },
       {
-        label: uz.nav.ovqat,
-        disabled: true,
+        // Ovqatlanish, uyqu va mashg'ulotlar bitta sahifada (bo'limlar)
+        href: "/bogcha/kundalik",
+        label: uz.nav.kundalik,
         icon: (
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
             <path strokeLinecap="round" strokeLinejoin="round"
-              d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-          </svg>
-        ),
-      },
-      {
-        label: uz.nav.uyqu,
-        disabled: true,
-        icon: (
-          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
-            <path strokeLinecap="round" strokeLinejoin="round"
-              d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-          </svg>
-        ),
-      },
-      {
-        label: uz.nav.mashgulotlar,
-        disabled: true,
-        icon: (
-          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
-            <path strokeLinecap="round" strokeLinejoin="round"
-              d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+              d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
           </svg>
         ),
       },
@@ -137,8 +120,8 @@ const sections: NavSection[] = [
     label: uz.sidebar.aloqa,
     items: [
       {
+        href: "/bogcha/xabarlar",
         label: uz.nav.xabarlar,
-        disabled: true,
         icon: (
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
             <path strokeLinecap="round" strokeLinejoin="round"
@@ -147,8 +130,8 @@ const sections: NavSection[] = [
         ),
       },
       {
+        href: "/bogcha/foto",
         label: uz.nav.foto,
-        disabled: true,
         icon: (
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
             <path strokeLinecap="round" strokeLinejoin="round"
@@ -162,8 +145,8 @@ const sections: NavSection[] = [
     label: uz.sidebar.moliya,
     items: [
       {
+        href: "/bogcha/tolovlar",
         label: uz.nav.tolov,
-        disabled: true,
         icon: (
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
             <path strokeLinecap="round" strokeLinejoin="round"
@@ -177,8 +160,8 @@ const sections: NavSection[] = [
     label: uz.sidebar.sozlamalar_group,
     items: [
       {
+        href: "/bogcha/sozlamalar",
         label: uz.nav.sozlamalar,
-        disabled: true,
         icon: (
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
             <path strokeLinecap="round" strokeLinejoin="round"
@@ -198,14 +181,22 @@ interface BogchaSidebarProps {
 export default function BogchaSidebar({ onClose }: BogchaSidebarProps) {
   const pathname = usePathname();
   const { user, logout } = useAuth();
+  const [logoutError, setLogoutError] = useState("");
 
   async function handleLogout() {
+    // Super admin leaving an impersonated org: not a logout, the session stays.
     if (impersonation.active()) {
       impersonation.end();
       window.location.href = "/admin/bogchalar";
       return;
     }
-    await logout();
+    setLogoutError("");
+    try {
+      await logout();
+    } catch {
+      setLogoutError(uz.auth.chiqish_xatosi);
+      return;
+    }
     window.location.href = "/login";
   }
 
@@ -294,8 +285,8 @@ export default function BogchaSidebar({ onClose }: BogchaSidebarProps) {
           <Avatar name={user?.name ?? "?"} size="sm" />
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium text-[var(--text)] truncate">{user?.name ?? "—"}</p>
-            <p className="text-xs text-[var(--text-3)] capitalize">
-              {user?.role === "super_admin" ? "Bosh admin" : user?.role ?? ""}
+            <p className="text-xs text-[var(--text-3)]">
+              {user?.role === "super_admin" ? "Bosh admin" : roleLabel(user?.role)}
             </p>
           </div>
         </div>
@@ -308,6 +299,9 @@ export default function BogchaSidebar({ onClose }: BogchaSidebarProps) {
           </svg>
           {uz.auth.chiqish}
         </button>
+        {logoutError && (
+          <p role="alert" className="px-3 pt-1 text-xs text-[#B91C1C]">{logoutError}</p>
+        )}
       </div>
     </aside>
   );

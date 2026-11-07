@@ -2,6 +2,9 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { api } from "@/lib/api";
+import { errorMessage, fieldErrors } from "@/lib/apiErrors";
+import { IS_DEMO } from "@/lib/demo-data";
+import ConfirmDialog from "@/components/ConfirmDialog";
 import Avatar from "@/components/ui/Avatar";
 import Badge from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
@@ -11,8 +14,10 @@ import Modal from "@/components/ui/Modal";
 import EmptyState from "@/components/ui/EmptyState";
 import PageHeader from "@/components/ui/PageHeader";
 import { SkeletonTable } from "@/components/ui/Skeleton";
+import ChildParentsModal from "@/components/ChildParentsModal";
 import type { ApiResponse, Child, Group } from "@/types";
 import uz from "@/i18n/uz";
+import { useReadOnly } from "@/lib/readOnly";
 
 interface ChildForm {
   first_name: string;
@@ -20,9 +25,10 @@ interface ChildForm {
   birth_date: string;
   gender:     "erkak" | "ayol" | "";
   group_id:   string;
+  is_active:  boolean;
 }
 
-const emptyForm: ChildForm = { first_name: "", last_name: "", birth_date: "", gender: "", group_id: "" };
+const emptyForm: ChildForm = { first_name: "", last_name: "", birth_date: "", gender: "", group_id: "", is_active: true };
 
 const childrenIcon = (
   <svg className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -31,6 +37,7 @@ const childrenIcon = (
 );
 
 export default function BolalarPage() {
+  const readOnly = useReadOnly();
   const [children, setChildren] = useState<Child[]>([]);
   const [groups,   setGroups]   = useState<Group[]>([]);
   const [loading,  setLoading]  = useState(true);
@@ -42,6 +49,11 @@ export default function BolalarPage() {
   const [formErrors,  setFormErrors]  = useState<Record<string, string[]>>({});
   const [search,      setSearch]      = useState("");
   const [filterGroup, setFilterGroup] = useState("");
+  const [parentsChild, setParentsChild] = useState<Child | null>(null);
+  const [formError,    setFormError]    = useState("");
+  const [editing,      setEditing]      = useState<Child | null>(null);
+  const [deleting,     setDeleting]     = useState<Child | null>(null);
+  const [success,      setSuccess]      = useState("");
 
   async function load() {
     setError(false);
@@ -77,32 +89,72 @@ export default function BolalarPage() {
     return list;
   }, [children, search, filterGroup]);
 
+  function openCreate() {
+    setSuccess("");
+    setEditing(null);
+    setForm(emptyForm);
+    setShowModal(true);
+  }
+
+  function openEdit(c: Child) {
+    setSuccess("");
+    setEditing(c);
+    setForm({
+      first_name: c.first_name,
+      last_name:  c.last_name,
+      birth_date: c.birth_date,
+      gender:     c.gender,
+      group_id:   c.group_id ? String(c.group_id) : "",
+      is_active:  c.is_active,
+    });
+    setShowModal(true);
+  }
+
   function closeModal() {
     setShowModal(false);
+    setEditing(null);
     setForm(emptyForm);
     setFormErrors({});
+    setFormError("");
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (saving) return;
     setFormErrors({});
+    setFormError("");
     setSaving(true);
+    const body = {
+      first_name: form.first_name,
+      last_name:  form.last_name,
+      birth_date: form.birth_date,
+      gender:     form.gender,
+      group_id:   form.group_id ? parseInt(form.group_id) : null,
+    };
     try {
-      await api.post("/v1/admin/children", {
-        first_name: form.first_name,
-        last_name:  form.last_name,
-        birth_date: form.birth_date,
-        gender:     form.gender,
-        group_id:   form.group_id ? parseInt(form.group_id) : null,
-      });
+      if (editing) {
+        if (IS_DEMO) return;
+        await api.put(`/v1/admin/children/${editing.id}`, { ...body, is_active: form.is_active });
+        setSuccess(uz.bolalar.yangilandi);
+      } else {
+        await api.post("/v1/admin/children", body);
+      }
       closeModal();
       await load();
     } catch (err: unknown) {
-      const e = err as { data?: { errors?: Record<string, string[]> } };
-      if (e?.data?.errors) setFormErrors(e.data.errors);
+      setFormErrors(fieldErrors(err));
+      setFormError(errorMessage(err));
     } finally {
       setSaving(false);
     }
+  }
+
+  async function confirmDelete() {
+    if (!deleting) return;
+    await api.delete(`/v1/admin/children/${deleting.id}`);
+    setDeleting(null);
+    setSuccess(uz.bolalar.ochirildi);
+    await load();
   }
 
   const hasFilter = search || filterGroup;
@@ -112,8 +164,8 @@ export default function BolalarPage() {
       <PageHeader
         title={uz.bolalar.sarlavha}
         description={uz.bolalar.sahifa_tavsif}
-        action={
-          <Button onClick={() => setShowModal(true)} icon={
+        action={readOnly ? undefined :
+          <Button onClick={openCreate} icon={
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
             </svg>
@@ -122,6 +174,10 @@ export default function BolalarPage() {
           </Button>
         }
       />
+
+      {success && (
+        <p role="status" className="mb-4 rounded-lg bg-[var(--success-bg)] text-[var(--success)] text-sm px-4 py-2.5">{success}</p>
+      )}
 
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-3 mb-5">
@@ -159,21 +215,26 @@ export default function BolalarPage() {
         ) : filtered.length === 0 ? (
           <EmptyState
             icon={childrenIcon}
-            title={hasFilter ? "Natija topilmadi" : uz.bolalar.bosh_sarlavha}
-            description={hasFilter ? "Boshqa kalit so'z bilan qidiring" : uz.bolalar.bosh_tavsif}
-            action={!hasFilter ? { label: `+ ${uz.bolalar.qoshish}`, onClick: () => setShowModal(true) } : undefined}
+            title={hasFilter ? uz.bolalar.natija_yoq : uz.bolalar.bosh_sarlavha}
+            description={hasFilter ? uz.bolalar.natija_yoq_tavsif : uz.bolalar.bosh_tavsif}
+            action={!hasFilter && !readOnly ? { label: `+ ${uz.bolalar.qoshish}`, onClick: openCreate } : undefined}
           />
         ) : (
           <>
             {/* Mobile card list (< sm) */}
             <ul className="sm:hidden divide-y divide-[#F2ECF0]">
               {filtered.map((c) => (
-                <li key={c.id} className="flex items-center gap-3 px-4 py-3.5">
+                <li key={c.id} className="flex items-start gap-3 px-4 py-3.5">
                   <Avatar name={`${c.first_name} ${c.last_name}`} size="sm" />
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium text-[#29232A] truncate">
-                      {c.last_name} {c.first_name}
-                    </p>
+                    <div className="flex items-start justify-between gap-2">
+                      <p className="font-medium text-[#29232A] truncate">
+                        {c.last_name} {c.first_name}
+                      </p>
+                      <Badge variant={c.is_active ? "success" : "neutral"}>
+                        {c.is_active ? uz.common.faol : uz.common.nofaol}
+                      </Badge>
+                    </div>
                     <p className="text-xs text-[#B8AAB2] mt-0.5">
                       {c.birth_date} · {c.gender === "erkak" ? uz.bolalar.jins_erkak : uz.bolalar.jins_qiz}
                     </p>
@@ -185,10 +246,17 @@ export default function BolalarPage() {
                     ) : (
                       <span className="text-xs text-[#D9C9D1]">{uz.bolalar.guruhsiz}</span>
                     )}
+                    {/* Amallar alohida qatorda — tor ekranda ism ustunini siqmasin */}
+                    <div className="flex flex-wrap gap-1 mt-2 -ml-2">
+                      <Button size="sm" variant="ghost" onClick={() => setParentsChild(c)}>
+                        {uz.bolalar.ota_onalar_btn}
+                      </Button>
+                      {!readOnly && <>
+                        <Button size="sm" variant="ghost" onClick={() => openEdit(c)}>{uz.common.tahrirlash}</Button>
+                        <Button size="sm" variant="ghost" onClick={() => { setSuccess(""); setDeleting(c); }}>{uz.common.ochirish}</Button>
+                      </>}
+                    </div>
                   </div>
-                  <Badge variant={c.is_active ? "success" : "neutral"}>
-                    {c.is_active ? uz.common.faol : uz.common.nofaol}
-                  </Badge>
                 </li>
               ))}
             </ul>
@@ -202,6 +270,7 @@ export default function BolalarPage() {
                   <th className="text-left px-5 py-3.5 text-xs font-semibold text-[#766B73] uppercase tracking-wide hidden lg:table-cell">{uz.bolalar.jinsi}</th>
                   <th className="text-left px-5 py-3.5 text-xs font-semibold text-[#766B73] uppercase tracking-wide">{uz.bolalar.guruh}</th>
                   <th className="text-left px-5 py-3.5 text-xs font-semibold text-[#766B73] uppercase tracking-wide">{uz.bolalar.holat}</th>
+                  <th className="px-5 py-3.5" />
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#F2ECF0]">
@@ -234,6 +303,17 @@ export default function BolalarPage() {
                         {c.is_active ? uz.common.faol : uz.common.nofaol}
                       </Badge>
                     </td>
+                    <td className="px-5 py-4">
+                      <div className="flex flex-wrap justify-end gap-1.5">
+                        <Button size="sm" variant="secondary" onClick={() => setParentsChild(c)}>
+                          {uz.bolalar.ota_onalar_btn}
+                        </Button>
+                        {!readOnly && <>
+                          <Button size="sm" variant="ghost" onClick={() => openEdit(c)}>{uz.common.tahrirlash}</Button>
+                          <Button size="sm" variant="ghost" onClick={() => { setSuccess(""); setDeleting(c); }}>{uz.common.ochirish}</Button>
+                        </>}
+                      </div>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -246,15 +326,18 @@ export default function BolalarPage() {
       <Modal
         open={showModal}
         onClose={closeModal}
-        title={uz.bolalar.qoshish}
+        title={editing ? uz.bolalar.tahrirlash : uz.bolalar.qoshish}
         footer={
           <>
             <Button variant="secondary" onClick={closeModal}>{uz.common.bekor_qilish}</Button>
-            <Button form="child-form" type="submit" loading={saving}>{uz.common.saqlash}</Button>
+            <Button form="child-form" type="submit" loading={saving} disabled={!!editing && IS_DEMO}>{uz.common.saqlash}</Button>
           </>
         }
       >
         <form id="child-form" onSubmit={handleSubmit} className="space-y-5">
+          {editing && IS_DEMO && (
+            <p role="note" className="rounded-lg bg-[#FFFBEB] border border-[#FDE68A] text-[#92400E] text-sm px-3 py-2">{uz.common.demo_saqlanmaydi}</p>
+          )}
           <div>
             <p className="text-xs font-semibold text-[#B8AAB2] uppercase tracking-wide mb-3">{uz.bolalar.bolaning_malumotlari}</p>
             <div className="grid grid-cols-2 gap-3">
@@ -310,9 +393,34 @@ export default function BolalarPage() {
                 <option key={g.id} value={g.id}>{g.name}</option>
               ))}
             </Select>
+            {editing && (
+              <div className="mt-3">
+                <Select
+                  label={uz.bolalar.holat}
+                  value={form.is_active ? "1" : "0"}
+                  onChange={(e) => setForm({ ...form, is_active: e.target.value === "1" })}
+                >
+                  <option value="1">{uz.common.faol}</option>
+                  <option value="0">{uz.common.nofaol}</option>
+                </Select>
+              </div>
+            )}
           </div>
+          {formError && <p role="alert" className="text-sm text-[#B91C1C]">{formError}</p>}
         </form>
       </Modal>
+
+      <ConfirmDialog
+        open={!!deleting}
+        title={`${uz.bolalar.ochirish}: ${deleting ? `${deleting.last_name} ${deleting.first_name}` : ""}`}
+        message={`${uz.bolalar.ochirish_tasdiqi} ${uz.bolalar.ochirish_izoh}`}
+        confirmLabel={uz.common.ochirish}
+        danger
+        onConfirm={confirmDelete}
+        onClose={() => setDeleting(null)}
+      />
+
+      <ChildParentsModal child={parentsChild} onClose={() => setParentsChild(null)} />
     </div>
   );
 }

@@ -41,9 +41,10 @@ class ReportController extends SuperAdminController
         [$from, $to] = $this->parseDates($request);
 
         // Organizations
-        $totalOrgs    = Organization::count();
-        $activeOrgs   = Organization::where('is_active', true)->count();
-        $newOrgs      = Organization::whereBetween('created_at', [$from, $to])->count();
+        $counts       = app(\App\Services\OrganizationService::class)->statusCounts();
+        $totalOrgs    = $counts['total'];
+        $activeOrgs   = $counts['active'];
+        $newOrgs      = Organization::counted()->whereBetween('created_at', [$from, $to])->count();
 
         // Subscriptions
         $subCounts = Subscription::select('status', DB::raw('count(*) as count'))
@@ -94,7 +95,8 @@ class ReportController extends SuperAdminController
             'organizations' => [
                 'total'    => $totalOrgs,
                 'active'   => $activeOrgs,
-                'inactive' => $totalOrgs - $activeOrgs,
+                'inactive' => $counts['not_active'],
+                'archived' => $counts['archived'],
                 'new'      => $newOrgs,
             ],
             'subscriptions' => [
@@ -298,9 +300,11 @@ class ReportController extends SuperAdminController
 
         $planId = $request->query('plan_id');
 
-        $totalOrgs    = Organization::count();
-        $activeOrgs   = Organization::where('is_active', true)->count();
-        $newInPeriod  = Organization::whereBetween('created_at', [$from, $to])->count();
+        // Dashboard va Bog'chalar sahifasi bilan bir xil qoida (arxivlanganlar alohida)
+        $counts       = app(\App\Services\OrganizationService::class)->statusCounts();
+        $totalOrgs    = $counts['total'];
+        $activeOrgs   = $counts['active'];
+        $newInPeriod  = Organization::counted()->whereBetween('created_at', [$from, $to])->count();
 
         // Orgs with at least one pending/overdue invoice
         $withUnpaidInvoices = Organization::whereHas('subscriptions', function ($q) {
@@ -329,7 +333,7 @@ class ReportController extends SuperAdminController
         ]);
 
         // Monthly growth: new orgs over last 12 months
-        $growth = Organization::where('created_at', '>=', now()->subMonths(11)->startOfMonth())
+        $growth = Organization::counted()->where('created_at', '>=', now()->subMonths(11)->startOfMonth())
             ->selectRaw("TO_CHAR(created_at, 'YYYY-MM') as period, count(*) as count")
             ->groupBy('period')
             ->orderBy('period')
@@ -352,7 +356,9 @@ class ReportController extends SuperAdminController
             'counts' => [
                 'total'                => $totalOrgs,
                 'active'               => $activeOrgs,
-                'inactive'             => $totalOrgs - $activeOrgs,
+                'inactive'             => $counts['not_active'],
+                'suspended'            => $counts['suspended'],
+                'archived'             => $counts['archived'],
                 'new_in_period'        => $newInPeriod,
                 'with_unpaid_invoices' => $withUnpaidInvoices,
                 'with_expired_subs'    => $withExpiredSubs,
@@ -368,16 +374,20 @@ class ReportController extends SuperAdminController
     {
         [$from, $to] = $this->parseDates($request);
 
-        $totalUsers  = User::count();
-        $activeUsers = User::where('is_active', true)->count();
-        $newInPeriod = User::whereBetween('created_at', [$from, $to])->count();
+        // Dashboard bilan bir xil: test/demo bog'chalar foydalanuvchilari hisobga olinmaydi (platforma foydalanuvchilari — olinadi)
+        $users = fn () => User::where(fn ($q) => $q->whereNull('organization_id')
+            ->orWhereIn('organization_id', Organization::counted()->select('id')));
 
-        $byRole = User::select('role', DB::raw('count(*) as count'))
+        $totalUsers  = $users()->count();
+        $activeUsers = $users()->where('is_active', true)->count();
+        $newInPeriod = $users()->whereBetween('created_at', [$from, $to])->count();
+
+        $byRole = $users()->select('role', DB::raw('count(*) as count'))
             ->groupBy('role')
             ->pluck('count', 'role');
 
         // Top 10 orgs by user count
-        $byOrg = User::whereNotNull('organization_id')
+        $byOrg = $users()->whereNotNull('organization_id')
             ->select('organization_id', DB::raw('count(*) as count'))
             ->groupBy('organization_id')
             ->orderByDesc('count')

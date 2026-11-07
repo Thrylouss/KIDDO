@@ -13,11 +13,14 @@ class NotificationController extends SuperAdminController
 {
     public function index(Request $request): JsonResponse
     {
-        $query = AppNotification::where('recipient_type', 'super_admin')
+        // Sahifalash: boshqa Super Admin ro'yxatlari kabi per_page (standart 50, ko'pi bilan 100)
+        $perPage   = min(max((int) $request->query('per_page', 50), 1), 100);
+        $paginated = AppNotification::where('recipient_type', 'super_admin')
             ->latest()
-            ->limit(50);
+            ->orderByDesc('id')
+            ->paginate($perPage);
 
-        $notifications = $query->get()->map(fn($n) => [
+        $notifications = collect($paginated->items())->map(fn($n) => [
             'id'         => $n->id,
             'title'      => $n->title,
             'message'    => $n->message,
@@ -31,6 +34,12 @@ class NotificationController extends SuperAdminController
             'unread_count' => AppNotification::where('recipient_type', 'super_admin')
                 ->whereNull('read_at')
                 ->count(),
+            'meta'         => [
+                'current_page' => $paginated->currentPage(),
+                'last_page'    => $paginated->lastPage(),
+                'per_page'     => $paginated->perPage(),
+                'total'        => $paginated->total(),
+            ],
         ]);
     }
 

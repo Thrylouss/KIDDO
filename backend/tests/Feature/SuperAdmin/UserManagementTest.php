@@ -343,14 +343,19 @@ class UserManagementTest extends TestCase
             ->assertUnprocessable();
     }
 
-    public function test_reset_password_requires_password_field(): void
+    public function test_reset_password_without_password_generates_temporary_one(): void
     {
         $sa   = $this->superAdmin();
         $user = $this->makeUser();
 
-        $this->actingAs($sa, 'sanctum')
+        // Parol berilmasa — tizim vaqtinchalik parol yaratadi (faqat shu javobda), birinchi kirishda almashtiriladi
+        $temp = $this->actingAs($sa, 'sanctum')
             ->postJson("/api/v1/super-admin/users/{$user->id}/reset-password", [])
-            ->assertUnprocessable();
+            ->assertOk()
+            ->json('data.temporary_password');
+
+        $this->assertTrue(\Illuminate\Support\Facades\Hash::check($temp, $user->fresh()->password));
+        $this->assertTrue($user->fresh()->must_change_password);
     }
 
     public function test_reset_password_writes_audit_log(): void

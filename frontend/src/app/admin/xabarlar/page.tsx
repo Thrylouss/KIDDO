@@ -1,7 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { api } from "@/lib/api";
+import { api, fetchAllPages } from "@/lib/api";
+import { errorMessage } from "@/lib/apiErrors";
 import { IS_DEMO } from "@/lib/demo-data";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
@@ -9,8 +10,17 @@ import Select from "@/components/ui/Select";
 import Modal from "@/components/ui/Modal";
 import Badge from "@/components/ui/Badge";
 import EmptyState from "@/components/ui/EmptyState";
+import Pagination from "@/components/ui/Pagination";
 import uz from "@/i18n/uz";
-import type { Notification, OrganizationSummary, ApiResponse } from "@/types";
+import type { Notification, OrganizationSummary } from "@/types";
+
+const PER_PAGE = 50;
+
+interface NotificationsResponse {
+  data: Notification[];
+  unread_count: number;
+  meta?: { current_page: number; last_page: number; per_page: number; total: number };
+}
 
 // ── Helpers ────────────────────────────────────────────────────────────────
 
@@ -62,16 +72,19 @@ function SendModal({
   const [form,   setForm]   = useState<SendForm>(emptyForm);
   const [saving, setSaving] = useState(false);
   const [errors, setErrors] = useState<Record<string, string[]>>({});
+  const [formError, setFormError] = useState("");
 
   function close() {
     setForm(emptyForm);
     setErrors({});
+    setFormError("");
     onClose();
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setErrors({});
+    setFormError("");
     setSaving(true);
     try {
       await api.post("/v1/super-admin/notifications", {
@@ -85,6 +98,7 @@ function SendModal({
     } catch (err: unknown) {
       const e = err as { data?: { errors?: Record<string, string[]> } };
       if (e?.data?.errors) setErrors(e.data.errors);
+      else setFormError(errorMessage(err));
     } finally {
       setSaving(false);
     }
@@ -148,6 +162,7 @@ function SendModal({
             <option key={o.id} value={o.id}>{o.name}</option>
           ))}
         </Select>
+        {formError && <p role="alert" className="text-sm text-[#B91C1C]">{formError}</p>}
       </form>
     </Modal>
   );
@@ -160,40 +175,62 @@ export default function XabarlarPage() {
   const [unreadCount,   setUnreadCount]   = useState(0);
   const [orgs,          setOrgs]          = useState<OrganizationSummary[]>([]);
   const [loading,       setLoading]       = useState(true);
+  const [error,         setError]         = useState("");
+  const [actionError,   setActionError]   = useState("");
+  const [orgsError,     setOrgsError]     = useState(false);
+  const [page,          setPage]          = useState(1);
+  const [meta,          setMeta]          = useState({ current_page: 1, last_page: 1, total: 0 });
   const [showSend,      setShowSend]      = useState(false);
   const [markingAll,    setMarkingAll]    = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
+    setError("");
     try {
-      const [nRes, oRes] = await Promise.all([
-        api.get<{ data: Notification[]; unread_count: number }>("/v1/super-admin/notifications"),
-        api.get<ApiResponse<OrganizationSummary[]>>("/v1/super-admin/organizations"),
-      ]);
-      setNotifications(nRes.data);
-      setUnreadCount(nRes.unread_count);
-      setOrgs(oRes.data);
+      const res = await api.get<NotificationsResponse>(`/v1/super-admin/notifications?per_page=${PER_PAGE}&page=${page}`);
+      const list = res?.data ?? [];
+      setNotifications(list);
+      setUnreadCount(res?.unread_count ?? 0);
+      setMeta(res?.meta ?? { current_page: 1, last_page: 1, total: list.length });
+    } catch (err) {
+      setNotifications([]);
+      setError(errorMessage(err));
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [page]);
 
   useEffect(() => { load(); }, [load]);
 
+  // Qabul qiluvchi tanlash uchun barcha bog'chalar (sahifalab, per_page=100) — bir marta
+  useEffect(() => {
+    fetchAllPages<OrganizationSummary>("/v1/super-admin/organizations?sort=name")
+      .then(setOrgs)
+      .catch(() => setOrgsError(true));
+  }, []);
+
   async function markRead(id: number) {
-    await api.patch(`/v1/super-admin/notifications/${id}/read`);
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, is_read: true } : n))
-    );
-    setUnreadCount((c) => Math.max(0, c - 1));
+    setActionError("");
+    try {
+      await api.patch(`/v1/super-admin/notifications/${id}/read`);
+      setNotifications((prev) =>
+        prev.map((n) => (n.id === id ? { ...n, is_read: true } : n))
+      );
+      setUnreadCount((c) => Math.max(0, c - 1));
+    } catch (err) {
+      setActionError(errorMessage(err));
+    }
   }
 
   async function markAllRead() {
     setMarkingAll(true);
+    setActionError("");
     try {
       await api.patch("/v1/super-admin/notifications/read-all");
       setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
       setUnreadCount(0);
+    } catch (err) {
+      setActionError(errorMessage(err));
     } finally {
       setMarkingAll(false);
     }
@@ -241,6 +278,9 @@ export default function XabarlarPage() {
         </div>
       )}
 
+      {orgsError && <p role="alert" className="text-xs text-[#B45309]">{uz.common.bogchalar_yuklanmadi}</p>}
+      {actionError && <p role="alert" className="rounded-lg bg-[#FEF2F2] px-4 py-3 text-sm text-[#B91C1C]">{actionError}</p>}
+
       {/* List */}
       <div className="bg-white rounded-xl border border-[#EDE3E8] overflow-hidden">
         {loading ? (
@@ -255,11 +295,19 @@ export default function XabarlarPage() {
               </div>
             ))}
           </div>
+        ) : error ? (
+          <div role="alert" data-testid="xabarlar-error" className="py-12 px-5 text-center">
+            <p className="text-sm text-[#B91C1C]">{error}</p>
+            <button onClick={load} className="mt-3 px-4 py-2 text-sm font-medium text-[#8E315D] border border-[#EDE3E8] rounded-lg hover:bg-[#FFF9F5] transition-colors">
+              {uz.common.qayta_urinish}
+            </button>
+          </div>
         ) : notifications.length === 0 ? (
           <div className="py-16">
             <EmptyState title={uz.super_admin.xabar_yoq} icon={bellIcon} />
           </div>
         ) : (
+          <>
           <ul className="divide-y divide-[#F2ECF0]">
             {notifications.map((n) => (
               <li
@@ -321,6 +369,8 @@ export default function XabarlarPage() {
               </li>
             ))}
           </ul>
+          <Pagination meta={meta} onPage={setPage} />
+          </>
         )}
       </div>
 
@@ -329,7 +379,7 @@ export default function XabarlarPage() {
         open={showSend}
         orgs={orgs}
         onClose={() => setShowSend(false)}
-        onSent={load}
+        onSent={() => (page === 1 ? load() : setPage(1))}
       />
     </div>
   );

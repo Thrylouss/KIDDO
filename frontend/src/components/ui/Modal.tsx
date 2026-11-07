@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useId, useRef } from "react";
 import Button from "./Button";
 
 type Size = "sm" | "md" | "lg";
@@ -20,17 +20,45 @@ interface ModalProps {
   size?: Size;
 }
 
+const FOCUSABLE = 'a[href], button:not([disabled]), input:not([disabled]):not([type="hidden"]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
 export default function Modal({ open, onClose, title, children, footer, size = "md" }: ModalProps) {
+  const titleId  = useId();
+  const panelRef = useRef<HTMLDivElement>(null);
+  const onCloseRef = useRef(onClose);
+  useEffect(() => { onCloseRef.current = onClose; }, [onClose]);
+
   useEffect(() => {
     if (!open) return;
-    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onCloseRef.current();
+      // Fokus modal ichida qoladi (Tab / Shift+Tab)
+      if (e.key === "Tab" && panelRef.current) {
+        const items = Array.from(panelRef.current.querySelectorAll<HTMLElement>(FOCUSABLE));
+        if (items.length === 0) return;
+        const first = items[0], last = items[items.length - 1];
+        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+      }
+    };
     document.addEventListener("keydown", onKey);
     document.body.style.overflow = "hidden";
     return () => {
       document.removeEventListener("keydown", onKey);
       document.body.style.overflow = "";
     };
-  }, [open, onClose]);
+  }, [open]);
+
+  // Ochilganda fokus modal ichiga (birinchi maydon), yopilganda oldingi elementga qaytadi
+  useEffect(() => {
+    if (!open) return;
+    const previous = document.activeElement as HTMLElement | null;
+    const panel = panelRef.current;
+    const target = panel?.querySelector<HTMLElement>("input:not([type=hidden]):not([disabled]), select, textarea")
+      ?? panel?.querySelector<HTMLElement>(FOCUSABLE);
+    (target ?? panel)?.focus({ preventScroll: true });
+    return () => { previous?.focus?.({ preventScroll: true }); };
+  }, [open]);
 
   if (!open) return null;
 
@@ -43,10 +71,11 @@ export default function Modal({ open, onClose, title, children, footer, size = "
       />
 
       {/* Panel */}
-      <div className={`relative w-full ${sizeCls[size]} bg-white rounded-2xl shadow-2xl animate-slide-up flex flex-col max-h-[90vh]`}>
+      <div ref={panelRef} role="dialog" aria-modal="true" aria-labelledby={titleId} tabIndex={-1}
+        className={`relative w-full ${sizeCls[size]} bg-white rounded-2xl outline-none shadow-2xl animate-slide-up flex flex-col max-h-[90vh]`}>
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-5 border-b border-[var(--border)]">
-          <h2 className="text-base font-semibold text-[var(--text)]">{title}</h2>
+          <h2 id={titleId} className="text-base font-semibold text-[var(--text)]">{title}</h2>
           <button
             onClick={onClose}
             className="rounded-lg p-1.5 text-[var(--text-3)] hover:text-[var(--text)] hover:bg-[var(--border-2)] transition-colors"

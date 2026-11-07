@@ -9,6 +9,9 @@ vi.mock("@/lib/api", () => ({
   api: { get: vi.fn() },
 }));
 
+// Bu fayl billing yoqilgan rejimdagi to'liq hisobotlarni tekshiradi (MVP rejimi — hisobotlar-mvp.test.tsx)
+vi.mock("@/lib/features", () => ({ BILLING_ENABLED: true }));
+
 vi.mock("next/link", () => ({
   default: ({ children, href }: { children: React.ReactNode; href: string }) => (
     <a href={href}>{children}</a>

@@ -239,7 +239,8 @@ class AuthTest extends TestCase
 
     public function test_parol_response_da_qaytarilmaydi(): void
     {
-        $user = User::factory()->create([
+        // Web login — ota-ona emas (ota-onalar faqat mobil ilovadan kiradi)
+        $user = User::factory()->teacher()->create([
             'phone'    => '+998901111114',
             'password' => Hash::make('password123'),
             'is_active' => true,

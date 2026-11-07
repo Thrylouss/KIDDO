@@ -4,6 +4,7 @@ import type {
   DashboardSummaryEnhanced,
   DashboardRecent,
   DashboardExpiring,
+  OrganizationDetail,
   OrganizationSummary,
   Plan,
   ReportRevenue,
@@ -208,6 +209,7 @@ export const DEMO_PARENTS: ParentProfile[] = [
     first_name: "Baxtiyor",
     last_name:  "Karimov",
     phone:      "+998901234101",
+    relation_type: "ota",
     children:   [{ id: 1, first_name: "Azizbek", last_name: "Karimov" }],
   },
   {
@@ -217,6 +219,7 @@ export const DEMO_PARENTS: ParentProfile[] = [
     first_name: "Mohira",
     last_name:  "Yusupova",
     phone:      "+998901234102",
+    relation_type: "ona",
     children:   [{ id: 2, first_name: "Malika", last_name: "Yusupova" }],
   },
   {
@@ -226,6 +229,7 @@ export const DEMO_PARENTS: ParentProfile[] = [
     first_name: "Sarvarbek",
     last_name:  "Toshmatov",
     phone:      "+998901234103",
+    relation_type: "ota",
     children:   [{ id: 3, first_name: "Sardor", last_name: "Toshmatov" }],
   },
   {
@@ -235,6 +239,7 @@ export const DEMO_PARENTS: ParentProfile[] = [
     first_name: "Muazzam",
     last_name:  "Ergasheva",
     phone:      "+998901234104",
+    relation_type: "ona",
     children:   [{ id: 5, first_name: "Gulnora", last_name: "Ergasheva" }],
   },
   {
@@ -244,6 +249,7 @@ export const DEMO_PARENTS: ParentProfile[] = [
     first_name: "Dostonbek",
     last_name:  "Nazarov",
     phone:      "+998901234105",
+    relation_type: "ota",
     children:   [{ id: 6, first_name: "Jasur", last_name: "Nazarov" }],
   },
   {
@@ -253,6 +259,7 @@ export const DEMO_PARENTS: ParentProfile[] = [
     first_name: "Hamid",
     last_name:  "Mirzayev",
     phone:      "+998901234106",
+    relation_type: "ota",
     children:   [{ id: 7, first_name: "Zulfiya", last_name: "Mirzayeva" }],
   },
   {
@@ -262,6 +269,7 @@ export const DEMO_PARENTS: ParentProfile[] = [
     first_name: "Ulugbek",
     last_name:  "Xasanov",
     phone:      "+998901234107",
+    relation_type: "ota",
     children:   [{ id: 9, first_name: "Bobur", last_name: "Xasanov" }],
   },
   {
@@ -271,6 +279,7 @@ export const DEMO_PARENTS: ParentProfile[] = [
     first_name: "Nargiza",
     last_name:  "Raximova",
     phone:      "+998901234108",
+    relation_type: "ona",
     children:   [
       { id: 10, first_name: "Nilufar",  last_name: "Raximova" },
       { id: 11, first_name: "Firdavs",  last_name: "Usmonov"  },
@@ -279,14 +288,6 @@ export const DEMO_PARENTS: ParentProfile[] = [
 ];
 
 // ── Super Admin demo data ──────────────────────────────────────────────────────
-
-const _SA_BOGCHALAR = [
-  { id: 1, name: "Yulduz bog'chasi",   phone: "+998711001001", is_active: true, created_at: "2025-01-15T09:00:00Z", subscription: { status: "active", ends_at: "2026-12-31", plan: "Premium" } },
-  { id: 2, name: "Nilufar bog'chasi",  phone: "+998711001002", is_active: true, created_at: "2025-02-10T09:00:00Z", subscription: { status: "active", ends_at: "2026-11-30", plan: "Asosiy" } },
-  { id: 3, name: "Bahor bog'chasi",    phone: "+998711001003", is_active: true, created_at: "2025-03-05T09:00:00Z", subscription: { status: "active", ends_at: "2026-11-05", plan: "Asosiy" } },
-  { id: 4, name: "Kamalak bog'chasi",  phone: "+998711001004", is_active: true, created_at: "2025-04-20T09:00:00Z", subscription: { status: "trial",  ends_at: "2026-11-10", plan: "Asosiy" } },
-  { id: 5, name: "Mehr bog'chasi",     phone: "+998711001005", is_active: true, created_at: "2025-05-01T09:00:00Z", subscription: { status: "active", ends_at: "2026-12-15", plan: "Premium" } },
-];
 
 export const DEMO_SA_PLANS: Plan[] = [
   {
@@ -322,16 +323,39 @@ export const DEMO_SA_ORGANIZATIONS: OrganizationSummary[] = [
   { id: 12, name: "Baxt bog'chasi",     phone: "+998711001012", address: "Qarshi, Baxt ko'ch.",          is_active: true,  created_at: "2025-10-15T09:00:00Z", admin: { id: 112, name: "Lola Ismoilova",    phone: "+998901110012" }, subscription: { id: 12, status: "trial",    ends_at: "2026-11-20", trial_ends_at: "2026-11-20", days_remaining: 24, plan: { id: 2, name: "Premium" } } },
 ];
 
+// Har bir bog'cha uchun [bolalar, faol guruhlar, faol tarbiyachilar, ota-onalar] — platforma sonlari shulardan yig'iladi
+const _SA_ORG_COUNTS: Record<number, [number, number, number, number]> = {
+  1: [46, 4, 5, 38], 2: [38, 3, 4, 31], 3: [52, 4, 6, 44], 4: [21, 2, 2, 17],
+  5: [64, 5, 7, 55], 6: [33, 3, 3, 27], 7: [41, 3, 4, 35], 8: [57, 5, 6, 48],
+  9: [18, 2, 2, 14], 10: [29, 3, 3, 24], 11: [12, 1, 1, 9], 12: [24, 2, 2, 20],
+};
+
+for (const org of DEMO_SA_ORGANIZATIONS) {
+  const [children, groups, teachers] = _SA_ORG_COUNTS[org.id] ?? [0, 0, 0, 0];
+  org.children_count = children;
+  org.groups_count   = groups;
+  org.teachers_count = teachers;
+}
+
+const _sumOrgs = (i: 0 | 1 | 2) =>
+  Object.values(_SA_ORG_COUNTS).reduce((sum, c) => sum + c[i], 0);
+const _SA_ACTIVE_ORGS = DEMO_SA_ORGANIZATIONS.filter(o => o.is_active).length;
+const _SA_TOTAL_CHILDREN = _sumOrgs(0);
+
 export const DEMO_SA_DASHBOARD: DashboardSummaryEnhanced = {
   period: { from: "2026-10-01", to: "2026-10-27" },
-  jami_bogchalar: 12,
-  faol_bogchalar: 10,
-  nofaol_bogchalar: 2,
+  jami_bogchalar: DEMO_SA_ORGANIZATIONS.length,
+  faol_bogchalar: _SA_ACTIVE_ORGS,
+  nofaol_bogchalar: DEMO_SA_ORGANIZATIONS.length - _SA_ACTIVE_ORGS,
   yangi_bogchalar: 2,
   muddati_yaqin: 3,
   tolov_kutilmoqda: 2,
   jami_foydalanuvchilar: 156,
-  oxirgi_bogchalar: _SA_BOGCHALAR,
+  oxirgi_bogchalar: [...DEMO_SA_ORGANIZATIONS].reverse().slice(0, 8).map(o => ({
+    id: o.id, name: o.name, phone: o.phone, address: o.address, is_active: o.is_active, created_at: o.created_at,
+    children_count: o.children_count ?? 0, groups_count: o.groups_count ?? 0, teachers_count: o.teachers_count ?? 0,
+    subscription: o.subscription ? { status: o.subscription.status, ends_at: o.subscription.ends_at, plan: o.subscription.plan?.name ?? null } : null,
+  })),
   obuna_holati: { active: 8, trial: 2, past_due: 1, expired: 1, cancelled: 0 },
   billing: {
     mrr: 12_000_000,
@@ -342,6 +366,19 @@ export const DEMO_SA_DASHBOARD: DashboardSummaryEnhanced = {
     prev_period_paid: 10_500_000,
     total_paid: 108_000_000,
     total_refunded: 1_500_000,
+  },
+  platforma: {
+    jami_bolalar: _SA_TOTAL_CHILDREN,
+    jami_guruhlar: _sumOrgs(1),
+    jami_tarbiyachilar: _sumOrgs(2),
+    bugungi_davomat: {
+      sana: "2026-10-27",
+      jami: _SA_TOTAL_CHILDREN,
+      keldi: 352,
+      kelmadi: 41,
+      sababli: 18,
+      belgilanmagan: _SA_TOTAL_CHILDREN - 352 - 41 - 18,
+    },
   },
 };
 
@@ -606,6 +643,47 @@ export const DEMO_SA_NOTIFICATIONS: Notification[] = [
 
 type RequestOptions = { method?: string };
 
+/** Bog'cha tafsiloti — ro'yxatdagi sonlardan; davomat ulushi demo uchun barqaror hisoblanadi. */
+function demoOrgDetail(org: OrganizationSummary): OrganizationDetail {
+  const [children, groups, teachers, parents] = _SA_ORG_COUNTS[org.id] ?? [0, 0, 0, 0];
+  const keldi   = org.is_active ? Math.round(children * 0.8) : 0;
+  const kelmadi = org.is_active ? Math.round(children * 0.08) : 0;
+  const sababli = org.is_active ? Math.round(children * 0.04) : 0;
+  return {
+    ...org,
+    admins: org.admin ? [{ id: org.admin.id, name: org.admin.name, phone: org.admin.phone ?? "", email: null, is_active: true }] : [],
+    children_count: children,
+    groups_count: groups,
+    teacher_profiles_count: teachers,
+    parent_profiles_count: parents,
+    bugungi_davomat: { sana: "2026-10-27", jami: children, keldi, kelmadi, sababli, belgilanmagan: children - keldi - kelmadi - sababli },
+  };
+}
+
+/**
+ * Bog'cha dashboardi: tarbiyachi demo kabinetida saqlagan bugungi davomat (localStorage) shu yerda aks etadi —
+ * tarbiyachi guruhidan tashqari bolalar "belgilanmagan".
+ */
+function demoAdminSummary(): DashboardSummary {
+  const { date, children } = DEMO_TEACHER_DASHBOARD.today;
+  const saved = getDemoAttendance(date);
+  const statuses = children.map(c => saved?.[c.id] ?? c.status);
+  const keldi   = statuses.filter(st => st === "present").length;
+  const kelmadi = statuses.length - keldi;
+  return {
+    ...DEMO_SUMMARY,
+    bogcha: { id: 1, name: "Yulduz bog'chasi", address: "Toshkent, Yunusobod t.", phone: "+998711001001" },
+    bugungi_davomat: {
+      sana: date,
+      jami: DEMO_SUMMARY.bolalar_soni,
+      keldi,
+      kelmadi,
+      sababli: 0,
+      belgilanmagan: DEMO_SUMMARY.bolalar_soni - statuses.length,
+    },
+  };
+}
+
 export function handleDemoRequest<T>(path: string, options: RequestOptions): Promise<T> {
   const method = (options.method ?? "GET").toUpperCase();
 
@@ -630,6 +708,26 @@ export function handleDemoRequest<T>(path: string, options: RequestOptions): Pro
         resolve(DEMO_SA_REVENUE as T);
       } else if (path.startsWith("/v1/super-admin/reports/subscriptions")) {
         resolve(DEMO_SA_SUBSCRIPTIONS as T);
+      } else if (path.startsWith("/v1/super-admin/organizations/stats")) {
+        // Demo tashkilotlarda turi belgilanmagan — faqat holat bo'yicha sonlar
+        const active = DEMO_SA_ORGANIZATIONS.filter(o => o.is_active).length;
+        resolve({ data: { total: DEMO_SA_ORGANIZATIONS.length, davlat: 0, xususiy: 0, turi_yoq: DEMO_SA_ORGANIZATIONS.length,
+          active, inactive: DEMO_SA_ORGANIZATIONS.length - active, suspended: 0, archived: 0, recent: [] } } as T);
+      } else if (path.startsWith("/v1/super-admin/organizations/filter-options")) {
+        resolve({ data: { districts: [], regions: [], mfys: [] } } as T);
+      } else if (/^\/v1\/super-admin\/organizations\/\d+\/(status-history|groups|teachers|attendance)/.test(path)) {
+        resolve({ data: [] } as T);
+      } else if (/^\/v1\/super-admin\/organizations\/\d+\/children-summary/.test(path)) {
+        resolve({ data: { jami: 0, faol: 0, nofaol: 0, jins: { ogil: 0, qiz: 0 }, guruhlar: [], yosh: [] } } as T);
+      } else if (/^\/v1\/super-admin\/organizations\/\d+\/activity/.test(path)) {
+        const id = parseInt(path.split("/")[4]);
+        resolve({ data: DEMO_SA_ACTIVITY_LOGS.filter(l => l.organization?.id === id) } as T);
+      } else if (/^\/v1\/super-admin\/organizations\/\d+\/payments/.test(path)) {
+        resolve({ data: [] } as T);
+      } else if (/^\/v1\/super-admin\/organizations\/\d+/.test(path)) {
+        const id  = parseInt(path.split("/")[4]);
+        const org = DEMO_SA_ORGANIZATIONS.find(o => o.id === id);
+        resolve((org ? { data: demoOrgDetail(org) } : undefined) as T);
       } else if (path.startsWith("/v1/super-admin/organizations")) {
         const qsIdx = path.indexOf("?");
         const params = qsIdx >= 0 ? new URLSearchParams(path.slice(qsIdx + 1)) : new URLSearchParams();
@@ -637,7 +735,7 @@ export function handleDemoRequest<T>(path: string, options: RequestOptions): Pro
         const status  = params.get("status") ?? "";
         const sort    = params.get("sort") ?? "newest";
         const page    = Math.max(1, parseInt(params.get("page") ?? "1"));
-        const perPage = 15;
+        const perPage = Math.min(100, Math.max(1, parseInt(params.get("per_page") ?? "15")));
 
         let list = [...DEMO_SA_ORGANIZATIONS];
 
@@ -645,11 +743,12 @@ export function handleDemoRequest<T>(path: string, options: RequestOptions): Pro
           list = list.filter(o =>
             o.name.toLowerCase().includes(search) ||
             (o.phone ?? "").includes(search) ||
+            (o.address ?? "").toLowerCase().includes(search) ||
             (o.admin?.name ?? "").toLowerCase().includes(search)
           );
         }
 
-        if      (status === "active")          list = list.filter(o => o.is_active && o.subscription?.status === "active");
+        if      (status === "active")          list = list.filter(o => o.is_active);
         else if (status === "inactive")        list = list.filter(o => !o.is_active);
         else if (status === "trial")           list = list.filter(o => o.subscription?.status === "trial");
         else if (status === "paid")            list = list.filter(o => o.subscription?.status === "active");
@@ -658,7 +757,10 @@ export function handleDemoRequest<T>(path: string, options: RequestOptions): Pro
         else if (status === "cancelled")       list = list.filter(o => o.subscription?.status === "cancelled");
 
         if      (sort === "newest")              list = [...list].reverse();
-        else if (sort === "name")                list = [...list].sort((a, b) => a.name.localeCompare(b.name));
+        else if (sort === "name" || sort === "name_asc") list = [...list].sort((a, b) => a.name.localeCompare(b.name));
+        else if (sort === "name_desc")           list = [...list].sort((a, b) => b.name.localeCompare(a.name));
+        else if (sort === "children_desc")       list = [...list].sort((a, b) => (b.children_count ?? 0) - (a.children_count ?? 0));
+        else if (sort === "children_asc")        list = [...list].sort((a, b) => (a.children_count ?? 0) - (b.children_count ?? 0));
         else if (sort === "subscription_expiry") list = [...list].sort((a, b) => (a.subscription?.days_remaining ?? 9999) - (b.subscription?.days_remaining ?? 9999));
         // "oldest" = default insertion order (already oldest-first)
 
@@ -754,7 +856,7 @@ export function handleDemoRequest<T>(path: string, options: RequestOptions): Pro
       } else if (path.startsWith("/v1/teacher/dashboard")) {
         resolve(DEMO_TEACHER_DASHBOARD as T);
       } else if (path.startsWith("/v1/admin/dashboard")) {
-        resolve(DEMO_SUMMARY as T);
+        resolve(demoAdminSummary() as T);
       } else if (path.startsWith("/v1/admin/groups")) {
         resolve({ data: DEMO_GROUPS } as T);
       } else if (path.startsWith("/v1/admin/children")) {

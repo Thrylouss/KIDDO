@@ -1,16 +1,20 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import Avatar from "@/components/ui/Avatar";
 import uz from "@/i18n/uz";
+import { BILLING_ENABLED } from "@/lib/features";
 
 interface ActiveItem {
   href: string;
   label: string;
   icon: React.ReactNode;
   disabled?: false;
+  /** KIDDO obuna/to'lov bo'limi — BILLING_ENABLED o'chiq bo'lsa yashiriladi. */
+  billing?: true;
 }
 
 interface DisabledItem {
@@ -56,8 +60,19 @@ const sections: NavSection[] = [
         ),
       },
       {
+        href: "/admin/demo-arizalar",
+        label: uz.demo_arizalar.sarlavha,
+        icon: (
+          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+            <path strokeLinecap="round" strokeLinejoin="round"
+              d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+          </svg>
+        ),
+      },
+      {
         href: "/admin/tariflar",
         label: "Tariflar",
+        billing: true,
         icon: (
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
             <path strokeLinecap="round" strokeLinejoin="round"
@@ -68,6 +83,7 @@ const sections: NavSection[] = [
       {
         href: "/admin/obunalar",
         label: "Obunalar",
+        billing: true,
         icon: (
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
             <path strokeLinecap="round" strokeLinejoin="round"
@@ -83,6 +99,7 @@ const sections: NavSection[] = [
       {
         href: "/admin/tolovlar",
         label: "To'lovlar",
+        billing: true,
         icon: (
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
             <path strokeLinecap="round" strokeLinejoin="round"
@@ -93,6 +110,7 @@ const sections: NavSection[] = [
       {
         href: "/admin/invoices",
         label: "Hisob-fakturalar",
+        billing: true,
         icon: (
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
             <path strokeLinecap="round" strokeLinejoin="round"
@@ -126,8 +144,8 @@ const sections: NavSection[] = [
         ),
       },
       {
+        href: "/admin/hisobotlar",
         label: "Hisobotlar",
-        disabled: true,
         icon: (
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
             <path strokeLinecap="round" strokeLinejoin="round"
@@ -151,8 +169,8 @@ const sections: NavSection[] = [
         ),
       },
       {
+        href: "/admin/sozlamalar",
         label: "Sozlamalar",
-        disabled: true,
         icon: (
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
             <path strokeLinecap="round" strokeLinejoin="round"
@@ -165,6 +183,13 @@ const sections: NavSection[] = [
   },
 ];
 
+const visibleSections: NavSection[] = sections
+  .map((section) => ({
+    ...section,
+    items: section.items.filter((item) => BILLING_ENABLED || item.disabled || !item.billing),
+  }))
+  .filter((section) => section.items.length > 0);
+
 interface SuperAdminSidebarProps {
   onClose?: () => void;
 }
@@ -172,9 +197,16 @@ interface SuperAdminSidebarProps {
 export default function SuperAdminSidebar({ onClose }: SuperAdminSidebarProps) {
   const pathname = usePathname();
   const { user, logout } = useAuth();
+  const [logoutError, setLogoutError] = useState("");
 
   async function handleLogout() {
-    await logout();
+    setLogoutError("");
+    try {
+      await logout();
+    } catch {
+      setLogoutError(uz.auth.chiqish_xatosi);
+      return;
+    }
     window.location.href = "/login";
   }
 
@@ -207,7 +239,7 @@ export default function SuperAdminSidebar({ onClose }: SuperAdminSidebarProps) {
 
       {/* Nav */}
       <nav className="flex-1 px-3 pb-3 overflow-y-auto space-y-4">
-        {sections.map((section) => (
+        {visibleSections.map((section) => (
           <div key={section.label}>
             <p className="px-3 pb-1.5 text-[10px] font-semibold uppercase tracking-wider text-[var(--text-3)]">
               {section.label}
@@ -275,6 +307,9 @@ export default function SuperAdminSidebar({ onClose }: SuperAdminSidebarProps) {
           </svg>
           {uz.auth.chiqish}
         </button>
+        {logoutError && (
+          <p role="alert" className="px-3 pt-1 text-xs text-[#B91C1C]">{logoutError}</p>
+        )}
       </div>
     </aside>
   );

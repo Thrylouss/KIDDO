@@ -14,19 +14,6 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        // Super Admin
-        User::firstOrCreate(
-            ['phone' => '+998901234567'],
-            [
-                'name'            => 'Super Admin',
-                'email'           => 'superadmin@kiddo.uz',
-                'password'        => Hash::make('superadmin123'),
-                'role'            => User::ROLE_SUPER_ADMIN,
-                'organization_id' => null,
-                'is_active'       => true,
-            ]
-        );
-
         // Planlar
         $basicPlan = \App\Models\Plan::firstOrCreate(
             ['slug' => 'boshlang-ich'],
@@ -359,7 +346,29 @@ class DatabaseSeeder extends Seeder
                     $notif
                 );
             }
+
+            $this->seedLocalAccounts();
         }
+    }
+
+    /**
+     * Ma'lum parolli hisoblar — faqat lokal ishlab chiqish uchun.
+     * Production'da super-admin bu seeder orqali yaratilmasligi kerak.
+     */
+    private function seedLocalAccounts(): void
+    {
+        // Super Admin
+        User::firstOrCreate(
+            ['phone' => '+998901234567'],
+            [
+                'name'            => 'Super Admin',
+                'email'           => 'superadmin@kiddo.uz',
+                'password'        => Hash::make('superadmin123'),
+                'role'            => User::ROLE_SUPER_ADMIN,
+                'organization_id' => null,
+                'is_active'       => true,
+            ]
+        );
 
         // Test uchun admin foydalanuvchi
         User::firstOrCreate(

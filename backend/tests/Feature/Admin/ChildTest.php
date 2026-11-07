@@ -126,6 +126,19 @@ class ChildTest extends TestCase
         $this->assertSoftDeleted('children', ['id' => $child->id]);
     }
 
+    public function test_tugilgan_sana_vaqt_zonasiz_y_m_d_formatida_qaytadi(): void
+    {
+        // ISO datetime (UTC) Toshkent sanasini bir kun oldinga surib ko'rsatardi
+        [$admin, $org] = $this->adminWithOrg();
+        $child = Child::factory()->create(['organization_id' => $org->id, 'birth_date' => '2023-09-23']);
+
+        $this->actingAs($admin, 'sanctum')->getJson('/api/v1/admin/children')
+             ->assertOk()
+             ->assertJsonPath('data.0.birth_date', '2023-09-23');
+        $this->actingAs($admin, 'sanctum')->getJson("/api/v1/admin/children/{$child->id}")
+             ->assertJsonPath('data.birth_date', '2023-09-23');
+    }
+
     public function test_yaratishda_majburiy_maydonlar(): void
     {
         [$admin] = $this->adminWithOrg();

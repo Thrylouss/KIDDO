@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { api } from "@/lib/api";
 import { useAuth } from "@/contexts/AuthContext";
 import uz from "@/i18n/uz";
@@ -11,6 +12,8 @@ import {
   clearDemoAttendance,
 } from "@/lib/demo-data";
 import type { TeacherDashboardData, AttendanceStatus } from "@/lib/demo-data";
+import AttendanceManager from "@/components/attendance/AttendanceManager";
+import type { TeacherDashboard } from "@/types";
 
 const UZ_MONTHS = [
   "yanvar","fevral","mart","aprel","may","iyun",
@@ -26,6 +29,70 @@ function Skeleton({ className }: { className?: string }) {
 }
 
 export default function TarbiyachiDashboardPage() {
+  return IS_DEMO ? <DemoTeacherDashboard /> : <RealTeacherDashboard />;
+}
+
+/** Real rejim: davomat backend orqali (GET /v1/teacher/dashboard, PUT /v1/teacher/attendance). */
+function RealTeacherDashboard() {
+  const { user } = useAuth();
+  const firstName = user?.name?.split(" ")[0] ?? "Tarbiyachi";
+  const [info, setInfo] = useState<TeacherDashboard | null>(null);   // setInfo — barqaror callback
+
+  return (
+    <div className="max-w-4xl mx-auto space-y-6">
+      <div>
+        <h1 className="text-2xl font-bold text-[#29232A]">
+          {uz.tarbiyachi_panel.xayrli_kun}, {firstName}!
+        </h1>
+        <p className="text-[#B8AAB2] mt-1 text-sm">{todayLabel()}</p>
+      </div>
+
+      {info?.group && (
+        <div data-testid="group-card" className="bg-[#8E315D] rounded-2xl p-5 text-white">
+          <p className="text-white/70 text-xs font-medium uppercase tracking-wide mb-1">
+            {uz.tarbiyachi_panel.mening_guruhim}
+          </p>
+          <h2 className="text-xl font-bold">{info.group.name}</h2>
+          <p className="text-white/70 text-sm mt-0.5">
+            {[info.group.age_category, info.group.capacity ? `${uz.tarbiyachi_panel.sigim}: ${info.group.capacity}` : null, info.teacher.position]
+              .filter(Boolean).join(" · ")}
+          </p>
+          <p data-testid="group-children-count" className="text-white text-sm font-semibold mt-2">
+            {uz.tarbiyachi_panel.jami_bolalar}: {info.children.length}
+          </p>
+        </div>
+      )}
+
+      <nav aria-label={uz.tarbiyachi_panel.tez_amallar} className="flex flex-wrap gap-2">
+        {[
+          { href: "/tarbiyachi/guruh",    label: uz.nav.mening_guruhim },
+          { href: "/tarbiyachi/kundalik", label: uz.nav.kundalik },
+          { href: "/tarbiyachi/xabarlar", label: uz.nav.xabarlar },
+          { href: "/tarbiyachi/foto",     label: uz.nav.foto },
+        ].map((a) => (
+          <Link
+            key={a.href}
+            href={a.href}
+            className="px-3.5 py-2 rounded-lg border border-[#EDE3E8] bg-white text-sm font-medium text-[#3D3240] hover:border-[#8E315D] hover:bg-[#FDF2F6] hover:text-[#8E315D] transition-colors"
+          >
+            {a.label}
+          </Link>
+        ))}
+      </nav>
+
+      <h2 id="davomat" className="text-sm font-semibold text-[#29232A] scroll-mt-4">{uz.tarbiyachi_panel.bugungi_davomat}</h2>
+      <AttendanceManager<TeacherDashboard>
+        loadPath="/v1/teacher/dashboard"
+        savePath="/v1/teacher/attendance"
+        noGroupsText={uz.davomat.guruh_yoq_tarbiyachi}
+        onLoaded={setInfo}
+      />
+    </div>
+  );
+}
+
+/** Demo rejim: soxta ma'lumot va localStorage (backendga so'rov ketmaydi). */
+function DemoTeacherDashboard() {
   const { user } = useAuth();
   const [data, setData]           = useState<TeacherDashboardData | null>(null);
   const [loading, setLoading]     = useState(true);
