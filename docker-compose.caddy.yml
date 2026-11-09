@@ -1,10 +1,20 @@
-# KIDDO — serverda Caddy (yoki boshqa reverse proxy) 80/443 portlarni egallagan bo'lsa.
-# nginx tashqariga 80/443 ochmaydi, faqat 127.0.0.1:8088 (HTTP) — HTTPS'ni Caddy beradi.
+# KIDDO — serverdagi umumiy Caddy konteyneri (qanot-caddy-1) ortida ishlash.
+# nginx 80/443 ni egallamaydi; Caddy uni Docker tarmog'i orqali `kiddo-nginx:80` nomi bilan topadi.
+# CADDY_NETWORK — Caddy konteyneri ulangan tarmoq (scripts/caddy-setup.sh root .env ga yozadi).
 #   docker compose -f docker-compose.prod.yml -f docker-compose.caddy.yml up -d
 services:
   nginx:
     ports: !override
-      - "127.0.0.1:8088:80"
+      - "127.0.0.1:8088:80"          # faqat serverning o'zidan tekshirish uchun
     volumes: !override
       - ./backend:/var/www/html:ro
       - ./docker/nginx/default.caddy.conf:/etc/nginx/conf.d/default.conf:ro
+    networks:
+      default: {}
+      caddy:
+        aliases: [kiddo-nginx]
+
+networks:
+  caddy:
+    external: true
+    name: ${CADDY_NETWORK:-qanot_default}
