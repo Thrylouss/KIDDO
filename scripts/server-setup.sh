@@ -43,7 +43,7 @@ $DC build
 PHP_IMAGE=$($DC config --images 2>/dev/null | awk '/-php/ && !f {print; f=1}')
 [ -n "$PHP_IMAGE" ] || PHP_IMAGE=kiddo-php
 echo "PHP image: $PHP_IMAGE"
-docker run --rm -e COMPOSER_HOME=/tmp/composer -v "$APP_DIR/backend:/var/www/html" -w /var/www/html \
+docker run --rm -u 0:0 -e COMPOSER_HOME=/tmp/composer -v "$APP_DIR/backend:/var/www/html" -w /var/www/html \
   "$PHP_IMAGE" composer install --no-dev --optimize-autoloader --no-interaction
 
 echo "==> 5/7 Baza va ilova"
