@@ -3,6 +3,7 @@
 #   cd /opt/kiddo && sudo bash scripts/server-setup.sh admin@example.com
 # Takroran ishga tushirish xavfsiz: mavjud .env fayllar va sertifikat qayta yaratilmaydi.
 set -euo pipefail
+trap 'echo; echo "XATO: $LINENO-qatorda to‘xtadi: $BASH_COMMAND"' ERR
 
 DOMAIN="kiddo-sad.uz"
 EMAIL="${1:?Foydalanish: bash scripts/server-setup.sh <email-for-ssl>}"
@@ -39,7 +40,9 @@ chown -R 1000:1000 backend/storage backend/bootstrap/cache
 
 echo "==> 4/7 Build (10-15 daqiqa olishi mumkin)"
 $DC build
-PHP_IMAGE=$($DC config --images | grep -m1 -- '-php')
+PHP_IMAGE=$($DC config --images 2>/dev/null | awk '/-php/ && !f {print; f=1}')
+[ -n "$PHP_IMAGE" ] || PHP_IMAGE=kiddo-php
+echo "PHP image: $PHP_IMAGE"
 docker run --rm -e COMPOSER_HOME=/tmp/composer -v "$APP_DIR/backend:/var/www/html" -w /var/www/html \
   "$PHP_IMAGE" composer install --no-dev --optimize-autoloader --no-interaction
 
