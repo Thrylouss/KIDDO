@@ -1,0 +1,10 @@
+# KIDDO — serverda Caddy (yoki boshqa reverse proxy) 80/443 portlarni egallagan bo'lsa.
+# nginx tashqariga 80/443 ochmaydi, faqat 127.0.0.1:8088 (HTTP) — HTTPS'ni Caddy beradi.
+#   docker compose -f docker-compose.prod.yml -f docker-compose.caddy.yml up -d
+services:
+  nginx:
+    ports: !override
+      - "127.0.0.1:8088:80"
+    volumes: !override
+      - ./backend:/var/www/html:ro
+      - ./docker/nginx/default.caddy.conf:/etc/nginx/conf.d/default.conf:ro
