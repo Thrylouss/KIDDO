@@ -37,6 +37,7 @@ if [ ! -f backend/.env ]; then
 fi
 mkdir -p backend/storage/app backend/storage/framework/{cache,sessions,views} backend/storage/logs backend/bootstrap/cache
 chown -R 1000:1000 backend/storage backend/bootstrap/cache
+chown 1000:1000 backend/.env
 
 echo "==> 4/7 Build (10-15 daqiqa olishi mumkin)"
 $DC build
