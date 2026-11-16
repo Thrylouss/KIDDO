@@ -16,8 +16,9 @@ import PageHeader from "@/components/ui/PageHeader";
 import { SkeletonTable } from "@/components/ui/Skeleton";
 import TeacherGroupsModal from "@/components/TeacherGroupsModal";
 import type { ApiResponse, TeacherProfile } from "@/types";
-import uz from "@/i18n/uz";
+import uz from "@/i18n";
 import { useReadOnly } from "@/lib/readOnly";
+import { useLocale } from "@/contexts/PreferencesContext";
 
 interface TeacherForm {
   first_name: string;
@@ -39,6 +40,7 @@ const teacherIcon = (
 );
 
 export default function TarbiyachilarPage() {
+  useLocale(); // til almashganda holat saqlangan holda qayta render
   const readOnly = useReadOnly();
   const [teachers, setTeachers] = useState<TeacherProfile[]>([]);
   const [loading,  setLoading]  = useState(true);
@@ -181,7 +183,7 @@ export default function TarbiyachilarPage() {
       )}
 
       {/* Tor ekranda jadval karta ichida gorizontal aylanadi — amal tugmalari kesilmasin */}
-      <div className="relative bg-white rounded-xl border border-[#EDE3E8] overflow-x-auto">
+      <div className="relative bg-white rounded-xl border border-[var(--border)] overflow-x-auto">
         {loading ? (
           <SkeletonTable rows={5} />
         ) : error ? (
@@ -196,35 +198,35 @@ export default function TarbiyachilarPage() {
         ) : (
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-[#EDE3E8] bg-[#FAF5F8]">
-                <th className="text-left px-5 py-3.5 text-xs font-semibold text-[#766B73] uppercase tracking-wide">Tarbiyachi</th>
-                <th className="text-left px-5 py-3.5 text-xs font-semibold text-[#766B73] uppercase tracking-wide hidden sm:table-cell">{uz.tarbiyachilar.telefon}</th>
-                <th className="text-left px-5 py-3.5 text-xs font-semibold text-[#766B73] uppercase tracking-wide hidden md:table-cell">{uz.tarbiyachilar.lavozim}</th>
-                <th className="text-left px-5 py-3.5 text-xs font-semibold text-[#766B73] uppercase tracking-wide hidden lg:table-cell">{uz.tarbiyachilar.guruh}</th>
-                <th className="text-left px-5 py-3.5 text-xs font-semibold text-[#766B73] uppercase tracking-wide">{uz.tarbiyachilar.holat}</th>
+              <tr className="border-b border-[var(--border)] bg-[var(--surface-2)]">
+                <th className="text-left px-5 py-3.5 text-xs font-semibold text-[var(--text-2)] uppercase tracking-wide">{uz.matn.tarbiyachi}</th>
+                <th className="text-left px-5 py-3.5 text-xs font-semibold text-[var(--text-2)] uppercase tracking-wide hidden sm:table-cell">{uz.tarbiyachilar.telefon}</th>
+                <th className="text-left px-5 py-3.5 text-xs font-semibold text-[var(--text-2)] uppercase tracking-wide hidden md:table-cell">{uz.tarbiyachilar.lavozim}</th>
+                <th className="text-left px-5 py-3.5 text-xs font-semibold text-[var(--text-2)] uppercase tracking-wide hidden lg:table-cell">{uz.tarbiyachilar.guruh}</th>
+                <th className="text-left px-5 py-3.5 text-xs font-semibold text-[var(--text-2)] uppercase tracking-wide">{uz.tarbiyachilar.holat}</th>
                 <th className="px-5 py-3.5" />
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#F2ECF0]">
+            <tbody className="divide-y divide-[var(--border-2)]">
               {teachers.map((t) => (
-                <tr key={t.id} className="hover:bg-[#FAF5F8] transition-colors duration-100">
+                <tr key={t.id} className="hover:bg-[var(--surface-2)] transition-colors duration-100">
                   <td className="px-5 py-4">
                     <div className="flex items-center gap-3">
                       <Avatar name={`${t.first_name} ${t.last_name}`} size="sm" />
                       <div>
-                        <p className="font-medium text-[#29232A]">{t.last_name} {t.first_name}</p>
-                        {t.user?.username && <p className="text-xs text-[#766B73]">{uz.tarbiyachilar.login}: <span className="font-mono">{t.user.username}</span></p>}
-                        {t.user?.must_change_password && <p className="text-xs text-[#92400E]">{uz.akkaunt.almashtirilmagan}</p>}
-                        <p className="text-xs text-[#B8AAB2] sm:hidden">{t.phone}</p>
+                        <p className="font-medium text-[var(--text)]">{t.last_name} {t.first_name}</p>
+                        {t.user?.username && <p className="text-xs text-[var(--text-2)]">{uz.tarbiyachilar.login}: <span className="font-mono">{t.user.username}</span></p>}
+                        {t.user?.must_change_password && <p className="text-xs text-[var(--warning-text)]">{uz.akkaunt.almashtirilmagan}</p>}
+                        <p className="text-xs text-[var(--text-3)] sm:hidden">{t.phone}</p>
                       </div>
                     </div>
                   </td>
-                  <td className="px-5 py-4 text-[#766B73] hidden sm:table-cell">{t.phone ?? <span className="text-[#D9C9D1]">—</span>}</td>
-                  <td className="px-5 py-4 text-[#766B73] hidden md:table-cell">{t.position}</td>
-                  <td className="px-5 py-4 text-[#766B73] hidden lg:table-cell">
+                  <td className="px-5 py-4 text-[var(--text-2)] hidden sm:table-cell">{t.phone ?? <span className="text-[var(--border-strong)]">—</span>}</td>
+                  <td className="px-5 py-4 text-[var(--text-2)] hidden md:table-cell">{t.position}</td>
+                  <td className="px-5 py-4 text-[var(--text-2)] hidden lg:table-cell">
                     {t.groups && t.groups.length > 0
                       ? t.groups.map(g => g.name).join(", ")
-                      : <span className="text-[#D9C9D1]">—</span>}
+                      : <span className="text-[var(--border-strong)]">—</span>}
                   </td>
                   <td className="px-5 py-4">
                     <Badge variant={t.is_active ? "success" : "neutral"}>
@@ -265,7 +267,7 @@ export default function TarbiyachilarPage() {
       >
         <form id="teacher-form" onSubmit={handleSubmit} className="space-y-4">
           {editing && IS_DEMO && (
-            <p role="note" className="rounded-lg bg-[#FFFBEB] border border-[#FDE68A] text-[#92400E] text-sm px-3 py-2">{uz.common.demo_saqlanmaydi}</p>
+            <p role="note" className="rounded-lg bg-[var(--warning-soft)] border border-[var(--warning-border)] text-[var(--warning-text)] text-sm px-3 py-2">{uz.common.demo_saqlanmaydi}</p>
           )}
           <div className="grid grid-cols-2 gap-3">
             <Input
@@ -304,14 +306,14 @@ export default function TarbiyachilarPage() {
             placeholder="+998901234567"
             error={formErrors.phone?.[0]}
           />
-          {!editing && <p className="text-xs text-[#766B73]">{uz.tarbiyachilar.parol_izoh}</p>}
+          {!editing && <p className="text-xs text-[var(--text-2)]">{uz.tarbiyachilar.parol_izoh}</p>}
           <Input
             label={`${uz.tarbiyachilar.lavozim} (${uz.tarbiyachilar.ixtiyoriy})`}
             value={form.position}
             onChange={(e) => setForm({ ...form, position: e.target.value })}
-            placeholder="Tarbiyachi"
+            placeholder={uz.matn.tarbiyachi}
           />
-          {formError && <p role="alert" className="text-sm text-[#B91C1C]">{formError}</p>}
+          {formError && <p role="alert" className="text-sm text-[var(--error-text)]">{formError}</p>}
         </form>
       </Modal>
 

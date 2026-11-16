@@ -1,4 +1,4 @@
-import uz from "@/i18n/uz";
+import uz from "@/i18n";
 import type { OrganizationSummary, OrgStatus, OrgType } from "@/types";
 
 const t = uz.bogchalar;
@@ -6,20 +6,20 @@ const t = uz.bogchalar;
 export const ORG_TYPES: OrgType[] = ["davlat", "xususiy"];
 export const ORG_STATUSES: OrgStatus[] = ["active", "inactive", "suspended", "archived"];
 
-export const TYPE_LABELS: Record<OrgType, string> = { davlat: t.turi_davlat, xususiy: t.turi_xususiy };
+export const TYPE_LABELS: Record<OrgType, string> = { get davlat() { return t.turi_davlat; }, get xususiy() { return t.turi_xususiy; } };
 
 export const STATUS_LABELS: Record<OrgStatus, string> = {
-  active:    t.holat_active,
-  inactive:  t.holat_inactive,
-  suspended: t.holat_suspended,
-  archived:  t.holat_archived,
+  get active() { return t.holat_active; },
+  get inactive() { return t.holat_inactive; },
+  get suspended() { return t.holat_suspended; },
+  get archived() { return t.holat_archived; },
 };
 
 export const STATUS_HINTS: Record<OrgStatus, string> = {
-  active:    t.holat_izoh_active,
-  inactive:  t.holat_izoh_inactive,
-  suspended: t.holat_izoh_suspended,
-  archived:  t.holat_izoh_archived,
+  get active() { return t.holat_izoh_active; },
+  get inactive() { return t.holat_izoh_inactive; },
+  get suspended() { return t.holat_izoh_suspended; },
+  get archived() { return t.holat_izoh_archived; },
 };
 
 /** Berry Pink tizimidagi ohanglar (Badge variantlari). */

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import Avatar from "@/components/ui/Avatar";
-import uz from "@/i18n/uz";
+import uz from "@/i18n";
 import { BILLING_ENABLED } from "@/lib/features";
 
 interface ActiveItem {
@@ -32,11 +32,11 @@ interface NavSection {
 
 const sections: NavSection[] = [
   {
-    label: "PLATFORMA",
+    get label() { return uz.sa_nav.platforma; },
     items: [
       {
         href: "/admin/dashboard",
-        label: "Dashboard",
+        get label() { return uz.sa_nav.dashboard; },
         icon: (
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
             <path strokeLinecap="round" strokeLinejoin="round"
@@ -47,11 +47,11 @@ const sections: NavSection[] = [
     ],
   },
   {
-    label: "BOG'CHALAR",
+    get label() { return uz.sa_nav.bogchalar_group; },
     items: [
       {
         href: "/admin/bogchalar",
-        label: uz.super_admin.bogchalar,
+        get label() { return uz.super_admin.bogchalar; },
         icon: (
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
             <path strokeLinecap="round" strokeLinejoin="round"
@@ -61,7 +61,7 @@ const sections: NavSection[] = [
       },
       {
         href: "/admin/demo-arizalar",
-        label: uz.demo_arizalar.sarlavha,
+        get label() { return uz.demo_arizalar.sarlavha; },
         icon: (
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
             <path strokeLinecap="round" strokeLinejoin="round"
@@ -71,7 +71,7 @@ const sections: NavSection[] = [
       },
       {
         href: "/admin/tariflar",
-        label: "Tariflar",
+        get label() { return uz.sa_nav.tariflar; },
         billing: true,
         icon: (
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
@@ -82,7 +82,7 @@ const sections: NavSection[] = [
       },
       {
         href: "/admin/obunalar",
-        label: "Obunalar",
+        get label() { return uz.sa_nav.obunalar; },
         billing: true,
         icon: (
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
@@ -94,11 +94,11 @@ const sections: NavSection[] = [
     ],
   },
   {
-    label: "MOLIYA",
+    get label() { return uz.sa_nav.moliya; },
     items: [
       {
         href: "/admin/tolovlar",
-        label: "To'lovlar",
+        get label() { return uz.sa_nav.tolovlar; },
         billing: true,
         icon: (
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
@@ -109,7 +109,7 @@ const sections: NavSection[] = [
       },
       {
         href: "/admin/invoices",
-        label: "Hisob-fakturalar",
+        get label() { return uz.sa_nav.hisob_fakturalar; },
         billing: true,
         icon: (
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
@@ -121,11 +121,11 @@ const sections: NavSection[] = [
     ],
   },
   {
-    label: "BOSHQARUV",
+    get label() { return uz.sa_nav.boshqaruv; },
     items: [
       {
         href: "/admin/foydalanuvchilar",
-        label: "Foydalanuvchilar",
+        get label() { return uz.sa_nav.foydalanuvchilar; },
         icon: (
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
             <path strokeLinecap="round" strokeLinejoin="round"
@@ -135,7 +135,7 @@ const sections: NavSection[] = [
       },
       {
         href: "/admin/xabarlar",
-        label: "Xabarlar",
+        get label() { return uz.sa_nav.xabarlar; },
         icon: (
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
             <path strokeLinecap="round" strokeLinejoin="round"
@@ -145,7 +145,7 @@ const sections: NavSection[] = [
       },
       {
         href: "/admin/hisobotlar",
-        label: "Hisobotlar",
+        get label() { return uz.sa_nav.hisobotlar; },
         icon: (
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
             <path strokeLinecap="round" strokeLinejoin="round"
@@ -156,11 +156,11 @@ const sections: NavSection[] = [
     ],
   },
   {
-    label: "TIZIM",
+    get label() { return uz.sa_nav.tizim; },
     items: [
       {
         href: "/admin/faollik",
-        label: "Faollik",
+        get label() { return uz.sa_nav.faollik; },
         icon: (
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
             <path strokeLinecap="round" strokeLinejoin="round"
@@ -170,7 +170,7 @@ const sections: NavSection[] = [
       },
       {
         href: "/admin/sozlamalar",
-        label: "Sozlamalar",
+        get label() { return uz.sa_nav.sozlamalar; },
         icon: (
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
             <path strokeLinecap="round" strokeLinejoin="round"
@@ -183,12 +183,15 @@ const sections: NavSection[] = [
   },
 ];
 
-const visibleSections: NavSection[] = sections
-  .map((section) => ({
-    ...section,
-    items: section.items.filter((item) => BILLING_ENABLED || item.disabled || !item.billing),
-  }))
-  .filter((section) => section.items.length > 0);
+/** Render vaqtida hisoblanadi — bo'lim sarlavhalari joriy tilda bo'lishi uchun (modul darajasida spread getter'ni qotiradi). */
+function visibleSections(): NavSection[] {
+  return sections
+    .map((section) => ({
+      label: section.label,
+      items: section.items.filter((item) => BILLING_ENABLED || item.disabled || !item.billing),
+    }))
+    .filter((section) => section.items.length > 0);
+}
 
 interface SuperAdminSidebarProps {
   onClose?: () => void;
@@ -223,7 +226,7 @@ export default function SuperAdminSidebar({ onClose }: SuperAdminSidebarProps) {
             </div>
             <span className="text-lg font-bold text-[var(--text)] tracking-tight">KIDDO</span>
           </div>
-          <p className="text-[11px] text-[var(--text-3)] mt-0.5 ml-9">Super Admin</p>
+          <p className="text-[11px] text-[var(--text-3)] mt-0.5 ml-9">{uz.super_admin.sarlavha}</p>
         </div>
         {onClose && (
           <button
@@ -239,7 +242,7 @@ export default function SuperAdminSidebar({ onClose }: SuperAdminSidebarProps) {
 
       {/* Nav */}
       <nav className="flex-1 px-3 pb-3 overflow-y-auto space-y-4">
-        {visibleSections.map((section) => (
+        {visibleSections().map((section) => (
           <div key={section.label}>
             <p className="px-3 pb-1.5 text-[10px] font-semibold uppercase tracking-wider text-[var(--text-3)]">
               {section.label}
@@ -252,7 +255,7 @@ export default function SuperAdminSidebar({ onClose }: SuperAdminSidebarProps) {
                       key={item.label}
                       className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-[var(--text-3)] cursor-default select-none"
                     >
-                      <span className="flex-shrink-0 text-[#D9C9D1]">{item.icon}</span>
+                      <span className="flex-shrink-0 text-[var(--border-strong)]">{item.icon}</span>
                       <span className="flex-1">{item.label}</span>
                       <span className="text-[10px] font-medium text-[var(--text-3)] bg-[var(--border-2)] px-1.5 py-0.5 rounded-full leading-none">
                         {uz.common.tez_kunda}
@@ -295,12 +298,12 @@ export default function SuperAdminSidebar({ onClose }: SuperAdminSidebarProps) {
           <Avatar name={user?.name ?? "?"} size="sm" />
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium text-[var(--text)] truncate">{user?.name ?? "—"}</p>
-            <p className="text-xs text-[var(--text-3)]">Super Admin</p>
+            <p className="text-xs text-[var(--text-3)]">{uz.super_admin.sarlavha}</p>
           </div>
         </div>
         <button
           onClick={handleLogout}
-          className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-[var(--text-2)] hover:bg-[#FEF2F2] hover:text-[#EF4444] transition-colors duration-150"
+          className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-[var(--text-2)] hover:bg-[var(--error-soft)] hover:text-[#EF4444] transition-colors duration-150"
         >
           <svg className="h-4 w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -308,7 +311,7 @@ export default function SuperAdminSidebar({ onClose }: SuperAdminSidebarProps) {
           {uz.auth.chiqish}
         </button>
         {logoutError && (
-          <p role="alert" className="px-3 pt-1 text-xs text-[#B91C1C]">{logoutError}</p>
+          <p role="alert" className="px-3 pt-1 text-xs text-[var(--error-text)]">{logoutError}</p>
         )}
       </div>
     </aside>

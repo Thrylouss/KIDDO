@@ -7,7 +7,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { impersonation } from "@/lib/api";
 import { roleLabel } from "@/lib/roles";
 import Avatar from "@/components/ui/Avatar";
-import uz from "@/i18n/uz";
+import uz from "@/i18n";
 
 interface ActiveItem {
   href: string;
@@ -31,11 +31,11 @@ interface NavSection {
 
 const sections: NavSection[] = [
   {
-    label: uz.sidebar.asosiy,
+    get label() { return uz.sidebar.asosiy; },
     items: [
       {
         href: "/bogcha/dashboard",
-        label: uz.nav.boshqaruv_paneli,
+        get label() { return uz.nav.boshqaruv_paneli; },
         icon: (
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
             <path strokeLinecap="round" strokeLinejoin="round"
@@ -46,11 +46,11 @@ const sections: NavSection[] = [
     ],
   },
   {
-    label: uz.sidebar.boshqaruv,
+    get label() { return uz.sidebar.boshqaruv; },
     items: [
       {
         href: "/bogcha/bolalar",
-        label: uz.nav.bolalar,
+        get label() { return uz.nav.bolalar; },
         icon: (
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
             <path strokeLinecap="round" strokeLinejoin="round"
@@ -60,7 +60,7 @@ const sections: NavSection[] = [
       },
       {
         href: "/bogcha/guruhlar",
-        label: uz.nav.guruhlar,
+        get label() { return uz.nav.guruhlar; },
         icon: (
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
             <path strokeLinecap="round" strokeLinejoin="round"
@@ -70,7 +70,7 @@ const sections: NavSection[] = [
       },
       {
         href: "/bogcha/tarbiyachilar",
-        label: uz.nav.tarbiyachilar,
+        get label() { return uz.nav.tarbiyachilar; },
         icon: (
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
             <path strokeLinecap="round" strokeLinejoin="round"
@@ -80,7 +80,7 @@ const sections: NavSection[] = [
       },
       {
         href: "/bogcha/ota-onalar",
-        label: uz.nav.ota_onalar,
+        get label() { return uz.nav.ota_onalar; },
         icon: (
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
             <path strokeLinecap="round" strokeLinejoin="round"
@@ -91,11 +91,11 @@ const sections: NavSection[] = [
     ],
   },
   {
-    label: uz.sidebar.kunlik_faoliyat,
+    get label() { return uz.sidebar.kunlik_faoliyat; },
     items: [
       {
         href: "/bogcha/davomat",
-        label: uz.nav.davomat,
+        get label() { return uz.nav.davomat; },
         icon: (
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
             <path strokeLinecap="round" strokeLinejoin="round"
@@ -106,7 +106,7 @@ const sections: NavSection[] = [
       {
         // Ovqatlanish, uyqu va mashg'ulotlar bitta sahifada (bo'limlar)
         href: "/bogcha/kundalik",
-        label: uz.nav.kundalik,
+        get label() { return uz.nav.kundalik; },
         icon: (
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
             <path strokeLinecap="round" strokeLinejoin="round"
@@ -117,11 +117,11 @@ const sections: NavSection[] = [
     ],
   },
   {
-    label: uz.sidebar.aloqa,
+    get label() { return uz.sidebar.aloqa; },
     items: [
       {
         href: "/bogcha/xabarlar",
-        label: uz.nav.xabarlar,
+        get label() { return uz.nav.xabarlar; },
         icon: (
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
             <path strokeLinecap="round" strokeLinejoin="round"
@@ -131,7 +131,7 @@ const sections: NavSection[] = [
       },
       {
         href: "/bogcha/foto",
-        label: uz.nav.foto,
+        get label() { return uz.nav.foto; },
         icon: (
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
             <path strokeLinecap="round" strokeLinejoin="round"
@@ -142,11 +142,11 @@ const sections: NavSection[] = [
     ],
   },
   {
-    label: uz.sidebar.moliya,
+    get label() { return uz.sidebar.moliya; },
     items: [
       {
         href: "/bogcha/tolovlar",
-        label: uz.nav.tolov,
+        get label() { return uz.nav.tolov; },
         icon: (
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
             <path strokeLinecap="round" strokeLinejoin="round"
@@ -157,11 +157,11 @@ const sections: NavSection[] = [
     ],
   },
   {
-    label: uz.sidebar.sozlamalar_group,
+    get label() { return uz.sidebar.sozlamalar_group; },
     items: [
       {
         href: "/bogcha/sozlamalar",
-        label: uz.nav.sozlamalar,
+        get label() { return uz.nav.sozlamalar; },
         icon: (
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
             <path strokeLinecap="round" strokeLinejoin="round"
@@ -213,7 +213,7 @@ export default function BogchaSidebar({ onClose }: BogchaSidebarProps) {
             </div>
             <span className="text-lg font-bold text-[var(--text)] tracking-tight">KIDDO</span>
           </div>
-          <p className="text-[11px] text-[var(--text-3)] mt-0.5 ml-9">Boshqaruv tizimi</p>
+          <p className="text-[11px] text-[var(--text-3)] mt-0.5 ml-9">{uz.ui.boshqaruv_tizimi}</p>
         </div>
         {onClose && (
           <button
@@ -242,7 +242,7 @@ export default function BogchaSidebar({ onClose }: BogchaSidebarProps) {
                       key={item.label}
                       className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-[var(--text-3)] cursor-default select-none"
                     >
-                      <span className="flex-shrink-0 text-[#D9C9D1]">{item.icon}</span>
+                      <span className="flex-shrink-0 text-[var(--border-strong)]">{item.icon}</span>
                       <span className="flex-1">{item.label}</span>
                       <span className="text-[10px] font-medium text-[var(--text-3)] bg-[var(--border-2)] px-1.5 py-0.5 rounded-full leading-none">
                         {uz.common.tez_kunda}
@@ -286,13 +286,13 @@ export default function BogchaSidebar({ onClose }: BogchaSidebarProps) {
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium text-[var(--text)] truncate">{user?.name ?? "—"}</p>
             <p className="text-xs text-[var(--text-3)]">
-              {user?.role === "super_admin" ? "Bosh admin" : roleLabel(user?.role)}
+              {user?.role === "super_admin" ? uz.ui.bosh_admin : roleLabel(user?.role)}
             </p>
           </div>
         </div>
         <button
           onClick={handleLogout}
-          className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-[var(--text-2)] hover:bg-[#FEF2F2] hover:text-[#EF4444] transition-colors duration-150"
+          className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-[var(--text-2)] hover:bg-[var(--error-soft)] hover:text-[#EF4444] transition-colors duration-150"
         >
           <svg className="h-4 w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -300,7 +300,7 @@ export default function BogchaSidebar({ onClose }: BogchaSidebarProps) {
           {uz.auth.chiqish}
         </button>
         {logoutError && (
-          <p role="alert" className="px-3 pt-1 text-xs text-[#B91C1C]">{logoutError}</p>
+          <p role="alert" className="px-3 pt-1 text-xs text-[var(--error-text)]">{logoutError}</p>
         )}
       </div>
     </aside>

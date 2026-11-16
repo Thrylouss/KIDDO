@@ -2,6 +2,7 @@
 
 import { useEffect, useId, useRef } from "react";
 import Button from "./Button";
+import uz from "@/i18n";
 
 type Size = "sm" | "md" | "lg";
 
@@ -79,7 +80,7 @@ export default function Modal({ open, onClose, title, children, footer, size = "
           <button
             onClick={onClose}
             className="rounded-lg p-1.5 text-[var(--text-3)] hover:text-[var(--text)] hover:bg-[var(--border-2)] transition-colors"
-            aria-label="Yopish"
+            aria-label={uz.common.yopish}
           >
             <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />

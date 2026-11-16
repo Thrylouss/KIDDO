@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Button from "@/components/ui/Button";
 import Modal from "@/components/ui/Modal";
-import uz from "@/i18n/uz";
+import uz from "@/i18n";
 
 interface TemporaryPasswordModalProps {
   /** null — yopiq */
@@ -50,17 +50,17 @@ export default function TemporaryPasswordModal({ credentials, onClose }: Tempora
     >
       {credentials && (
         <div className="space-y-4">
-          <p role="note" className="rounded-lg border border-[#FDE68A] bg-[#FFFBEB] px-3 py-2 text-xs text-[#92400E]">
+          <p role="note" className="rounded-lg border border-[var(--warning-border)] bg-[var(--warning-soft)] px-3 py-2 text-xs text-[var(--warning-text)]">
             {t.vaqtinchalik_ogohlantirish}
           </p>
           <dl className="space-y-2 text-sm">
-            <div className="flex items-center justify-between gap-3 rounded-lg bg-[#FAF5F8] px-3 py-2">
-              <dt className="text-[#766B73]">{t.login}</dt>
-              <dd data-testid="temp-login" className="font-mono font-semibold text-[#29232A]">{credentials.login}</dd>
+            <div className="flex items-center justify-between gap-3 rounded-lg bg-[var(--surface-2)] px-3 py-2">
+              <dt className="text-[var(--text-2)]">{t.login}</dt>
+              <dd data-testid="temp-login" className="font-mono font-semibold text-[var(--text)]">{credentials.login}</dd>
             </div>
-            <div className="flex items-center justify-between gap-3 rounded-lg bg-[#FAF5F8] px-3 py-2">
-              <dt className="text-[#766B73]">{t.vaqtinchalik_parol}</dt>
-              <dd data-testid="temp-password" className="font-mono font-semibold tracking-wider text-[#8E315D] select-all">{credentials.password}</dd>
+            <div className="flex items-center justify-between gap-3 rounded-lg bg-[var(--surface-2)] px-3 py-2">
+              <dt className="text-[var(--text-2)]">{t.vaqtinchalik_parol}</dt>
+              <dd data-testid="temp-password" className="font-mono font-semibold tracking-wider text-[var(--primary)] select-all">{credentials.password}</dd>
             </div>
           </dl>
         </div>

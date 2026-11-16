@@ -13,8 +13,9 @@ import Modal from "@/components/ui/Modal";
 import PageHeader from "@/components/ui/PageHeader";
 import Select from "@/components/ui/Select";
 import { SkeletonTable } from "@/components/ui/Skeleton";
-import uz from "@/i18n/uz";
+import uz from "@/i18n";
 import { useReadOnly } from "@/lib/readOnly";
+import { useLocale } from "@/contexts/PreferencesContext";
 
 const t = uz.tolov;
 
@@ -34,6 +35,7 @@ const currentMonth = () => todayIso().slice(0, 7);
 
 /** Rahbar: bolalarning oylik to'lov holati (qayd etish, tahrirlash, bekor qilish). */
 export default function TolovlarPage() {
+  useLocale(); // til almashganda holat saqlangan holda qayta render
   const [month, setMonth]     = useState(currentMonth());
   const [groupId, setGroupId] = useState("");
   const [data, setData]       = useState<Overview | null>(null);
@@ -120,7 +122,7 @@ export default function TolovlarPage() {
       </div>
 
       {s && (
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-px overflow-hidden rounded-xl border border-[#EDE3E8] bg-[#EDE3E8] mb-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-px overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--border)] mb-4">
           {[
             { id: "jami", label: t.jami, value: String(s.jami) },
             { id: "tolagan", label: t.tolagan, value: String(s.tolagan) },
@@ -128,8 +130,8 @@ export default function TolovlarPage() {
             { id: "summa", label: t.summa, value: som(s.summa) },
           ].map((c) => (
             <div key={c.id} className="bg-white px-4 py-3">
-              <p className="text-[11px] text-[#B8AAB2] font-medium uppercase tracking-wide">{c.label}</p>
-              <p data-testid={`pay-${c.id}`} className="text-xl font-bold text-[#29232A] leading-tight">{c.value}</p>
+              <p className="text-[11px] text-[var(--text-3)] font-medium uppercase tracking-wide">{c.label}</p>
+              <p data-testid={`pay-${c.id}`} className="text-xl font-bold text-[var(--text)] leading-tight">{c.value}</p>
             </div>
           ))}
         </div>
@@ -137,7 +139,7 @@ export default function TolovlarPage() {
 
       {success && <p role="status" className="mb-4 rounded-lg bg-[var(--success-bg)] text-[var(--success)] text-sm px-4 py-2.5">{success}</p>}
 
-      <div className="relative bg-white rounded-xl border border-[#EDE3E8] overflow-x-auto">
+      <div className="relative bg-white rounded-xl border border-[var(--border)] overflow-x-auto">
         {loading ? (
           <SkeletonTable rows={6} />
         ) : error ? (
@@ -147,7 +149,7 @@ export default function TolovlarPage() {
         ) : (
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-[#EDE3E8] bg-[#FAF5F8] text-left text-xs font-semibold text-[#766B73] uppercase tracking-wide">
+              <tr className="border-b border-[var(--border)] bg-[var(--surface-2)] text-left text-xs font-semibold text-[var(--text-2)] uppercase tracking-wide">
                 <th className="px-5 py-3.5">{t.bola}</th>
                 <th className="px-5 py-3.5 hidden sm:table-cell">{t.guruh}</th>
                 <th className="px-5 py-3.5">{t.holat}</th>
@@ -155,23 +157,23 @@ export default function TolovlarPage() {
                 <th className="px-5 py-3.5"><span className="sr-only">{uz.common.amallar}</span></th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#F2ECF0]">
+            <tbody className="divide-y divide-[var(--border-2)]">
               {data.children.map((row) => (
-                <tr key={row.id} data-testid={`pay-row-${row.id}`} className="hover:bg-[#FAF5F8]">
+                <tr key={row.id} data-testid={`pay-row-${row.id}`} className="hover:bg-[var(--surface-2)]">
                   <td className="px-5 py-3.5">
-                    <p className="font-medium text-[#29232A]">{row.last_name} {row.first_name}</p>
-                    <p className="text-xs text-[#B8AAB2] sm:hidden">{row.group?.name ?? "—"}</p>
+                    <p className="font-medium text-[var(--text)]">{row.last_name} {row.first_name}</p>
+                    <p className="text-xs text-[var(--text-3)] sm:hidden">{row.group?.name ?? "—"}</p>
                   </td>
-                  <td className="px-5 py-3.5 text-[#766B73] hidden sm:table-cell">{row.group?.name ?? "—"}</td>
+                  <td className="px-5 py-3.5 text-[var(--text-2)] hidden sm:table-cell">{row.group?.name ?? "—"}</td>
                   <td className="px-5 py-3.5">
                     {row.payment ? (
                       <div>
                         <Badge variant="success">{t.tolangan_badge}</Badge>
-                        <p className="text-[11px] text-[#B8AAB2] mt-1">{formatUzDate(row.payment.paid_at)}{row.payment.note ? ` · ${row.payment.note}` : ""}</p>
+                        <p className="text-[11px] text-[var(--text-3)] mt-1">{formatUzDate(row.payment.paid_at)}{row.payment.note ? ` · ${row.payment.note}` : ""}</p>
                       </div>
                     ) : <Badge variant="warning">{t.tolanmagan_badge}</Badge>}
                   </td>
-                  <td className="px-5 py-3.5 text-[#29232A] hidden md:table-cell whitespace-nowrap">{row.payment ? som(row.payment.amount) : "—"}</td>
+                  <td className="px-5 py-3.5 text-[var(--text)] hidden md:table-cell whitespace-nowrap">{row.payment ? som(row.payment.amount) : "—"}</td>
                   <td className="px-5 py-3.5">
                     {!readOnly && (
                       <div className="flex flex-wrap justify-end gap-1.5">
@@ -197,14 +199,14 @@ export default function TolovlarPage() {
           </>
         }>
         <form id="payment-form" onSubmit={save} className="space-y-4" noValidate>
-          <p className="text-xs text-[#766B73]">{t.oy}: <strong>{month}</strong></p>
+          <p className="text-xs text-[var(--text-2)]">{t.oy}: <strong>{month}</strong></p>
           <Input id="payment-amount" label={t.summa_som} type="number" min={1} inputMode="numeric" value={form.amount} required
             onChange={(e) => setForm({ ...form, amount: e.target.value })} error={errors.amount?.[0]} />
           <Input id="payment-date" label={t.sana} type="date" max={todayIso()} value={form.paid_at} required
             onChange={(e) => setForm({ ...form, paid_at: e.target.value })} error={errors.paid_at?.[0]} />
           <Input id="payment-note" label={t.izoh} value={form.note} maxLength={255}
             onChange={(e) => setForm({ ...form, note: e.target.value })} error={errors.note?.[0]} />
-          {formError && <p role="alert" className="text-sm text-[#B91C1C]">{formError}</p>}
+          {formError && <p role="alert" className="text-sm text-[var(--error-text)]">{formError}</p>}
         </form>
       </Modal>
 

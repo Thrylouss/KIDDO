@@ -4,7 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import { submitDemoRequest } from "@/lib/api";
 import { fieldErrors } from "@/lib/apiErrors";
 import { Icon } from "./icons";
-import uz from "@/i18n/uz";
+import uz from "@/i18n";
+import uzDict from "@/i18n/uz";
 
 const t = uz.landing;
 
@@ -60,18 +61,18 @@ function validate(f: Fields): Errors {
 }
 
 const inputCls = (err?: string) =>
-  `w-full rounded-2xl border bg-white px-4 py-3 text-[15px] text-[#29232A] placeholder:text-[#B8AAB2] outline-none transition
-   ${err ? "border-[#EF4444] focus:ring-4 focus:ring-[#EF4444]/15" : "border-[#EDE3E8] focus:border-[#D95F87] focus:ring-4 focus:ring-[#D95F87]/15"}`;
+  `w-full rounded-2xl border bg-white px-4 py-3 text-[15px] text-[var(--text)] placeholder:text-[var(--text-3)] outline-none transition
+   ${err ? "border-[#EF4444] focus:ring-4 focus:ring-[#EF4444]/15" : "border-[var(--border)] focus:border-[var(--secondary)] focus:ring-4 focus:ring-[var(--secondary)]/15"}`;
 
 function Field({ id, label, required, optional, error, children }: {
   id: string; label: string; required?: boolean; optional?: boolean; error?: string; children: React.ReactNode;
 }) {
   return (
     <div className="flex flex-col gap-1.5">
-      <label htmlFor={id} className="text-sm font-medium text-[#3D3240]">
+      <label htmlFor={id} className="text-sm font-medium text-[var(--label)]">
         {label}
-        {required && <span className="text-[#D95F87] ml-0.5" aria-hidden="true">*</span>}
-        {optional && <span className="ml-1.5 text-xs font-normal text-[#B8AAB2]">({t.f_ixtiyoriy})</span>}
+        {required && <span className="text-[var(--secondary)] ml-0.5" aria-hidden="true">*</span>}
+        {optional && <span className="ml-1.5 text-xs font-normal text-[var(--text-3)]">({t.f_ixtiyoriy})</span>}
       </label>
       {children}
       {error && <p id={`${id}-xato`} role="alert" className="text-xs text-[#DC2626]">{error}</p>}
@@ -149,12 +150,12 @@ export default function DemoRequestForm() {
 
   if (done) {
     return (
-      <div ref={doneRef} tabIndex={-1} role="status" data-testid="demo-success" className="outline-none flex flex-col items-center text-center rounded-3xl bg-white border border-[#EDE3E8] p-8 sm:p-12 shadow-[0_30px_80px_-40px_rgba(143,49,88,0.5)]">
-        <span className="h-16 w-16 rounded-full bg-[#DCFCE7] text-[#166534] flex items-center justify-center landing-rise">
+      <div ref={doneRef} tabIndex={-1} role="status" data-testid="demo-success" className="outline-none flex flex-col items-center text-center rounded-3xl bg-white border border-[var(--border)] p-8 sm:p-12 shadow-[0_30px_80px_-40px_rgba(143,49,88,0.5)]">
+        <span className="h-16 w-16 rounded-full bg-[var(--success-bg)] text-[var(--success)] flex items-center justify-center landing-rise">
           <Icon name="check" className="h-8 w-8" />
         </span>
-        <p className="mt-6 text-xl font-semibold text-[#29232A] max-w-md text-balance">{done}</p>
-        <button type="button" onClick={() => setDone("")} className="mt-8 text-sm font-semibold text-[#8F3158] hover:underline">
+        <p className="mt-6 text-xl font-semibold text-[var(--text)] max-w-md text-balance">{done}</p>
+        <button type="button" onClick={() => setDone("")} className="mt-8 text-sm font-semibold text-[var(--primary)] hover:underline">
           {t.f_yana}
         </button>
       </div>
@@ -163,7 +164,7 @@ export default function DemoRequestForm() {
 
   return (
     <form ref={formRef} onSubmit={onSubmit} noValidate method="post" aria-label={t.demo_form_sarlavha}
-      className="relative rounded-3xl bg-white border border-[#EDE3E8] p-5 sm:p-8 shadow-[0_30px_80px_-40px_rgba(143,49,88,0.5)]">
+      className="relative rounded-3xl bg-white border border-[var(--border)] p-5 sm:p-8 shadow-[0_30px_80px_-40px_rgba(143,49,88,0.5)]">
       <div className="grid gap-4 sm:gap-5 sm:grid-cols-2">
         <div className="sm:col-span-2">
           <Field id="demo-kindergarten_name" label={t.f_nomi} required error={errors.kindergarten_name}>
@@ -173,11 +174,11 @@ export default function DemoRequestForm() {
         </div>
 
         <fieldset className="sm:col-span-2">
-          <legend className="text-sm font-medium text-[#3D3240] mb-1.5">{t.f_turi}</legend>
-          <div className="grid grid-cols-2 gap-2 rounded-2xl bg-[#FAF5F8] p-1">
+          <legend className="text-sm font-medium text-[var(--label)] mb-1.5">{t.f_turi}</legend>
+          <div className="grid grid-cols-2 gap-2 rounded-2xl bg-[var(--surface-2)] p-1">
             {(["davlat", "xususiy"] as const).map((v) => (
               <label key={v} className={`cursor-pointer rounded-xl py-2.5 text-center text-sm font-semibold transition
-                ${f.kindergarten_type === v ? "bg-white text-[#8F3158] shadow-sm" : "text-[#746873] hover:text-[#29232A]"}`}>
+                ${f.kindergarten_type === v ? "bg-white text-[var(--primary)] shadow-sm" : "text-[var(--text-2)] hover:text-[var(--text)]"}`}>
                 <input type="radio" name="demo-turi" value={v} checked={f.kindergarten_type === v} onChange={() => set("kindergarten_type", v)} className="sr-only" />
                 {v === "davlat" ? t.f_davlat : t.f_xususiy}
               </label>
@@ -188,7 +189,8 @@ export default function DemoRequestForm() {
         <Field id="demo-region" label={t.f_viloyat} required error={errors.region}>
           <select {...a11y("region")} className={inputCls(errors.region)} value={f.region} onChange={(e) => set("region", e.target.value)}>
             <option value="">{t.f_viloyat_ph}</option>
-            {t.viloyatlar.map((v) => <option key={v} value={v}>{v}</option>)}
+            {/* Qiymat har doim O'zbekcha (backend ma'lumoti bir xil), yorliq — tanlangan tilda */}
+            {uzDict.landing.viloyatlar.map((v, i) => <option key={v} value={v}>{t.viloyatlar[i] ?? v}</option>)}
           </select>
         </Field>
         <Field id="demo-district" label={t.f_tuman} required error={errors.district}>
@@ -240,19 +242,19 @@ export default function DemoRequestForm() {
         <div className="sm:col-span-2">
           <label htmlFor="demo-consent" className="flex items-start gap-3 cursor-pointer">
             <input {...a11y("consent")} type="checkbox" checked={f.consent} onChange={(e) => set("consent", e.target.checked)}
-              className="mt-0.5 h-5 w-5 flex-shrink-0 rounded border-[#EDE3E8] accent-[#8F3158]" />
-            <span className="text-sm text-[#5A4E58] leading-relaxed">{t.f_rozilik}<span className="text-[#D95F87] ml-0.5" aria-hidden="true">*</span></span>
+              className="mt-0.5 h-5 w-5 flex-shrink-0 rounded border-[var(--border)] accent-[var(--primary)]" />
+            <span className="text-sm text-[var(--label)] leading-relaxed">{t.f_rozilik}<span className="text-[var(--secondary)] ml-0.5" aria-hidden="true">*</span></span>
           </label>
           {errors.consent && <p id="demo-consent-xato" role="alert" className="mt-1.5 text-xs text-[#DC2626]">{errors.consent}</p>}
         </div>
       </div>
 
       {formError && (
-        <p role="alert" data-testid="demo-form-error" className="mt-5 rounded-2xl bg-[#FEF2F2] border border-[#FECACA] px-4 py-3 text-sm text-[#B91C1C]">{formError}</p>
+        <p role="alert" data-testid="demo-form-error" className="mt-5 rounded-2xl bg-[var(--error-soft)] border border-[var(--error-border)] px-4 py-3 text-sm text-[var(--error-text)]">{formError}</p>
       )}
 
       <button type="submit" disabled={sending} aria-busy={sending || undefined}
-        className="mt-6 group inline-flex w-full h-13 py-3.5 items-center justify-center gap-2 rounded-full bg-[#8F3158] px-7 text-base font-semibold text-white shadow-lg shadow-[#8F3158]/25 hover:bg-[#742544] active:scale-[0.99] disabled:opacity-70 disabled:cursor-wait transition">
+        className="mt-6 group inline-flex w-full h-13 py-3.5 items-center justify-center gap-2 rounded-full bg-[var(--primary)] px-7 text-base font-semibold text-white shadow-lg shadow-[var(--primary)]/25 hover:bg-[var(--primary-h)] active:scale-[0.99] disabled:opacity-70 disabled:cursor-wait transition">
         {sending ? (
           <><span className="h-4 w-4 rounded-full border-2 border-white/40 border-t-white animate-spin" aria-hidden="true" />{t.f_yuborilmoqda}</>
         ) : (

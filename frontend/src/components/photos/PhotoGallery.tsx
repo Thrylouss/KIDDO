@@ -11,7 +11,7 @@ import Input from "@/components/ui/Input";
 import Modal from "@/components/ui/Modal";
 import PageHeader from "@/components/ui/PageHeader";
 import Select from "@/components/ui/Select";
-import uz from "@/i18n/uz";
+import uz from "@/i18n";
 import { useReadOnly } from "@/lib/readOnly";
 
 const t = uz.foto;
@@ -64,9 +64,11 @@ export default function PhotoGallery({ basePath, description, canDeleteAll = fal
       const qs = new URLSearchParams({ page: String(page) });
       if (groupId) qs.set("group_id", groupId);
       const res = await api.get<PageData>(`${basePath}/photos?${qs}`);
-      setPhotos((prev) => (page === 1 ? res.data : [...prev, ...res.data]));
-      setGroups(res.groups);
-      setMeta(res.meta);
+      // Bo'sh javob (masalan, demo rejimda galereya ma'lumoti yo'q) sahifani yiqitmasin — bo'sh holat ko'rsatiladi
+      const items = res?.data ?? [];
+      setPhotos((prev) => (page === 1 ? items : [...prev, ...items]));
+      setGroups(res?.groups ?? []);
+      setMeta(res?.meta ?? null);
     } catch {
       setError(true);
     } finally {
@@ -135,14 +137,14 @@ export default function PhotoGallery({ basePath, description, canDeleteAll = fal
 
       {loading ? (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3" aria-busy="true">
-          {Array.from({ length: 8 }).map((_, i) => <div key={i} className="aspect-square rounded-xl bg-[#F2ECF0] animate-pulse" />)}
+          {Array.from({ length: 8 }).map((_, i) => <div key={i} className="aspect-square rounded-xl bg-[var(--border-2)] animate-pulse" />)}
         </div>
       ) : error ? (
-        <div className="bg-white rounded-xl border border-[#EDE3E8]">
+        <div className="bg-white rounded-xl border border-[var(--border)]">
           <EmptyState icon={photoIcon} title={uz.common.yuklash_xatosi} action={{ label: uz.common.qayta_urinish, onClick: () => load(1) }} />
         </div>
       ) : photos.length === 0 ? (
-        <div className="bg-white rounded-xl border border-[#EDE3E8]">
+        <div className="bg-white rounded-xl border border-[var(--border)]">
           <EmptyState icon={photoIcon} title={t.bosh} description={readOnly ? undefined : t.bosh_tavsif}
             action={!readOnly && groups.length > 0 ? { label: t.yuklash, onClick: openUpload } : undefined} />
         </div>
@@ -150,14 +152,14 @@ export default function PhotoGallery({ basePath, description, canDeleteAll = fal
         <>
           <ul className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3" data-testid="photo-grid">
             {photos.map((p) => (
-              <li key={p.id} className="bg-white rounded-xl border border-[#EDE3E8] overflow-hidden">
-                <button type="button" onClick={() => setViewing(p)} className="block w-full aspect-square bg-[#FAF5F8]" aria-label={p.caption ?? t.sarlavha}>
+              <li key={p.id} className="bg-white rounded-xl border border-[var(--border)] overflow-hidden">
+                <button type="button" onClick={() => setViewing(p)} className="block w-full aspect-square bg-[var(--surface-2)]" aria-label={p.caption ?? t.sarlavha}>
                   {/* eslint-disable-next-line @next/next/no-img-element -- himoyalangan API rasmi (cookie), next/image optimizatsiyasi emas */}
                   <img src={p.url} alt={p.caption ?? ""} loading="lazy" className="h-full w-full object-cover" />
                 </button>
                 <div className="px-3 py-2">
-                  <p className="text-xs font-medium text-[#29232A] truncate">{p.caption || p.group?.name}</p>
-                  <p className="text-[11px] text-[#B8AAB2]">{p.group?.name} · {formatUzDate(p.taken_on)}</p>
+                  <p className="text-xs font-medium text-[var(--text)] truncate">{p.caption || p.group?.name}</p>
+                  <p className="text-[11px] text-[var(--text-3)]">{p.group?.name} · {formatUzDate(p.taken_on)}</p>
                 </div>
               </li>
             ))}
@@ -186,12 +188,12 @@ export default function PhotoGallery({ basePath, description, canDeleteAll = fal
             <label htmlFor="photo-file" className="text-sm font-medium text-[var(--text)]">{t.fayl} <span className="text-[#EF4444]">*</span></label>
             <input id="photo-file" type="file" accept="image/jpeg,image/png,image/webp"
               onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-              className="block w-full text-sm text-[#766B73] file:mr-3 file:rounded-lg file:border-0 file:bg-[#FDF2F6] file:px-3 file:py-2 file:text-sm file:font-medium file:text-[#8E315D] hover:file:bg-[#FBE7EF]" />
-            {errors.photo?.[0] && <p className="text-xs text-[#B91C1C]">{errors.photo[0]}</p>}
+              className="block w-full text-sm text-[var(--text-2)] file:mr-3 file:rounded-lg file:border-0 file:bg-[var(--primary-lt)] file:px-3 file:py-2 file:text-sm file:font-medium file:text-[var(--primary)] hover:file:bg-[var(--primary-lt)]" />
+            {errors.photo?.[0] && <p className="text-xs text-[var(--error-text)]">{errors.photo[0]}</p>}
           </div>
           <Input id="photo-caption" label={t.izoh} value={form.caption} maxLength={255} onChange={(e) => setForm({ ...form, caption: e.target.value })} error={errors.caption?.[0]} />
           <Input id="photo-date" label={t.sana} type="date" max={todayIso()} value={form.taken_on} onChange={(e) => setForm({ ...form, taken_on: e.target.value })} error={errors.taken_on?.[0]} />
-          {formError && <p role="alert" className="text-sm text-[#B91C1C]">{formError}</p>}
+          {formError && <p role="alert" className="text-sm text-[var(--error-text)]">{formError}</p>}
         </form>
       </Modal>
 
@@ -200,8 +202,8 @@ export default function PhotoGallery({ basePath, description, canDeleteAll = fal
         {viewing && (
           <figure>
             {/* eslint-disable-next-line @next/next/no-img-element -- himoyalangan API rasmi (cookie) */}
-            <img src={viewing.url} alt={viewing.caption ?? ""} className="w-full max-h-[70vh] object-contain rounded-lg bg-[#FAF5F8]" />
-            <figcaption className="mt-2 text-xs text-[#766B73]">
+            <img src={viewing.url} alt={viewing.caption ?? ""} className="w-full max-h-[70vh] object-contain rounded-lg bg-[var(--surface-2)]" />
+            <figcaption className="mt-2 text-xs text-[var(--text-2)]">
               {viewing.group?.name} · {formatUzDate(viewing.taken_on)}{viewing.uploaded_by ? ` · ${t.yuklagan}: ${viewing.uploaded_by}` : ""}
             </figcaption>
           </figure>

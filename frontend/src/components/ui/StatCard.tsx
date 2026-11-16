@@ -1,3 +1,5 @@
+import { intlLocale } from "@/i18n";
+
 interface StatCardProps {
   title: string;
   value: number;
@@ -15,7 +17,7 @@ export default function StatCard({ title, value, subtitle, icon }: StatCardProps
           {icon}
         </div>
       </div>
-      <p className="text-3xl font-bold tracking-tight text-[var(--text)]">{value.toLocaleString()}</p>
+      <p className="text-3xl font-bold tracking-tight text-[var(--text)]">{value.toLocaleString(intlLocale())}</p>
       {subtitle && <p className="mt-1 text-xs text-[var(--text-3)]">{subtitle}</p>}
     </div>
   );

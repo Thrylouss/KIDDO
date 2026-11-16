@@ -7,6 +7,8 @@ import SuperAdminSidebar from "@/components/SuperAdminSidebar";
 import Topbar from "@/components/Topbar";
 import DemoBanner from "@/components/DemoBanner";
 import { IS_DEMO } from "@/lib/demo-data";
+import uz from "@/i18n";
+import { useLocale } from "@/contexts/PreferencesContext";
 
 function SuperAdminGuard({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
@@ -24,7 +26,7 @@ function SuperAdminGuard({ children }: { children: React.ReactNode }) {
       <div className="min-h-screen flex items-center justify-center bg-[var(--bg)]">
         <div className="flex flex-col items-center gap-3">
           <div className="h-8 w-8 rounded-full border-2 border-[var(--border)] border-t-[var(--primary)] animate-spin" />
-          <p className="text-sm text-[var(--text-2)]">Yuklanmoqda...</p>
+          <p className="text-sm text-[var(--text-2)]">{uz.common.yuklanmoqda}</p>
         </div>
       </div>
     );
@@ -68,6 +70,7 @@ function SuperAdminGuard({ children }: { children: React.ReactNode }) {
 }
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
+  useLocale(); // til almashganda holat saqlangan holda qayta render
   return (
     <AuthProvider>
       <SuperAdminGuard>{children}</SuperAdminGuard>

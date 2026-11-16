@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
+import uz from "@/i18n";
 
 type ToastKind = "success" | "error";
 interface ToastItem { id: number; kind: ToastKind; text: string }
@@ -37,9 +38,9 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
         {items.map((i) => (
           <div key={i.id} role={i.kind === "error" ? "alert" : "status"} data-testid={`toast-${i.kind}`}
             className={`pointer-events-auto flex w-full sm:w-auto sm:max-w-sm items-start gap-3 rounded-xl border px-4 py-3 text-sm shadow-lg animate-slide-up
-              ${i.kind === "success" ? "bg-white border-[#BBF7D0] text-[#166534]" : "bg-white border-[#FECACA] text-[#B91C1C]"}`}>
+              ${i.kind === "success" ? "bg-white border-[var(--success-border)] text-[var(--success)]" : "bg-white border-[var(--error-border)] text-[var(--error-text)]"}`}>
             <span className="flex-1">{i.text}</span>
-            <button type="button" onClick={() => dismiss(i.id)} aria-label="Yopish" className="opacity-60 hover:opacity-100">×</button>
+            <button type="button" onClick={() => dismiss(i.id)} aria-label={uz.common.yopish} className="opacity-60 hover:opacity-100">×</button>
           </div>
         ))}
       </div>

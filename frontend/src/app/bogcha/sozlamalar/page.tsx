@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
 import AccountSettings from "@/components/settings/AccountSettings";
-import uz from "@/i18n/uz";
+import uz from "@/i18n";
+import { useLocale } from "@/contexts/PreferencesContext";
 
 const t = uz.sozlamalar;
 
@@ -14,6 +15,7 @@ interface Bogcha {
 
 /** Rahbar sozlamalari: bog'cha ma'lumotlari (faqat ko'rish — Super Admin yangilaydi) va o'z paroli. */
 export default function BogchaSozlamalarPage() {
+  useLocale(); // til almashganda holat saqlangan holda qayta render
   const [bogcha, setBogcha] = useState<Bogcha | null>(null);
   const [error, setError]   = useState(false);
   const [loaded, setLoaded] = useState(false);
@@ -32,23 +34,23 @@ export default function BogchaSozlamalarPage() {
 
   return (
     <AccountSettings>
-      <section className="bg-white rounded-xl border border-[#EDE3E8]">
-        <div className="px-5 py-4 border-b border-[#EDE3E8]">
-          <h2 className="text-sm font-semibold text-[#29232A]">{t.bogcha}</h2>
-          <p className="text-xs text-[#766B73] mt-0.5">{t.bogcha_izoh}</p>
+      <section className="bg-white rounded-xl border border-[var(--border)]">
+        <div className="px-5 py-4 border-b border-[var(--border)]">
+          <h2 className="text-sm font-semibold text-[var(--text)]">{t.bogcha}</h2>
+          <p className="text-xs text-[var(--text-2)] mt-0.5">{t.bogcha_izoh}</p>
         </div>
         {error ? (
-          <p role="alert" className="px-5 py-4 text-sm text-[#B91C1C]">{uz.common.yuklash_xatosi}</p>
+          <p role="alert" className="px-5 py-4 text-sm text-[var(--error-text)]">{uz.common.yuklash_xatosi}</p>
         ) : !loaded ? (
-          <p className="px-5 py-4 text-sm text-[#B8AAB2]">{uz.common.yuklanmoqda}</p>
+          <p className="px-5 py-4 text-sm text-[var(--text-3)]">{uz.common.yuklanmoqda}</p>
         ) : !bogcha ? (
-          <p className="px-5 py-4 text-sm text-[#B8AAB2]">—</p>
+          <p className="px-5 py-4 text-sm text-[var(--text-3)]">—</p>
         ) : (
-          <dl data-testid="bogcha-info" className="divide-y divide-[#F2ECF0]">
+          <dl data-testid="bogcha-info" className="divide-y divide-[var(--border-2)]">
             {rows.map(([label, value]) => (
               <div key={label} className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 px-5 py-3 text-sm">
-                <dt className="sm:w-40 text-[#766B73]">{label}</dt>
-                <dd className="text-[#29232A] font-medium">{value ?? "—"}</dd>
+                <dt className="sm:w-40 text-[var(--text-2)]">{label}</dt>
+                <dd className="text-[var(--text)] font-medium">{value ?? "—"}</dd>
               </div>
             ))}
           </dl>

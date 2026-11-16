@@ -26,7 +26,7 @@ const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
               "text-sm text-[var(--text)] outline-none transition-all duration-150",
               error
                 ? "border-[#EF4444] focus:ring-2 focus:ring-[#EF4444]/20"
-                : "border-[var(--border)] focus:border-[var(--primary)] focus:ring-2 focus:ring-[#8E315D]/15",
+                : "border-[var(--border)] focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--primary)]/15",
               className,
             ].join(" ")}
             {...props}

@@ -1,4 +1,4 @@
-import uz from "@/i18n/uz";
+import uz from "@/i18n";
 import type { ActivityDirection, AttendanceState, DailyChild, MealType } from "@/types";
 
 /**
@@ -12,31 +12,31 @@ export function canRecord(child: DailyChild): boolean {
 }
 
 export const MEAL_LABELS: Record<MealType, string> = {
-  nonushta:     uz.kundalik.tur_nonushta,
-  ikkinchi_nonushta: uz.kundalik.tur_ikkinchi_nonushta,
-  tushlik:      uz.kundalik.tur_tushlik,
-  peshinlik:    uz.kundalik.tur_peshinlik,
-  kechki_ovqat: uz.kundalik.tur_kechki_ovqat,
+  get nonushta() { return uz.kundalik.tur_nonushta; },
+  get ikkinchi_nonushta() { return uz.kundalik.tur_ikkinchi_nonushta; },
+  get tushlik() { return uz.kundalik.tur_tushlik; },
+  get peshinlik() { return uz.kundalik.tur_peshinlik; },
+  get kechki_ovqat() { return uz.kundalik.tur_kechki_ovqat; },
 };
 
 export const DIRECTION_LABELS: Record<ActivityDirection, string> = {
-  jismoniy:   uz.kundalik.dir_jismoniy,
-  nutq:       uz.kundalik.dir_nutq,
-  matematika: uz.kundalik.dir_matematika,
-  tasviriy:   uz.kundalik.dir_tasviriy,
-  musiqa:     uz.kundalik.dir_musiqa,
-  atrof_olam: uz.kundalik.dir_atrof_olam,
-  ijtimoiy:   uz.kundalik.dir_ijtimoiy,
-  boshqa:     uz.kundalik.dir_boshqa,
+  get jismoniy() { return uz.kundalik.dir_jismoniy; },
+  get nutq() { return uz.kundalik.dir_nutq; },
+  get matematika() { return uz.kundalik.dir_matematika; },
+  get tasviriy() { return uz.kundalik.dir_tasviriy; },
+  get musiqa() { return uz.kundalik.dir_musiqa; },
+  get atrof_olam() { return uz.kundalik.dir_atrof_olam; },
+  get ijtimoiy() { return uz.kundalik.dir_ijtimoiy; },
+  get boshqa() { return uz.kundalik.dir_boshqa; },
 };
 
 type BadgeVariant = "success" | "error" | "warning" | "neutral";
 
 const ATTENDANCE_BADGES: Record<AttendanceState | "none", { label: string; variant: BadgeVariant }> = {
-  present: { label: uz.kundalik.keldi,         variant: "success" },
-  absent:  { label: uz.kundalik.kelmadi,       variant: "error" },
-  excused: { label: uz.kundalik.sababli,       variant: "warning" },
-  none:    { label: uz.kundalik.belgilanmagan, variant: "neutral" },
+  present: { get label() { return uz.kundalik.keldi; },         variant: "success" },
+  absent: { get label() { return uz.kundalik.kelmadi; },       variant: "error" },
+  excused: { get label() { return uz.kundalik.sababli; },       variant: "warning" },
+  none: { get label() { return uz.kundalik.belgilanmagan; }, variant: "neutral" },
 };
 
 export function attendanceBadge(status: AttendanceState | null) {

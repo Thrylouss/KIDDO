@@ -10,7 +10,7 @@ import ConfirmDialog from "@/components/ConfirmDialog";
 import { attendanceBadge, canRecord, childName, recordErrors } from "@/components/daily/dailyRules";
 import type { DailyBasePath } from "@/components/daily/DailyManager";
 import type { DailyChild, DailyDay, DailySleep } from "@/types";
-import uz from "@/i18n/uz";
+import uz from "@/i18n";
 
 interface SleepPanelProps {
   day:      DailyDay;
@@ -28,7 +28,7 @@ function draftOf(sleep: DailySleep | null): Draft {
   return { started_at: sleep?.started_at ?? "", ended_at: sleep?.ended_at ?? "", note: sleep?.note ?? "" };
 }
 
-const timeCls = "w-full rounded-lg border border-[#EDE3E8] bg-white px-2.5 py-1.5 text-sm text-[#29232A] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/30 disabled:bg-[#FAF5F8] disabled:text-[#B8AAB2]";
+const timeCls = "w-full rounded-lg border border-[var(--border)] bg-white px-2.5 py-1.5 text-sm text-[var(--text)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/30 disabled:bg-[var(--surface-2)] disabled:text-[var(--text-3)]";
 
 /** Har bir «Keldi» bola uchun kuniga bitta uyqu: uxladi / uyg'ondi (bo'sh — «Hali uxlayapti»). */
 export default function SleepPanel({ day, basePath, onSaved }: SleepPanelProps) {
@@ -139,21 +139,21 @@ export default function SleepPanel({ day, basePath, onSaved }: SleepPanelProps) 
   }
 
   if (day.children.length === 0) {
-    return <p className="bg-white rounded-xl border border-[#EDE3E8] p-8 text-center text-sm text-[#766B73]">{uz.kundalik.bola_yoq}</p>;
+    return <p className="bg-white rounded-xl border border-[var(--border)] p-8 text-center text-sm text-[var(--text-2)]">{uz.kundalik.bola_yoq}</p>;
   }
 
   return (
     <div className="space-y-4">
-      <p className="text-sm text-[#766B73]">{uz.kundalik.qoida} {uz.kundalik.tugash_izoh}.</p>
+      <p className="text-sm text-[var(--text-2)]">{uz.kundalik.qoida} {uz.kundalik.tugash_izoh}.</p>
 
       {eligible.length > 0 && !disabled && (
         <div className="flex flex-wrap items-end gap-2">
-          <label className="text-sm text-[#3D3240]">
+          <label className="text-sm text-[var(--label)]">
             <span className="block mb-1">{uz.kundalik.hammaga_boshlanish}</span>
             <input type="time" aria-label={uz.kundalik.hammaga_boshlanish} value={bulkStart} onChange={(e) => setBulkStart(e.target.value)} className={timeCls} />
           </label>
           <Button type="button" size="sm" variant="secondary" onClick={applyBulkStart} disabled={!bulkStart}>{uz.common.tasdiqlash}</Button>
-          <label className="text-sm text-[#3D3240] sm:ml-4">
+          <label className="text-sm text-[var(--label)] sm:ml-4">
             <span className="block mb-1">{uz.kundalik.hammaga_tugash}</span>
             <input type="time" aria-label={uz.kundalik.hammaga_tugash} value={bulkEnd} onChange={(e) => setBulkEnd(e.target.value)} className={timeCls} />
           </label>
@@ -163,7 +163,7 @@ export default function SleepPanel({ day, basePath, onSaved }: SleepPanelProps) 
         </div>
       )}
 
-      <ul className="bg-white rounded-xl border border-[#EDE3E8] divide-y divide-[#F2ECF0]">
+      <ul className="bg-white rounded-xl border border-[var(--border)] divide-y divide-[var(--border-2)]">
         {day.children.map((c) => {
           const allowed = canRecord(c);
           const badge   = attendanceBadge(c.attendance);
@@ -172,7 +172,7 @@ export default function SleepPanel({ day, basePath, onSaved }: SleepPanelProps) 
           return (
             <li key={c.id} className="px-4 py-3 space-y-2">
               <div className="flex flex-wrap items-center gap-2">
-                <p className="font-medium text-[#29232A] text-sm flex-1">{name}</p>
+                <p className="font-medium text-[var(--text)] text-sm flex-1">{name}</p>
                 {c.sleep?.is_sleeping && <Badge variant="info">{uz.kundalik.hali_uxlayapti}</Badge>}
                 {!allowed && <Badge variant={badge.variant}>{badge.label}</Badge>}
                 {c.sleep && day.editable && (
@@ -184,39 +184,39 @@ export default function SleepPanel({ day, basePath, onSaved }: SleepPanelProps) 
 
               {allowed ? (
                 <div className="grid grid-cols-2 sm:grid-cols-[8rem_8rem_1fr] gap-2">
-                  <label className="text-xs text-[#766B73]">
+                  <label className="text-xs text-[var(--text-2)]">
                     {uz.kundalik.boshlanish}
                     <input type="time" aria-label={`${uz.kundalik.boshlanish}: ${name}`} value={d.started_at} disabled={disabled}
                       onChange={(e) => update(c.id, "started_at", e.target.value)} className={`${timeCls} mt-1`} />
                   </label>
-                  <label className="text-xs text-[#766B73]">
+                  <label className="text-xs text-[var(--text-2)]">
                     {uz.kundalik.tugash}
                     <input type="time" aria-label={`${uz.kundalik.tugash}: ${name}`} value={d.ended_at} disabled={disabled}
                       onChange={(e) => update(c.id, "ended_at", e.target.value)} className={`${timeCls} mt-1`} />
                   </label>
-                  <label className="text-xs text-[#766B73] col-span-2 sm:col-span-1">
+                  <label className="text-xs text-[var(--text-2)] col-span-2 sm:col-span-1">
                     {uz.kundalik.izoh}
                     <input type="text" aria-label={`${uz.kundalik.izoh}: ${name}`} value={d.note} maxLength={255} disabled={disabled}
                       onChange={(e) => update(c.id, "note", e.target.value)} className={`${timeCls} mt-1`} />
                   </label>
                 </div>
               ) : c.sleep ? (
-                <p className="text-xs text-[#92400E]">
+                <p className="text-xs text-[var(--warning-text)]">
                   {c.sleep.started_at}{c.sleep.ended_at ? `–${c.sleep.ended_at}` : ""} · {uz.kundalik.davomat_ozgargan}
                 </p>
               ) : null}
 
               {allowed && formatDuration(d.started_at, d.ended_at) && (
-                <p className="text-xs text-[#766B73]">{uz.kundalik.davomiylik}: {formatDuration(d.started_at, d.ended_at)}</p>
+                <p className="text-xs text-[var(--text-2)]">{uz.kundalik.davomiylik}: {formatDuration(d.started_at, d.ended_at)}</p>
               )}
-              {rowErrors[c.id] && <p className="text-xs text-[#B91C1C]">{rowErrors[c.id]}</p>}
+              {rowErrors[c.id] && <p className="text-xs text-[var(--error-text)]">{rowErrors[c.id]}</p>}
             </li>
           );
         })}
       </ul>
 
       {(error || rules.length > 0) && (
-        <div role="alert" className="text-sm text-[#B91C1C] space-y-1">
+        <div role="alert" className="text-sm text-[var(--error-text)] space-y-1">
           {error && <p>{error}</p>}
           {rules.map((r) => <p key={r}>{r}</p>)}
         </div>

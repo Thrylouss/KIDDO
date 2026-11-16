@@ -10,7 +10,7 @@ import { Skeleton } from "@/components/ui/Skeleton";
 import { EXCUSE_REASON_LABELS } from "@/components/attendance/AttendanceSheet";
 import { attendanceBadge, MEAL_LABELS } from "@/components/daily/dailyRules";
 import type { ChildHistory } from "@/types";
-import uz from "@/i18n/uz";
+import uz from "@/i18n";
 
 /** Bolaning oxirgi 14 kunlik tarixi: davomat (sababli izoh bilan), ovqatlanish, uyqu, mashg'ulotlar. */
 export default function ChildDailyHistory({ childId }: { childId: number }) {
@@ -33,19 +33,19 @@ export default function ChildDailyHistory({ childId }: { childId: number }) {
   useEffect(() => { load(childId); }, [load, childId]);
 
   return (
-    <section className="bg-white rounded-2xl border border-[#EDE3E8] p-5">
-      <h2 className="text-sm font-semibold text-[#29232A] mb-3">{uz.guruh.tarix}</h2>
+    <section className="bg-white rounded-2xl border border-[var(--border)] p-5">
+      <h2 className="text-sm font-semibold text-[var(--text)] mb-3">{uz.guruh.tarix}</h2>
       {loading && !data ? (
         <Skeleton className="h-24" />
       ) : error ? (
         <div className="text-sm">
-          <p role="alert" className="text-[#B91C1C] mb-2">{error}</p>
+          <p role="alert" className="text-[var(--error-text)] mb-2">{error}</p>
           <Button size="sm" variant="secondary" onClick={() => load(childId)}>{uz.common.qayta_urinish}</Button>
         </div>
       ) : !data || data.days.length === 0 ? (
-        <p className="text-sm text-[#766B73]">{uz.guruh.tarix_yoq}</p>
+        <p className="text-sm text-[var(--text-2)]">{uz.guruh.tarix_yoq}</p>
       ) : (
-        <ul className="divide-y divide-[#F2ECF0]" data-testid="child-history">
+        <ul className="divide-y divide-[var(--border-2)]" data-testid="child-history">
           {data.days.map((d) => {
             const badge = attendanceBadge(d.attendance);
             const sleep = d.sleep
@@ -54,22 +54,22 @@ export default function ChildDailyHistory({ childId }: { childId: number }) {
             return (
               <li key={d.date} className="py-3 space-y-1">
                 <div className="flex flex-wrap items-center gap-2">
-                  <p className="text-sm font-medium text-[#29232A]">{formatUzDate(d.date)}</p>
+                  <p className="text-sm font-medium text-[var(--text)]">{formatUzDate(d.date)}</p>
                   <Badge variant={badge.variant}>{badge.label}</Badge>
                 </div>
                 {d.attendance === "excused" && (
-                  <p className="text-xs text-[#92400E]">
+                  <p className="text-xs text-[var(--warning-text)]">
                     {d.excuse_reason ? `${EXCUSE_REASON_LABELS[d.excuse_reason]}: ` : ""}{d.note}
                   </p>
                 )}
-                <p className="text-xs text-[#766B73]">
+                <p className="text-xs text-[var(--text-2)]">
                   {uz.kundalik.ovqatlar}: {d.meals.length
                     ? d.meals.map((m) => `${MEAL_LABELS[m.meal_type]} ${m.served_at}${m.ate ? "" : ` (${uz.kundalik.ovqatlanmadi.toLowerCase()})`}`).join(", ")
                     : uz.guruh.ovqat_yoq}
                 </p>
-                <p className="text-xs text-[#766B73]">{uz.kundalik.uyqu}: {sleep}</p>
+                <p className="text-xs text-[var(--text-2)]">{uz.kundalik.uyqu}: {sleep}</p>
                 {d.activities.length > 0 && (
-                  <p className="text-xs text-[#766B73]">{uz.guruh.mashgulotlar}: {d.activities.map((a) => a.title).join(", ")}</p>
+                  <p className="text-xs text-[var(--text-2)]">{uz.guruh.mashgulotlar}: {d.activities.map((a) => a.title).join(", ")}</p>
                 )}
               </li>
             );

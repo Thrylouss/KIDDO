@@ -11,8 +11,9 @@ import Modal from "@/components/ui/Modal";
 import TemporaryPasswordModal from "@/components/accounts/TemporaryPasswordModal";
 import EmptyState from "@/components/ui/EmptyState";
 import { SkeletonTable } from "@/components/ui/Skeleton";
-import uz from "@/i18n/uz";
+import uz, { intlLocale } from "@/i18n";
 import type { UserSummary, PaginatedResponse, Role, OrganizationSummary } from "@/types";
+import { useLocale } from "@/contexts/PreferencesContext";
 
 // ── Helpers ────────────────────────────────────────────────────────
 
@@ -35,7 +36,7 @@ function roleVariant(role: Role): "warning" | "info" | "success" | "neutral" {
 
 function formatDate(iso: string | null): string {
   if (!iso) return uz.foydalanuvchilar.hech_qachon;
-  return new Date(iso).toLocaleDateString("uz-UZ", {
+  return new Date(iso).toLocaleDateString(intlLocale(), {
     year: "numeric", month: "short", day: "numeric",
   });
 }
@@ -63,6 +64,7 @@ interface EditForm {
 // ── Page ───────────────────────────────────────────────────────────
 
 export default function FoydalanuvchilarPage() {
+  useLocale(); // til almashganda holat saqlangan holda qayta render
   const [users,   setUsers]   = useState<UserSummary[]>([]);
   const [meta,    setMeta]    = useState<{ current_page: number; last_page: number; per_page: number; total: number } | null>(null);
   const [loading, setLoading] = useState(true);
@@ -248,19 +250,19 @@ export default function FoydalanuvchilarPage() {
     <div className="max-w-7xl mx-auto">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-[#29232A]">{uz.foydalanuvchilar.sarlavha}</h1>
-          <p className="text-sm text-[#766B73] mt-0.5">{uz.foydalanuvchilar.sahifa_tavsif}</p>
+          <h1 className="text-2xl font-bold text-[var(--text)]">{uz.foydalanuvchilar.sarlavha}</h1>
+          <p className="text-sm text-[var(--text-2)] mt-0.5">{uz.foydalanuvchilar.sahifa_tavsif}</p>
         </div>
       </div>
-      <div className="bg-white rounded-xl border border-[#EDE3E8] p-12 text-center">
-        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#FDF2F6]">
-          <svg className="h-7 w-7 text-[#8E315D]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+      <div className="bg-white rounded-xl border border-[var(--border)] p-12 text-center">
+        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-[var(--primary-lt)]">
+          <svg className="h-7 w-7 text-[var(--primary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
         </div>
-        <p className="text-base font-semibold text-[#29232A]">Tez kunda</p>
-        <p className="mt-1.5 text-sm text-[#766B73]">
-          Bu bo&apos;lim demo versiyada ko&apos;rsatilmaydi. To&apos;liq versiyada mavjud.
+        <p className="text-base font-semibold text-[var(--text)]">{uz.matn.tez_kunda}</p>
+        <p className="mt-1.5 text-sm text-[var(--text-2)]">
+          {uz.matn.bu_bolim_demo_versiyada_korsatilmaydi}
         </p>
       </div>
     </div>
@@ -271,11 +273,11 @@ export default function FoydalanuvchilarPage() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-[#29232A]">{uz.foydalanuvchilar.sarlavha}</h1>
-          <p className="text-sm text-[#766B73] mt-0.5">{uz.foydalanuvchilar.sahifa_tavsif}</p>
+          <h1 className="text-2xl font-bold text-[var(--text)]">{uz.foydalanuvchilar.sarlavha}</h1>
+          <p className="text-sm text-[var(--text-2)] mt-0.5">{uz.foydalanuvchilar.sahifa_tavsif}</p>
         </div>
         {meta && (
-          <span className="text-sm font-medium text-[#766B73] bg-[#F2ECF0] px-3 py-1 rounded-full">
+          <span className="text-sm font-medium text-[var(--text-2)] bg-[var(--border-2)] px-3 py-1 rounded-full">
             {uz.foydalanuvchilar.jami}: {meta.total}
           </span>
         )}
@@ -326,7 +328,7 @@ export default function FoydalanuvchilarPage() {
       {loading ? (
         <SkeletonTable rows={8} />
       ) : error ? (
-        <div className="bg-white rounded-xl border border-[#EDE3E8] p-12 text-center">
+        <div className="bg-white rounded-xl border border-[var(--border)] p-12 text-center">
           <p className="text-[#EF4444] mb-3">{uz.common.yuklash_xatosi}</p>
           <Button variant="secondary" onClick={() => setApiParams(p => ({ ...p }))}>
             {uz.common.qayta_urinish}
@@ -338,11 +340,11 @@ export default function FoydalanuvchilarPage() {
           description={uz.foydalanuvchilar.bosh_tavsif}
         />
       ) : (
-        <div className="bg-white rounded-xl border border-[#EDE3E8] overflow-hidden">
+        <div className="bg-white rounded-xl border border-[var(--border)] overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-[#EDE3E8] bg-[#FAF5F8]">
+                <tr className="border-b border-[var(--border)] bg-[var(--surface-2)]">
                   {[
                     uz.foydalanuvchilar.ismi,
                     uz.foydalanuvchilar.telefon,
@@ -352,23 +354,23 @@ export default function FoydalanuvchilarPage() {
                     uz.foydalanuvchilar.oxirgi_kirish,
                     uz.foydalanuvchilar.amallar,
                   ].map(h => (
-                    <th key={h} className="text-left text-xs font-medium text-[#766B73] uppercase tracking-wide px-4 py-3 whitespace-nowrap">
+                    <th key={h} className="text-left text-xs font-medium text-[var(--text-2)] uppercase tracking-wide px-4 py-3 whitespace-nowrap">
                       {h}
                     </th>
                   ))}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#F2ECF0]">
+              <tbody className="divide-y divide-[var(--border-2)]">
                 {users.map(u => (
-                  <tr key={u.id} className="hover:bg-[#FAF5F8] transition-colors">
+                  <tr key={u.id} className="hover:bg-[var(--surface-2)] transition-colors">
                     {/* Name + email */}
                     <td className="px-4 py-3">
-                      <div className="font-medium text-[#29232A]">{u.name}</div>
-                      {u.email && <div className="text-xs text-[#B8AAB2] mt-0.5">{u.email}</div>}
+                      <div className="font-medium text-[var(--text)]">{u.name}</div>
+                      {u.email && <div className="text-xs text-[var(--text-3)] mt-0.5">{u.email}</div>}
                     </td>
 
                     {/* Phone */}
-                    <td className="px-4 py-3 text-[#3D3240] whitespace-nowrap">
+                    <td className="px-4 py-3 text-[var(--label)] whitespace-nowrap">
                       {u.phone ?? "—"}
                     </td>
 
@@ -378,10 +380,10 @@ export default function FoydalanuvchilarPage() {
                     </td>
 
                     {/* Organization */}
-                    <td className="px-4 py-3 text-[#3D3240]">
+                    <td className="px-4 py-3 text-[var(--label)]">
                       {u.organization
                         ? <span className="font-medium">{u.organization.name}</span>
-                        : <span className="text-[#B8AAB2] text-xs italic">{uz.foydalanuvchilar.tashkilot_yoq}</span>
+                        : <span className="text-[var(--text-3)] text-xs italic">{uz.foydalanuvchilar.tashkilot_yoq}</span>
                       }
                     </td>
 
@@ -393,7 +395,7 @@ export default function FoydalanuvchilarPage() {
                     </td>
 
                     {/* Last login */}
-                    <td className="px-4 py-3 text-[#766B73] text-xs whitespace-nowrap">
+                    <td className="px-4 py-3 text-[var(--text-2)] text-xs whitespace-nowrap">
                       {formatDate(u.last_login_at)}
                     </td>
 
@@ -402,8 +404,8 @@ export default function FoydalanuvchilarPage() {
                       <div className="relative">
                         <button
                           onClick={() => setOpenMenuId(openMenuId === u.id ? null : u.id)}
-                          className="p-1.5 rounded-lg text-[#B8AAB2] hover:text-[#3D3240] hover:bg-[#F2ECF0] transition-colors"
-                          aria-label="Amallar"
+                          className="p-1.5 rounded-lg text-[var(--text-3)] hover:text-[var(--label)] hover:bg-[var(--border-2)] transition-colors"
+                          aria-label={uz.matn.amallar}
                         >
                           <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
                             <path d="M10 3a1.5 1.5 0 110 3 1.5 1.5 0 010-3zm0 5.5a1.5 1.5 0 110 3 1.5 1.5 0 010-3zm0 5.5a1.5 1.5 0 110 3 1.5 1.5 0 010-3z" />
@@ -411,32 +413,32 @@ export default function FoydalanuvchilarPage() {
                         </button>
                         {openMenuId === u.id && (
                           <div
-                            className="absolute right-0 mt-1 w-52 bg-white rounded-lg shadow-lg border border-[#EDE3E8] z-20 py-1"
+                            className="absolute right-0 mt-1 w-52 bg-white rounded-lg shadow-lg border border-[var(--border)] z-20 py-1"
                             onClick={() => setOpenMenuId(null)}
                           >
                             <button
-                              className="w-full text-left px-4 py-2 text-sm text-[#3D3240] hover:bg-[#F2ECF0]"
+                              className="w-full text-left px-4 py-2 text-sm text-[var(--label)] hover:bg-[var(--border-2)]"
                               onClick={() => openEdit(u)}
                             >
                               {uz.foydalanuvchilar.tahrirlash}
                             </button>
                             {!u.is_active ? (
                               <button
-                                className="w-full text-left px-4 py-2 text-sm text-[#3D3240] hover:bg-[#F2ECF0]"
+                                className="w-full text-left px-4 py-2 text-sm text-[var(--label)] hover:bg-[var(--border-2)]"
                                 onClick={() => setConfirmActivate(u)}
                               >
                                 {uz.foydalanuvchilar.faollashtirish}
                               </button>
                             ) : (
                               <button
-                                className="w-full text-left px-4 py-2 text-sm text-[#3D3240] hover:bg-[#F2ECF0]"
+                                className="w-full text-left px-4 py-2 text-sm text-[var(--label)] hover:bg-[var(--border-2)]"
                                 onClick={() => setConfirmDeactivate(u)}
                               >
                                 {uz.foydalanuvchilar.faolsizlantirish}
                               </button>
                             )}
                             <button
-                              className="w-full text-left px-4 py-2 text-sm text-[#3D3240] hover:bg-[#F2ECF0]"
+                              className="w-full text-left px-4 py-2 text-sm text-[var(--label)] hover:bg-[var(--border-2)]"
                               onClick={() => setResetTarget(u)}
                             >
                               {uz.foydalanuvchilar.parol_yangilash}
@@ -453,8 +455,8 @@ export default function FoydalanuvchilarPage() {
 
           {/* Pagination */}
           {meta && meta.last_page > 1 && (
-            <div className="flex items-center justify-between px-4 py-3 border-t border-[#EDE3E8]">
-              <p className="text-sm text-[#766B73]">
+            <div className="flex items-center justify-between px-4 py-3 border-t border-[var(--border)]">
+              <p className="text-sm text-[var(--text-2)]">
                 {meta.current_page} / {meta.last_page} {uz.super_admin.sahifa}
               </p>
               <div className="flex gap-2">
@@ -489,7 +491,7 @@ export default function FoydalanuvchilarPage() {
           <div className="space-y-4">
             {/* Name */}
             <div>
-              <label className="block text-sm font-medium text-[#3D3240] mb-1">
+              <label className="block text-sm font-medium text-[var(--label)] mb-1">
                 {uz.foydalanuvchilar.ism_familiya} <span className="text-[#EF4444]">*</span>
               </label>
               <Input
@@ -501,7 +503,7 @@ export default function FoydalanuvchilarPage() {
 
             {/* Phone */}
             <div>
-              <label className="block text-sm font-medium text-[#3D3240] mb-1">
+              <label className="block text-sm font-medium text-[var(--label)] mb-1">
                 {uz.foydalanuvchilar.telefon} <span className="text-[#EF4444]">*</span>
               </label>
               <Input
@@ -513,7 +515,7 @@ export default function FoydalanuvchilarPage() {
 
             {/* Email */}
             <div>
-              <label className="block text-sm font-medium text-[#3D3240] mb-1">
+              <label className="block text-sm font-medium text-[var(--label)] mb-1">
                 {uz.foydalanuvchilar.email}
               </label>
               <Input
@@ -526,7 +528,7 @@ export default function FoydalanuvchilarPage() {
 
             {/* Role */}
             <div>
-              <label className="block text-sm font-medium text-[#3D3240] mb-1">
+              <label className="block text-sm font-medium text-[var(--label)] mb-1">
                 {uz.foydalanuvchilar.rol} <span className="text-[#EF4444]">*</span>
               </label>
               <Select
@@ -542,7 +544,7 @@ export default function FoydalanuvchilarPage() {
 
             {/* Organization */}
             <div>
-              <label className="block text-sm font-medium text-[#3D3240] mb-1">
+              <label className="block text-sm font-medium text-[var(--label)] mb-1">
                 {uz.foydalanuvchilar.tashkilot}
               </label>
               <Select
@@ -558,7 +560,7 @@ export default function FoydalanuvchilarPage() {
 
             {/* Status */}
             <div className="flex items-center gap-3">
-              <label className="text-sm font-medium text-[#3D3240]">
+              <label className="text-sm font-medium text-[var(--label)]">
                 {uz.foydalanuvchilar.holat}
               </label>
               <button
@@ -566,7 +568,7 @@ export default function FoydalanuvchilarPage() {
                 onClick={() => setEditForm(f => f ? { ...f, is_active: !f.is_active } : f)}
                 className={[
                   "relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200",
-                  editForm.is_active ? "bg-[#8E315D]" : "bg-[#D9C9D1]",
+                  editForm.is_active ? "bg-[var(--primary)]" : "bg-[var(--border-strong)]",
                 ].join(" ")}
                 role="switch"
                 aria-checked={editForm.is_active}
@@ -578,13 +580,13 @@ export default function FoydalanuvchilarPage() {
                   ].join(" ")}
                 />
               </button>
-              <span className="text-sm text-[#766B73]">
+              <span className="text-sm text-[var(--text-2)]">
                 {editForm.is_active ? uz.common.faol : uz.common.nofaol}
               </span>
             </div>
 
             {editError && (
-              <p className="text-sm text-[#EF4444] bg-[#FEF2F2] px-3 py-2 rounded-lg">{editError}</p>
+              <p className="text-sm text-[#EF4444] bg-[var(--error-soft)] px-3 py-2 rounded-lg">{editError}</p>
             )}
 
             <div className="flex gap-3 justify-end pt-2">
@@ -611,11 +613,11 @@ export default function FoydalanuvchilarPage() {
         onClose={() => { setConfirmActivate(null); setActionError(""); }}
         title={uz.foydalanuvchilar.faollashtirish}
       >
-        <p className="text-sm text-[#3D3240] mb-4">
+        <p className="text-sm text-[var(--label)] mb-4">
           {uz.foydalanuvchilar.faollashtirish_tasdiq}
         </p>
         {confirmActivate && (
-          <p className="text-sm font-medium text-[#29232A] mb-4">{confirmActivate.name}</p>
+          <p className="text-sm font-medium text-[var(--text)] mb-4">{confirmActivate.name}</p>
         )}
         {actionError && <p className="text-sm text-[#EF4444] mb-3">{actionError}</p>}
         <div className="flex gap-3 justify-end">
@@ -634,11 +636,11 @@ export default function FoydalanuvchilarPage() {
         onClose={() => { setConfirmDeactivate(null); setActionError(""); }}
         title={uz.foydalanuvchilar.faolsizlantirish}
       >
-        <p className="text-sm text-[#3D3240] mb-4">
+        <p className="text-sm text-[var(--label)] mb-4">
           {uz.foydalanuvchilar.faolsizlantirish_tasdiq}
         </p>
         {confirmDeactivate && (
-          <p className="text-sm font-medium text-[#29232A] mb-4">{confirmDeactivate.name}</p>
+          <p className="text-sm font-medium text-[var(--text)] mb-4">{confirmDeactivate.name}</p>
         )}
         {actionError && <p className="text-sm text-[#EF4444] mb-3">{actionError}</p>}
         <div className="flex gap-3 justify-end">
@@ -658,9 +660,9 @@ export default function FoydalanuvchilarPage() {
         title={uz.foydalanuvchilar.parol_yangilash}
       >
         {resetTarget && (
-          <p className="text-sm text-[#766B73] mb-2">{resetTarget.name}</p>
+          <p className="text-sm text-[var(--text-2)] mb-2">{resetTarget.name}</p>
         )}
-        <p className="text-sm text-[#29232A] mb-4">{uz.akkaunt.parol_yangilash_tasdiq}</p>
+        <p className="text-sm text-[var(--text)] mb-4">{uz.akkaunt.parol_yangilash_tasdiq}</p>
         {actionError && <p className="text-sm text-[#EF4444] mb-3">{actionError}</p>}
         <div className="flex gap-3 justify-end">
           <Button variant="secondary" onClick={() => { setResetTarget(null); setActionError(""); }}>

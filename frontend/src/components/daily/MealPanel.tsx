@@ -11,7 +11,7 @@ import ConfirmDialog from "@/components/ConfirmDialog";
 import { attendanceBadge, canRecord, childName, MEAL_LABELS, recordErrors } from "@/components/daily/dailyRules";
 import type { DailyBasePath } from "@/components/daily/DailyManager";
 import type { DailyDay, DailyMeal, MealType } from "@/types";
-import uz from "@/i18n/uz";
+import uz from "@/i18n";
 
 interface MealPanelProps {
   day:      DailyDay;
@@ -94,12 +94,12 @@ export default function MealPanel({ day, basePath, onSaved }: MealPanelProps) {
 
   return (
     <div className="space-y-4">
-      <p className="text-sm text-[#766B73]">{uz.kundalik.qoida}</p>
+      <p className="text-sm text-[var(--text-2)]">{uz.kundalik.qoida}</p>
 
       {day.children.length === 0 ? (
-        <p className="bg-white rounded-xl border border-[#EDE3E8] p-8 text-center text-sm text-[#766B73]">{uz.kundalik.bola_yoq}</p>
+        <p className="bg-white rounded-xl border border-[var(--border)] p-8 text-center text-sm text-[var(--text-2)]">{uz.kundalik.bola_yoq}</p>
       ) : (
-        <form onSubmit={submit} className="bg-white rounded-xl border border-[#EDE3E8] p-4 sm:p-5 space-y-4" aria-label={uz.kundalik.tab_ovqat}>
+        <form onSubmit={submit} className="bg-white rounded-xl border border-[var(--border)] p-4 sm:p-5 space-y-4" aria-label={uz.kundalik.tab_ovqat}>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Select
               label={uz.kundalik.ovqat_turi}
@@ -146,8 +146,8 @@ export default function MealPanel({ day, basePath, onSaved }: MealPanelProps) {
                 const badge   = attendanceBadge(c.attendance);
                 const isOn    = allowed && selected.includes(c.id);
                 return (
-                  <li key={c.id} className={`rounded-lg ${isOn ? "bg-[#FAF5F8]" : ""}`}>
-                    <label className={`flex items-center gap-2 px-2 py-1.5 text-sm ${allowed ? "text-[#29232A]" : "text-[#B8AAB2]"}`}>
+                  <li key={c.id} className={`rounded-lg ${isOn ? "bg-[var(--surface-2)]" : ""}`}>
+                    <label className={`flex items-center gap-2 px-2 py-1.5 text-sm ${allowed ? "text-[var(--text)]" : "text-[var(--text-3)]"}`}>
                       <input
                         type="checkbox"
                         checked={isOn}
@@ -164,7 +164,7 @@ export default function MealPanel({ day, basePath, onSaved }: MealPanelProps) {
                           value={notAte[c.id] ? "0" : "1"}
                           disabled={disabled}
                           onChange={(e) => setNotAte((cur) => ({ ...cur, [c.id]: e.target.value === "0" }))}
-                          className="rounded-md border border-[#EDE3E8] bg-white px-2 py-1 text-xs text-[#29232A]"
+                          className="rounded-md border border-[var(--border)] bg-white px-2 py-1 text-xs text-[var(--text)]"
                         >
                           <option value="1">{uz.kundalik.ovqatlandi}</option>
                           <option value="0">{uz.kundalik.ovqatlanmadi}</option>
@@ -177,7 +177,7 @@ export default function MealPanel({ day, basePath, onSaved }: MealPanelProps) {
                           value={rowNotes[c.id] ?? ""}
                           disabled={disabled}
                           onChange={(e) => setRowNotes((cur) => ({ ...cur, [c.id]: e.target.value }))}
-                          className="flex-1 min-w-[120px] rounded-md border border-[#EDE3E8] bg-white px-2 py-1 text-xs text-[#29232A]"
+                          className="flex-1 min-w-[120px] rounded-md border border-[var(--border)] bg-white px-2 py-1 text-xs text-[var(--text)]"
                         />
                       </div>
                     )}
@@ -188,7 +188,7 @@ export default function MealPanel({ day, basePath, onSaved }: MealPanelProps) {
           </div>
 
           {(error || rules.length > 0) && (
-            <div role="alert" className="text-sm text-[#B91C1C] space-y-1">
+            <div role="alert" className="text-sm text-[var(--error-text)] space-y-1">
               {error && <p>{error}</p>}
               {rules.map((r) => <p key={r}>{r}</p>)}
             </div>
@@ -201,14 +201,14 @@ export default function MealPanel({ day, basePath, onSaved }: MealPanelProps) {
       )}
 
       {withMeals.length > 0 && (
-        <ul className="bg-white rounded-xl border border-[#EDE3E8] divide-y divide-[#F2ECF0]">
+        <ul className="bg-white rounded-xl border border-[var(--border)] divide-y divide-[var(--border-2)]">
           {withMeals.map((c) => (
             <li key={c.id} className="px-4 py-3">
-              <p className="font-medium text-[#29232A] text-sm">{childName(c)}</p>
-              {!canRecord(c) && <p className="text-xs text-[#92400E] mt-0.5">{uz.kundalik.davomat_ozgargan}</p>}
+              <p className="font-medium text-[var(--text)] text-sm">{childName(c)}</p>
+              {!canRecord(c) && <p className="text-xs text-[var(--warning-text)] mt-0.5">{uz.kundalik.davomat_ozgargan}</p>}
               <ul className="mt-1.5 space-y-1">
                 {c.meals.map((m) => (
-                  <li key={m.id} className="flex items-center gap-2 text-sm text-[#3D3240]">
+                  <li key={m.id} className="flex items-center gap-2 text-sm text-[var(--label)]">
                     <span className="flex-1">
                       {MEAL_LABELS[m.meal_type]} · {m.served_at}{m.note ? ` · ${m.note}` : ""}
                       {m.ate === false && <span className="ml-1.5"><Badge variant="warning">{uz.kundalik.ovqatlanmadi}</Badge></span>}

@@ -8,7 +8,7 @@ import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import Modal from "@/components/ui/Modal";
 import TemporaryPasswordModal from "@/components/accounts/TemporaryPasswordModal";
-import uz from "@/i18n/uz";
+import uz, { intlLocale } from "@/i18n";
 import type { OrganizationDetail } from "@/types";
 
 const t = uz.akkaunt;
@@ -70,16 +70,16 @@ export default function AdminAccountCard({ org, onChanged }: AdminAccountCardPro
   }
 
   return (
-    <div className="bg-white rounded-xl border border-[#EDE3E8]">
-      <div className="px-5 py-4 border-b border-[#EDE3E8]">
-        <h2 className="text-sm font-semibold text-[#29232A]">{t.rahbar_akkaunti}</h2>
+    <div className="bg-white rounded-xl border border-[var(--border)]">
+      <div className="px-5 py-4 border-b border-[var(--border)]">
+        <h2 className="text-sm font-semibold text-[var(--text)]">{t.rahbar_akkaunti}</h2>
       </div>
       <div className="p-5 space-y-3">
-        {error && <p role="alert" className="text-sm text-[#B91C1C]">{error}</p>}
+        {error && <p role="alert" className="text-sm text-[var(--error-text)]">{error}</p>}
 
         {org.admins.length === 0 ? (
           <form onSubmit={create} className="space-y-3" noValidate>
-            <p className="text-sm text-[#B8AAB2]">{t.rahbar_yoq}</p>
+            <p className="text-sm text-[var(--text-3)]">{t.rahbar_yoq}</p>
             <Input id="admin-username" label={t.login} value={username} required maxLength={32} autoCapitalize="none"
               onChange={(e) => setUsername(e.target.value)} hint={t.login_izoh} error={errors.username?.[0]} />
             <Input id="admin-name" label={t.ism} value={name} maxLength={255} placeholder={org.director_name ?? ""}
@@ -92,15 +92,15 @@ export default function AdminAccountCard({ org, onChanged }: AdminAccountCardPro
               {org.admins.map((admin) => (
                 <li key={admin.id} data-testid={`admin-${admin.id}`} className="space-y-1">
                   <div className="flex items-center gap-2">
-                    <p className="flex-1 min-w-0 text-sm font-medium text-[#29232A] truncate">{admin.name}</p>
+                    <p className="flex-1 min-w-0 text-sm font-medium text-[var(--text)] truncate">{admin.name}</p>
                     <Badge variant={admin.is_active ? "success" : "neutral"}>{admin.is_active ? uz.common.faol : uz.common.nofaol}</Badge>
                   </div>
-                  <p className="text-xs text-[#766B73]">
-                    {t.login}: <span className="font-mono text-[#29232A]">{admin.username ?? admin.phone ?? admin.email ?? "—"}</span>
+                  <p className="text-xs text-[var(--text-2)]">
+                    {t.login}: <span className="font-mono text-[var(--text)]">{admin.username ?? admin.phone ?? admin.email ?? "—"}</span>
                   </p>
-                  {admin.must_change_password && <p className="text-xs text-[#92400E]">{t.almashtirilmagan}</p>}
-                  <p className="text-xs text-[#B8AAB2]">
-                    {t.oxirgi_kirish}: {admin.last_login_at ? new Date(admin.last_login_at).toLocaleString("uz-UZ") : t.hech_kirmagan}
+                  {admin.must_change_password && <p className="text-xs text-[var(--warning-text)]">{t.almashtirilmagan}</p>}
+                  <p className="text-xs text-[var(--text-3)]">
+                    {t.oxirgi_kirish}: {admin.last_login_at ? new Date(admin.last_login_at).toLocaleString(intlLocale()) : t.hech_kirmagan}
                   </p>
                 </li>
               ))}
@@ -122,7 +122,7 @@ export default function AdminAccountCard({ org, onChanged }: AdminAccountCardPro
           </>
         }
       >
-        <p className="text-sm text-[#29232A]">{t.parol_yangilash_tasdiq}</p>
+        <p className="text-sm text-[var(--text)]">{t.parol_yangilash_tasdiq}</p>
       </Modal>
 
       <TemporaryPasswordModal credentials={credentials} onClose={() => setCredentials(null)} />

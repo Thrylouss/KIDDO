@@ -7,7 +7,8 @@ import TarbiyachiSidebar from "@/components/TarbiyachiSidebar";
 import Topbar from "@/components/Topbar";
 import DemoBanner from "@/components/DemoBanner";
 import { IS_DEMO } from "@/lib/demo-data";
-import uz from "@/i18n/uz";
+import uz from "@/i18n";
+import { useLocale } from "@/contexts/PreferencesContext";
 
 function TarbiyachiGuard({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
@@ -69,6 +70,7 @@ function TarbiyachiGuard({ children }: { children: React.ReactNode }) {
 }
 
 export default function TarbiyachiLayout({ children }: { children: React.ReactNode }) {
+  useLocale(); // til almashganda holat saqlangan holda qayta render
   return (
     <AuthProvider>
       <TarbiyachiGuard>{children}</TarbiyachiGuard>

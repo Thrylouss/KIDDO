@@ -6,7 +6,7 @@ import { errorMessage, fieldErrors } from "@/lib/apiErrors";
 import { IS_DEMO } from "@/lib/demo-data";
 import Button from "@/components/ui/Button";
 import Modal from "@/components/ui/Modal";
-import uz from "@/i18n/uz";
+import uz, { plural } from "@/i18n";
 
 const t = uz.bogchalar;
 
@@ -55,8 +55,8 @@ export default function OrgBulkStatusDialog({ action, ids, onClose, onDone }: {
         </Button>
       </>}>
       <form id="org-bulk-form" onSubmit={submit} className="space-y-4" noValidate>
-        <p className="rounded-xl bg-[#FAF5F8] px-4 py-3 text-sm text-[var(--text-2)]">
-          <span className="font-semibold text-[var(--text)]">{ids.length} {t.tanlangan}.</span> {archive ? t.ommaviy_izoh_arxiv : t.ommaviy_izoh_tiklash}
+        <p className="rounded-xl bg-[var(--surface-2)] px-4 py-3 text-sm text-[var(--text-2)]">
+          <span className="font-semibold text-[var(--text)]">{ids.length} {plural(ids.length, t.tanlangan)}.</span> {archive ? t.ommaviy_izoh_arxiv : t.ommaviy_izoh_tiklash}
         </p>
         <div className="flex flex-col gap-1.5">
           <label htmlFor="org-bulk-reason" className="text-sm font-medium text-[var(--text)]">
@@ -64,9 +64,9 @@ export default function OrgBulkStatusDialog({ action, ids, onClose, onDone }: {
           </label>
           <textarea id="org-bulk-reason" rows={2} maxLength={500} value={reason} placeholder={t.sabab_ph}
             onChange={(e) => { setReason(e.target.value); setError(""); }}
-            className="w-full rounded-lg border border-[var(--border)] bg-white px-3.5 py-2.5 text-sm outline-none resize-y focus:border-[var(--primary)] focus:ring-2 focus:ring-[#8E315D]/15" />
+            className="w-full rounded-lg border border-[var(--border)] bg-white px-3.5 py-2.5 text-sm outline-none resize-y focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--primary)]/15" />
         </div>
-        {error && <p role="alert" className="rounded-lg bg-[#FEF2F2] px-4 py-3 text-sm text-[#B91C1C]">{error}</p>}
+        {error && <p role="alert" className="rounded-lg bg-[var(--error-soft)] px-4 py-3 text-sm text-[var(--error-text)]">{error}</p>}
       </form>
     </Modal>
   );

@@ -9,7 +9,7 @@ import Button from "@/components/ui/Button";
 import Select from "@/components/ui/Select";
 import Modal from "@/components/ui/Modal";
 import type { ApiResponse, Child, ParentChildLink, ParentProfile, ParentRelation } from "@/types";
-import uz from "@/i18n/uz";
+import uz from "@/i18n";
 import { useReadOnly } from "@/lib/readOnly";
 
 interface ChildParentsModalProps {
@@ -131,20 +131,20 @@ export default function ChildParentsModal({ child, onClose }: ChildParentsModalP
     <Modal open onClose={onClose} title={`${uz.bolalar.ota_onalar_btn}: ${fullName(child)}`} size="lg">
       <div className="space-y-5">
         {IS_DEMO && (
-          <p role="note" className="rounded-lg bg-[#FFFBEB] border border-[#FDE68A] text-[#92400E] text-sm px-3 py-2">{uz.common.demo_saqlanmaydi}</p>
+          <p role="note" className="rounded-lg bg-[var(--warning-soft)] border border-[var(--warning-border)] text-[var(--warning-text)] text-sm px-3 py-2">{uz.common.demo_saqlanmaydi}</p>
         )}
         {success && (
           <p role="status" className="rounded-lg bg-[var(--success-bg)] text-[var(--success)] text-sm px-3 py-2">{success}</p>
         )}
         {actionError && (
-          <p role="alert" className="text-sm text-[#B91C1C]">{actionError}</p>
+          <p role="alert" className="text-sm text-[var(--error-text)]">{actionError}</p>
         )}
 
         {loading ? (
-          <p className="text-sm text-[#766B73]">{uz.common.yuklanmoqda}</p>
+          <p className="text-sm text-[var(--text-2)]">{uz.common.yuklanmoqda}</p>
         ) : loadError ? (
           <div className="text-sm">
-            <p role="alert" className="text-[#B91C1C] mb-2">{loadError}</p>
+            <p role="alert" className="text-[var(--error-text)] mb-2">{loadError}</p>
             <Button variant="secondary" size="sm" onClick={load}>{uz.common.qayta_urinish}</Button>
           </div>
         ) : (
@@ -152,18 +152,18 @@ export default function ChildParentsModal({ child, onClose }: ChildParentsModalP
             <section>
               <h3 className="text-sm font-semibold text-[var(--text)] mb-2">{uz.bolalar.boglangan_ota_onalar}</h3>
               {linked.length === 0 ? (
-                <p className="text-sm text-[#766B73]">{uz.bolalar.ota_ona_boglanmagan}</p>
+                <p className="text-sm text-[var(--text-2)]">{uz.bolalar.ota_ona_boglanmagan}</p>
               ) : (
-                <ul className="divide-y divide-[#F2ECF0] border border-[#EDE3E8] rounded-lg">
+                <ul className="divide-y divide-[var(--border-2)] border border-[var(--border)] rounded-lg">
                   {linked.map(({ parent, link }) => (
                     <li key={parent.id} className="flex flex-wrap items-center gap-2 px-3 py-2.5 text-sm">
-                      <span className="font-medium text-[#29232A]">{fullName(parent)}</span>
-                      <span className="text-[#766B73]">{link ? RELATION_LABELS[link.relation_type] ?? link.relation_type : "—"}</span>
+                      <span className="font-medium text-[var(--text)]">{fullName(parent)}</span>
+                      <span className="text-[var(--text-2)]">{link ? RELATION_LABELS[link.relation_type] ?? link.relation_type : "—"}</span>
                       {link?.is_primary && <Badge variant="info">{uz.bolalar.asosiy_vakil}</Badge>}
                       <span className="flex-1" />
                       {unlinkId === parent.id ? (
                         <span className="flex items-center gap-2">
-                          <span className="text-xs text-[#766B73]">{uz.bolalar.olib_tashlash_tasdiq}</span>
+                          <span className="text-xs text-[var(--text-2)]">{uz.bolalar.olib_tashlash_tasdiq}</span>
                           <Button size="sm" variant="danger" loading={busy} onClick={() => confirmUnlink(parent.id)}>{uz.common.tasdiqlash}</Button>
                           <Button size="sm" variant="secondary" disabled={busy} onClick={() => setUnlinkId(null)}>{uz.common.bekor_qilish}</Button>
                         </span>
@@ -182,11 +182,11 @@ export default function ChildParentsModal({ child, onClose }: ChildParentsModalP
             {!readOnly && <section>
               <h3 className="text-sm font-semibold text-[var(--text)] mb-2">{uz.bolalar.ota_ona_boglash}</h3>
               {available.length === 0 ? (
-                <p className="text-sm text-[#766B73]">{parents.length === 0 ? uz.bolalar.ota_ona_yoq : uz.bolalar.hammasi_boglangan}</p>
+                <p className="text-sm text-[var(--text-2)]">{parents.length === 0 ? uz.bolalar.ota_ona_yoq : uz.bolalar.hammasi_boglangan}</p>
               ) : confirming && selected ? (
-                <div className="rounded-lg border border-[#EDE3E8] bg-[#FAF5F8] p-3 space-y-3 text-sm">
-                  <p className="text-[#3D3240]">{uz.bolalar.boglash_tasdiq}</p>
-                  <p className="font-medium text-[#29232A]">
+                <div className="rounded-lg border border-[var(--border)] bg-[var(--surface-2)] p-3 space-y-3 text-sm">
+                  <p className="text-[var(--label)]">{uz.bolalar.boglash_tasdiq}</p>
+                  <p className="font-medium text-[var(--text)]">
                     {fullName(selected)} → {fullName(child)} · {relation ? RELATION_LABELS[relation] : ""}
                     {isPrimary ? ` · ${uz.bolalar.asosiy_vakil}` : ""}
                   </p>
@@ -223,11 +223,11 @@ export default function ChildParentsModal({ child, onClose }: ChildParentsModalP
                       ))}
                     </Select>
                   </div>
-                  <label className="flex items-start gap-2 text-sm text-[#3D3240]">
+                  <label className="flex items-start gap-2 text-sm text-[var(--label)]">
                     <input type="checkbox" checked={isPrimary} onChange={(e) => setIsPrimary(e.target.checked)} className="mt-0.5" />
                     <span>
                       {uz.bolalar.asosiy_vakil}
-                      <span className="block text-xs text-[#766B73]">{uz.bolalar.asosiy_vakil_izoh}</span>
+                      <span className="block text-xs text-[var(--text-2)]">{uz.bolalar.asosiy_vakil_izoh}</span>
                     </span>
                   </label>
                   <Button type="submit" size="sm" disabled={IS_DEMO || busy}>{uz.bolalar.boglash}</Button>

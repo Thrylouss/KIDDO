@@ -16,8 +16,9 @@ import PageHeader from "@/components/ui/PageHeader";
 import { SkeletonTable } from "@/components/ui/Skeleton";
 import ChildParentsModal from "@/components/ChildParentsModal";
 import type { ApiResponse, Child, Group } from "@/types";
-import uz from "@/i18n/uz";
+import uz from "@/i18n";
 import { useReadOnly } from "@/lib/readOnly";
+import { useLocale } from "@/contexts/PreferencesContext";
 
 interface ChildForm {
   first_name: string;
@@ -37,6 +38,7 @@ const childrenIcon = (
 );
 
 export default function BolalarPage() {
+  useLocale(); // til almashganda holat saqlangan holda qayta render
   const readOnly = useReadOnly();
   const [children, setChildren] = useState<Child[]>([]);
   const [groups,   setGroups]   = useState<Group[]>([]);
@@ -187,7 +189,7 @@ export default function BolalarPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             suffix={
-              <svg className="h-4 w-4 text-[#B8AAB2]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <svg className="h-4 w-4 text-[var(--text-3)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
               </svg>
             }
@@ -203,7 +205,7 @@ export default function BolalarPage() {
         </div>
       </div>
 
-      <div className="bg-white rounded-xl border border-[#EDE3E8] overflow-hidden">
+      <div className="bg-white rounded-xl border border-[var(--border)] overflow-hidden">
         {loading ? (
           <SkeletonTable rows={6} />
         ) : error ? (
@@ -222,29 +224,29 @@ export default function BolalarPage() {
         ) : (
           <>
             {/* Mobile card list (< sm) */}
-            <ul className="sm:hidden divide-y divide-[#F2ECF0]">
+            <ul className="sm:hidden divide-y divide-[var(--border-2)]">
               {filtered.map((c) => (
                 <li key={c.id} className="flex items-start gap-3 px-4 py-3.5">
                   <Avatar name={`${c.first_name} ${c.last_name}`} size="sm" />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between gap-2">
-                      <p className="font-medium text-[#29232A] truncate">
+                      <p className="font-medium text-[var(--text)] truncate">
                         {c.last_name} {c.first_name}
                       </p>
                       <Badge variant={c.is_active ? "success" : "neutral"}>
                         {c.is_active ? uz.common.faol : uz.common.nofaol}
                       </Badge>
                     </div>
-                    <p className="text-xs text-[#B8AAB2] mt-0.5">
+                    <p className="text-xs text-[var(--text-3)] mt-0.5">
                       {c.birth_date} · {c.gender === "erkak" ? uz.bolalar.jins_erkak : uz.bolalar.jins_qiz}
                     </p>
                     {c.group?.name ? (
-                      <span className="inline-flex items-center gap-1 text-xs text-[#766B73] mt-0.5">
+                      <span className="inline-flex items-center gap-1 text-xs text-[var(--text-2)] mt-0.5">
                         <span className="h-1.5 w-1.5 rounded-full bg-[#22C55E]" />
                         {c.group.name}
                       </span>
                     ) : (
-                      <span className="text-xs text-[#D9C9D1]">{uz.bolalar.guruhsiz}</span>
+                      <span className="text-xs text-[var(--border-strong)]">{uz.bolalar.guruhsiz}</span>
                     )}
                     {/* Amallar alohida qatorda — tor ekranda ism ustunini siqmasin */}
                     <div className="flex flex-wrap gap-1 mt-2 -ml-2">
@@ -264,38 +266,38 @@ export default function BolalarPage() {
             {/* Desktop table (sm+) */}
             <table className="hidden sm:table w-full text-sm">
               <thead>
-                <tr className="border-b border-[#EDE3E8] bg-[#FAF5F8]">
-                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-[#766B73] uppercase tracking-wide">Bola</th>
-                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-[#766B73] uppercase tracking-wide hidden md:table-cell">{uz.bolalar.tug_sanasi}</th>
-                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-[#766B73] uppercase tracking-wide hidden lg:table-cell">{uz.bolalar.jinsi}</th>
-                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-[#766B73] uppercase tracking-wide">{uz.bolalar.guruh}</th>
-                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-[#766B73] uppercase tracking-wide">{uz.bolalar.holat}</th>
+                <tr className="border-b border-[var(--border)] bg-[var(--surface-2)]">
+                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-[var(--text-2)] uppercase tracking-wide">{uz.matn.bola}</th>
+                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-[var(--text-2)] uppercase tracking-wide hidden md:table-cell">{uz.bolalar.tug_sanasi}</th>
+                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-[var(--text-2)] uppercase tracking-wide hidden lg:table-cell">{uz.bolalar.jinsi}</th>
+                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-[var(--text-2)] uppercase tracking-wide">{uz.bolalar.guruh}</th>
+                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-[var(--text-2)] uppercase tracking-wide">{uz.bolalar.holat}</th>
                   <th className="px-5 py-3.5" />
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#F2ECF0]">
+              <tbody className="divide-y divide-[var(--border-2)]">
                 {filtered.map((c) => (
-                  <tr key={c.id} className="hover:bg-[#FAF5F8] transition-colors duration-100">
+                  <tr key={c.id} className="hover:bg-[var(--surface-2)] transition-colors duration-100">
                     <td className="px-5 py-4">
                       <div className="flex items-center gap-3">
                         <Avatar name={`${c.first_name} ${c.last_name}`} size="sm" />
-                        <p className="font-medium text-[#29232A]">{c.last_name} {c.first_name}</p>
+                        <p className="font-medium text-[var(--text)]">{c.last_name} {c.first_name}</p>
                       </div>
                     </td>
-                    <td className="px-5 py-4 text-[#766B73] hidden md:table-cell">{c.birth_date}</td>
+                    <td className="px-5 py-4 text-[var(--text-2)] hidden md:table-cell">{c.birth_date}</td>
                     <td className="px-5 py-4 hidden lg:table-cell">
                       <Badge variant={c.gender === "erkak" ? "info" : "neutral"}>
                         {c.gender === "erkak" ? uz.bolalar.jins_erkak : uz.bolalar.jins_qiz}
                       </Badge>
                     </td>
-                    <td className="px-5 py-4 text-[#766B73]">
+                    <td className="px-5 py-4 text-[var(--text-2)]">
                       {c.group?.name ? (
                         <span className="inline-flex items-center gap-1">
                           <span className="h-1.5 w-1.5 rounded-full bg-[#22C55E]" />
                           {c.group.name}
                         </span>
                       ) : (
-                        <span className="text-[#D9C9D1]">{uz.bolalar.guruhsiz}</span>
+                        <span className="text-[var(--border-strong)]">{uz.bolalar.guruhsiz}</span>
                       )}
                     </td>
                     <td className="px-5 py-4">
@@ -336,10 +338,10 @@ export default function BolalarPage() {
       >
         <form id="child-form" onSubmit={handleSubmit} className="space-y-5">
           {editing && IS_DEMO && (
-            <p role="note" className="rounded-lg bg-[#FFFBEB] border border-[#FDE68A] text-[#92400E] text-sm px-3 py-2">{uz.common.demo_saqlanmaydi}</p>
+            <p role="note" className="rounded-lg bg-[var(--warning-soft)] border border-[var(--warning-border)] text-[var(--warning-text)] text-sm px-3 py-2">{uz.common.demo_saqlanmaydi}</p>
           )}
           <div>
-            <p className="text-xs font-semibold text-[#B8AAB2] uppercase tracking-wide mb-3">{uz.bolalar.bolaning_malumotlari}</p>
+            <p className="text-xs font-semibold text-[var(--text-3)] uppercase tracking-wide mb-3">{uz.bolalar.bolaning_malumotlari}</p>
             <div className="grid grid-cols-2 gap-3">
               <Input
                 label={uz.bolalar.ismi}
@@ -381,8 +383,8 @@ export default function BolalarPage() {
             </Select>
           </div>
 
-          <div className="pt-1 border-t border-[#EDE3E8]">
-            <p className="text-xs font-semibold text-[#B8AAB2] uppercase tracking-wide mb-3 mt-3">{uz.bolalar.bogcha_malumotlari}</p>
+          <div className="pt-1 border-t border-[var(--border)]">
+            <p className="text-xs font-semibold text-[var(--text-3)] uppercase tracking-wide mb-3 mt-3">{uz.bolalar.bogcha_malumotlari}</p>
             <Select
               label={uz.bolalar.guruh}
               value={form.group_id}
@@ -406,7 +408,7 @@ export default function BolalarPage() {
               </div>
             )}
           </div>
-          {formError && <p role="alert" className="text-sm text-[#B91C1C]">{formError}</p>}
+          {formError && <p role="alert" className="text-sm text-[var(--error-text)]">{formError}</p>}
         </form>
       </Modal>
 

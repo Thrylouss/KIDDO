@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import Avatar from "@/components/ui/Avatar";
-import uz from "@/i18n/uz";
+import uz from "@/i18n";
 
 interface ActiveItem {
   href: string;
@@ -28,11 +28,11 @@ interface NavSection {
 
 const sections: NavSection[] = [
   {
-    label: uz.sidebar.asosiy,
+    get label() { return uz.sidebar.asosiy; },
     items: [
       {
         href: "/admin/dashboard",
-        label: uz.nav.boshqaruv_paneli,
+        get label() { return uz.nav.boshqaruv_paneli; },
         icon: (
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
             <path strokeLinecap="round" strokeLinejoin="round"
@@ -43,11 +43,11 @@ const sections: NavSection[] = [
     ],
   },
   {
-    label: uz.sidebar.boshqaruv,
+    get label() { return uz.sidebar.boshqaruv; },
     items: [
       {
         href: "/admin/bolalar",
-        label: uz.nav.bolalar,
+        get label() { return uz.nav.bolalar; },
         icon: (
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
             <path strokeLinecap="round" strokeLinejoin="round"
@@ -57,7 +57,7 @@ const sections: NavSection[] = [
       },
       {
         href: "/admin/guruhlar",
-        label: uz.nav.guruhlar,
+        get label() { return uz.nav.guruhlar; },
         icon: (
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
             <path strokeLinecap="round" strokeLinejoin="round"
@@ -67,7 +67,7 @@ const sections: NavSection[] = [
       },
       {
         href: "/admin/tarbiyachilar",
-        label: uz.nav.tarbiyachilar,
+        get label() { return uz.nav.tarbiyachilar; },
         icon: (
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
             <path strokeLinecap="round" strokeLinejoin="round"
@@ -77,7 +77,7 @@ const sections: NavSection[] = [
       },
       {
         href: "/admin/ota-onalar",
-        label: uz.nav.ota_onalar,
+        get label() { return uz.nav.ota_onalar; },
         icon: (
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
             <path strokeLinecap="round" strokeLinejoin="round"
@@ -88,10 +88,10 @@ const sections: NavSection[] = [
     ],
   },
   {
-    label: uz.sidebar.kunlik_faoliyat,
+    get label() { return uz.sidebar.kunlik_faoliyat; },
     items: [
       {
-        label: uz.nav.davomat,
+        get label() { return uz.nav.davomat; },
         disabled: true,
         icon: (
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
@@ -101,7 +101,7 @@ const sections: NavSection[] = [
         ),
       },
       {
-        label: uz.nav.ovqat,
+        get label() { return uz.nav.ovqat; },
         disabled: true,
         icon: (
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
@@ -111,7 +111,7 @@ const sections: NavSection[] = [
         ),
       },
       {
-        label: uz.nav.uyqu,
+        get label() { return uz.nav.uyqu; },
         disabled: true,
         icon: (
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
@@ -121,7 +121,7 @@ const sections: NavSection[] = [
         ),
       },
       {
-        label: uz.nav.mashgulotlar,
+        get label() { return uz.nav.mashgulotlar; },
         disabled: true,
         icon: (
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
@@ -133,10 +133,10 @@ const sections: NavSection[] = [
     ],
   },
   {
-    label: uz.sidebar.aloqa,
+    get label() { return uz.sidebar.aloqa; },
     items: [
       {
-        label: uz.nav.xabarlar,
+        get label() { return uz.nav.xabarlar; },
         disabled: true,
         icon: (
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
@@ -146,7 +146,7 @@ const sections: NavSection[] = [
         ),
       },
       {
-        label: uz.nav.foto,
+        get label() { return uz.nav.foto; },
         disabled: true,
         icon: (
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
@@ -158,10 +158,10 @@ const sections: NavSection[] = [
     ],
   },
   {
-    label: uz.sidebar.moliya,
+    get label() { return uz.sidebar.moliya; },
     items: [
       {
-        label: uz.nav.tolov,
+        get label() { return uz.nav.tolov; },
         disabled: true,
         icon: (
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
@@ -173,10 +173,10 @@ const sections: NavSection[] = [
     ],
   },
   {
-    label: uz.sidebar.sozlamalar_group,
+    get label() { return uz.sidebar.sozlamalar_group; },
     items: [
       {
-        label: uz.nav.sozlamalar,
+        get label() { return uz.nav.sozlamalar; },
         disabled: true,
         icon: (
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
@@ -216,7 +216,7 @@ export default function Sidebar({ onClose }: SidebarProps) {
             </div>
             <span className="text-lg font-bold text-[var(--text)] tracking-tight">KIDDO</span>
           </div>
-          <p className="text-[11px] text-[var(--text-3)] mt-0.5 ml-9">Boshqaruv tizimi</p>
+          <p className="text-[11px] text-[var(--text-3)] mt-0.5 ml-9">{uz.ui.boshqaruv_tizimi}</p>
         </div>
         {onClose && (
           <button
@@ -293,7 +293,7 @@ export default function Sidebar({ onClose }: SidebarProps) {
         </div>
         <button
           onClick={handleLogout}
-          className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-[var(--text-2)] hover:bg-[#FEF2F2] hover:text-[#EF4444] transition-colors duration-150"
+          className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-[var(--text-2)] hover:bg-[var(--error-soft)] hover:text-[#EF4444] transition-colors duration-150"
         >
           <svg className="h-4 w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />

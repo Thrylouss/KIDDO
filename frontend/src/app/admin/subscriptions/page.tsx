@@ -8,14 +8,15 @@ import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import Select from "@/components/ui/Select";
 import Modal from "@/components/ui/Modal";
-import uz from "@/i18n/uz";
+import uz, { intlLocale, plural } from "@/i18n";
 import type { FullSubscription, Plan, PaginatedResponse, PlatformSummary, ApiResponse } from "@/types";
+import { useLocale } from "@/contexts/PreferencesContext";
 
 // ── Helpers ────────────────────────────────────────────────────────
 
 function fmtDate(iso: string | null): string {
   if (!iso) return "—";
-  return new Date(iso).toLocaleDateString("uz-UZ", { year: "numeric", month: "short", day: "numeric" });
+  return new Date(iso).toLocaleDateString(intlLocale(), { year: "numeric", month: "short", day: "numeric" });
 }
 
 function subStatusVariant(status: string): "success" | "info" | "warning" | "error" | "neutral" {
@@ -38,15 +39,15 @@ function subStatusLabel(status: string): string {
 
 function DaysCell({ days, status }: { days: number; status: string }) {
   if (status === "expired" || status === "cancelled") {
-    return <span className="text-[#EF4444] text-sm font-medium">Tugagan</span>;
+    return <span className="text-[#EF4444] text-sm font-medium">{uz.matn.tugagan}</span>;
   }
-  if (days === 0) return <span className="text-[#EF4444] text-sm font-semibold">Bugun tugaydi</span>;
+  if (days === 0) return <span className="text-[#EF4444] text-sm font-semibold">{uz.matn.bugun_tugaydi}</span>;
   const cls = days < 7
     ? "text-[#EF4444] font-semibold"
     : days <= 14
     ? "text-[#F59E0B] font-semibold"
-    : "text-[#766B73]";
-  return <span className={`text-sm ${cls}`}>{days} {uz.super_admin.qolgan_kun}</span>;
+    : "text-[var(--text-2)]";
+  return <span className={`text-sm ${cls}`}>{days} {plural(days, uz.super_admin.qolgan_kun)}</span>;
 }
 
 // ── Pagination component ───────────────────────────────────────────
@@ -60,15 +61,15 @@ function Pagination({
 }) {
   if (meta.last_page <= 1) return null;
   return (
-    <div className="flex items-center justify-between px-5 py-3.5 border-t border-[#EDE3E8]">
-      <p className="text-sm text-[#766B73]">Jami {meta.total} ta</p>
+    <div className="flex items-center justify-between px-5 py-3.5 border-t border-[var(--border)]">
+      <p className="text-sm text-[var(--text-2)]">{uz.matn.jami} {meta.total} {uz.matn.ta}</p>
       <div className="flex items-center gap-1">
         <button
           onClick={() => onPage(meta.current_page - 1)}
           disabled={meta.current_page === 1}
-          className="px-3 py-1.5 text-sm rounded-lg border border-[#EDE3E8] text-[#3D3240] disabled:opacity-40 hover:bg-[#FFF9F5] transition-colors"
+          className="px-3 py-1.5 text-sm rounded-lg border border-[var(--border)] text-[var(--label)] disabled:opacity-40 hover:bg-[var(--hover)] transition-colors"
         >
-          Oldingi
+          {uz.matn.oldingi}
         </button>
         {Array.from({ length: Math.min(5, meta.last_page) }, (_, i) => {
           const page = i + 1;
@@ -78,8 +79,8 @@ function Pagination({
               onClick={() => onPage(page)}
               className={`px-3 py-1.5 text-sm rounded-lg transition-colors ${
                 page === meta.current_page
-                  ? "bg-[#8E315D] text-white"
-                  : "border border-[#EDE3E8] text-[#3D3240] hover:bg-[#FFF9F5]"
+                  ? "bg-[var(--primary)] text-white"
+                  : "border border-[var(--border)] text-[var(--label)] hover:bg-[var(--hover)]"
               }`}
             >
               {page}
@@ -89,9 +90,9 @@ function Pagination({
         <button
           onClick={() => onPage(meta.current_page + 1)}
           disabled={meta.current_page === meta.last_page}
-          className="px-3 py-1.5 text-sm rounded-lg border border-[#EDE3E8] text-[#3D3240] disabled:opacity-40 hover:bg-[#FFF9F5] transition-colors"
+          className="px-3 py-1.5 text-sm rounded-lg border border-[var(--border)] text-[var(--label)] disabled:opacity-40 hover:bg-[var(--hover)] transition-colors"
         >
-          Keyingi
+          {uz.matn.keyingi}
         </button>
       </div>
     </div>
@@ -112,6 +113,7 @@ const emptyRenew: RenewForm = { plan_id: "", ends_at: "", payment_status: "paid"
 // ── Page ───────────────────────────────────────────────────────────
 
 export default function SubscriptionsPage() {
+  useLocale(); // til almashganda holat saqlangan holda qayta render
   const [subs,    setSubs]    = useState<FullSubscription[]>([]);
   const [plans,   setPlans]   = useState<Plan[]>([]);
   const [meta,    setMeta]    = useState({ current_page: 1, last_page: 1, total: 0, per_page: 15 });
@@ -251,11 +253,11 @@ export default function SubscriptionsPage() {
   }
 
   const statTiles = [
-    { key: "active",    label: uz.super_admin.faol_obunalar,        color: "bg-[#DCFCE7] text-[#166534]" },
-    { key: "trial",     label: uz.super_admin.trial_obunalar,       color: "bg-[#FCE8F0] text-[#8E315D]" },
-    { key: "past_due",  label: uz.super_admin.past_due,             color: "bg-[#FEF3C7] text-[#92400E]" },
-    { key: "expired",   label: uz.super_admin.tugagan_obunalar,     color: "bg-[#FEE2E2] text-[#991B1B]" },
-    { key: "cancelled", label: uz.super_admin.bekor,                color: "bg-[#F2ECF0] text-[#3D3240]" },
+    { key: "active",    label: uz.super_admin.faol_obunalar,        color: "bg-[var(--success-bg)] text-[var(--success)]" },
+    { key: "trial",     label: uz.super_admin.trial_obunalar,       color: "bg-[var(--info-bg)] text-[var(--primary)]" },
+    { key: "past_due",  label: uz.super_admin.past_due,             color: "bg-[var(--warning-bg)] text-[var(--warning-text)]" },
+    { key: "expired",   label: uz.super_admin.tugagan_obunalar,     color: "bg-[var(--error-bg)] text-[var(--error)]" },
+    { key: "cancelled", label: uz.super_admin.bekor,                color: "bg-[var(--border-2)] text-[var(--label)]" },
   ];
 
   return (
@@ -263,8 +265,8 @@ export default function SubscriptionsPage() {
       {/* Header */}
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-[#29232A]">{uz.super_admin.obunalar}</h1>
-          <p className="text-sm text-[#B8AAB2] mt-0.5">Barcha bog&apos;chalar obunalarini boshqaring</p>
+          <h1 className="text-2xl font-bold text-[var(--text)]">{uz.super_admin.obunalar}</h1>
+          <p className="text-sm text-[var(--text-3)] mt-0.5">{uz.matn.barcha_bogchalar_obunalarini_boshqaring}</p>
         </div>
       </div>
 
@@ -277,21 +279,21 @@ export default function SubscriptionsPage() {
               onClick={() => { setFilterStatus(filterStatus === key ? "" : key); setPage(1); }}
               className={`rounded-xl border p-4 text-center transition-all ${
                 filterStatus === key
-                  ? "border-[#8E315D] ring-1 ring-[#8E315D]"
-                  : "border-[#EDE3E8] hover:border-[#D9C9D1]"
+                  ? "border-[var(--primary)] ring-1 ring-[var(--primary)]"
+                  : "border-[var(--border)] hover:border-[var(--border-strong)]"
               } bg-white`}
             >
               <div className={`text-xl font-bold mb-1 px-2 py-1 rounded-lg inline-block ${color}`}>
                 {stats[key as keyof typeof stats]}
               </div>
-              <p className="text-xs text-[#766B73] mt-1">{label}</p>
+              <p className="text-xs text-[var(--text-2)] mt-1">{label}</p>
             </button>
           ))}
         </div>
       )}
 
       {/* Filters */}
-      <div className="bg-white rounded-xl border border-[#EDE3E8] px-5 py-4">
+      <div className="bg-white rounded-xl border border-[var(--border)] px-5 py-4">
         <div className="flex flex-wrap items-end gap-3">
           <div className="w-44">
             <Select
@@ -309,7 +311,7 @@ export default function SubscriptionsPage() {
           </div>
           <div className="w-44">
             <Select
-              label="Tarif bo'yicha"
+              label={uz.matn.tarif_boyicha}
               value={filterPlan}
               onChange={(e) => { setFilterPlan(e.target.value); setPage(1); }}
             >
@@ -322,33 +324,33 @@ export default function SubscriptionsPage() {
           {(filterStatus || filterPlan) && (
             <button
               onClick={() => { setFilterStatus(""); setFilterPlan(""); setPage(1); }}
-              className="px-4 py-2 text-sm text-[#766B73] hover:text-[#3D3240] border border-[#EDE3E8] rounded-lg hover:bg-[#FFF9F5] transition-colors"
+              className="px-4 py-2 text-sm text-[var(--text-2)] hover:text-[var(--label)] border border-[var(--border)] rounded-lg hover:bg-[var(--hover)] transition-colors"
             >
-              Tozalash
+              {uz.matn.tozalash}
             </button>
           )}
         </div>
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-xl border border-[#EDE3E8] overflow-hidden">
+      <div className="bg-white rounded-xl border border-[var(--border)] overflow-hidden">
         {loading ? (
-          <div className="animate-pulse divide-y divide-[#F2ECF0]">
+          <div className="animate-pulse divide-y divide-[var(--border-2)]">
             {[...Array(8)].map((_, i) => (
               <div key={i} className="flex items-center gap-4 px-5 py-4">
-                <div className="h-4 w-40 bg-[#F2ECF0] rounded" />
-                <div className="h-4 w-24 bg-[#F2ECF0] rounded" />
-                <div className="h-6 w-16 bg-[#F2ECF0] rounded-full" />
-                <div className="h-4 w-20 bg-[#F2ECF0] rounded ml-auto" />
+                <div className="h-4 w-40 bg-[var(--border-2)] rounded" />
+                <div className="h-4 w-24 bg-[var(--border-2)] rounded" />
+                <div className="h-6 w-16 bg-[var(--border-2)] rounded-full" />
+                <div className="h-4 w-20 bg-[var(--border-2)] rounded ml-auto" />
               </div>
             ))}
           </div>
         ) : subs.length === 0 ? (
           <div className="py-16 text-center">
-            <svg className="h-10 w-10 text-[#D9C9D1] mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+            <svg className="h-10 w-10 text-[var(--border-strong)] mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
-            <p className="text-[#B8AAB2] text-sm">{uz.common.malumot_yoq}</p>
+            <p className="text-[var(--text-3)] text-sm">{uz.common.malumot_yoq}</p>
           </div>
         ) : (
           <>
@@ -356,36 +358,36 @@ export default function SubscriptionsPage() {
             <div className="hidden lg:block overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="bg-[#FAF5F8] border-b border-[#EDE3E8]">
-                    <th className="text-left px-5 py-3.5 text-xs font-semibold text-[#766B73] uppercase tracking-wide">Bog&apos;cha</th>
-                    <th className="text-left px-5 py-3.5 text-xs font-semibold text-[#766B73] uppercase tracking-wide">{uz.super_admin.tarif}</th>
-                    <th className="text-left px-5 py-3.5 text-xs font-semibold text-[#766B73] uppercase tracking-wide">{uz.super_admin.holat}</th>
-                    <th className="text-left px-5 py-3.5 text-xs font-semibold text-[#766B73] uppercase tracking-wide">{uz.super_admin.tugash}</th>
-                    <th className="text-left px-5 py-3.5 text-xs font-semibold text-[#766B73] uppercase tracking-wide">{uz.super_admin.qolgan}</th>
-                    <th className="text-right px-5 py-3.5 text-xs font-semibold text-[#766B73] uppercase tracking-wide">{uz.super_admin.amallar}</th>
+                  <tr className="bg-[var(--surface-2)] border-b border-[var(--border)]">
+                    <th className="text-left px-5 py-3.5 text-xs font-semibold text-[var(--text-2)] uppercase tracking-wide">{uz.matn.bogcha}</th>
+                    <th className="text-left px-5 py-3.5 text-xs font-semibold text-[var(--text-2)] uppercase tracking-wide">{uz.super_admin.tarif}</th>
+                    <th className="text-left px-5 py-3.5 text-xs font-semibold text-[var(--text-2)] uppercase tracking-wide">{uz.super_admin.holat}</th>
+                    <th className="text-left px-5 py-3.5 text-xs font-semibold text-[var(--text-2)] uppercase tracking-wide">{uz.super_admin.tugash}</th>
+                    <th className="text-left px-5 py-3.5 text-xs font-semibold text-[var(--text-2)] uppercase tracking-wide">{uz.super_admin.qolgan}</th>
+                    <th className="text-right px-5 py-3.5 text-xs font-semibold text-[var(--text-2)] uppercase tracking-wide">{uz.super_admin.amallar}</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#F2ECF0]">
+                <tbody className="divide-y divide-[var(--border-2)]">
                   {subs.map((sub) => (
-                    <tr key={sub.id} className="hover:bg-[#FAF5F8] transition-colors">
+                    <tr key={sub.id} className="hover:bg-[var(--surface-2)] transition-colors">
                       <td className="px-5 py-3.5">
                         <div className="flex items-center gap-3">
-                          <div className="h-8 w-8 rounded-lg bg-[#FDF2F6] flex items-center justify-center text-[#8E315D] font-bold text-xs flex-shrink-0">
+                          <div className="h-8 w-8 rounded-lg bg-[var(--primary-lt)] flex items-center justify-center text-[var(--primary)] font-bold text-xs flex-shrink-0">
                             {(sub.organization?.name ?? "?").charAt(0).toUpperCase()}
                           </div>
                           <Link
                             href={`/admin/bogchalar/${sub.organization_id}`}
-                            className="font-medium text-[#29232A] hover:text-[#8E315D] transition-colors"
+                            className="font-medium text-[var(--text)] hover:text-[var(--primary)] transition-colors"
                           >
                             {sub.organization?.name ?? "—"}
                           </Link>
                         </div>
                       </td>
-                      <td className="px-5 py-3.5 text-[#766B73]">{sub.plan?.name ?? "—"}</td>
+                      <td className="px-5 py-3.5 text-[var(--text-2)]">{sub.plan?.name ?? "—"}</td>
                       <td className="px-5 py-3.5">
                         <Badge variant={subStatusVariant(sub.status)}>{subStatusLabel(sub.status)}</Badge>
                       </td>
-                      <td className="px-5 py-3.5 text-[#766B73]">{fmtDate(sub.ends_at)}</td>
+                      <td className="px-5 py-3.5 text-[var(--text-2)]">{fmtDate(sub.ends_at)}</td>
                       <td className="px-5 py-3.5">
                         <DaysCell days={sub.days_remaining} status={sub.status} />
                       </td>
@@ -393,20 +395,20 @@ export default function SubscriptionsPage() {
                         <div className="flex items-center justify-end gap-1.5">
                           <Link
                             href={`/admin/bogchalar/${sub.organization_id}`}
-                            className="px-2.5 py-1.5 text-xs font-medium text-[#8E315D] hover:bg-[#FDF2F6] rounded-lg transition-colors"
+                            className="px-2.5 py-1.5 text-xs font-medium text-[var(--primary)] hover:bg-[var(--primary-lt)] rounded-lg transition-colors"
                           >
-                            Ko&apos;rish
+                            {uz.matn.korish}
                           </Link>
                           <button
                             onClick={() => openRenew(sub)}
-                            className="px-2.5 py-1.5 text-xs font-medium text-[#3D3240] hover:bg-[#F2ECF0] rounded-lg transition-colors"
+                            className="px-2.5 py-1.5 text-xs font-medium text-[var(--label)] hover:bg-[var(--border-2)] rounded-lg transition-colors"
                           >
-                            Uzaytirish
+                            {uz.matn.uzaytirish}
                           </button>
                           {sub.status !== "cancelled" && sub.status !== "expired" && (
                             <button
                               onClick={() => openChangePlan(sub)}
-                              className="px-2.5 py-1.5 text-xs font-medium text-[#3D3240] hover:bg-[#F2ECF0] rounded-lg transition-colors"
+                              className="px-2.5 py-1.5 text-xs font-medium text-[var(--label)] hover:bg-[var(--border-2)] rounded-lg transition-colors"
                             >
                               {uz.super_admin.tarif_almashtirish}
                             </button>
@@ -414,9 +416,9 @@ export default function SubscriptionsPage() {
                           {sub.status !== "cancelled" && (
                             <button
                               onClick={() => openCancel(sub)}
-                              className="px-2.5 py-1.5 text-xs font-medium text-[#991B1B] hover:bg-[#FEE2E2] rounded-lg transition-colors"
+                              className="px-2.5 py-1.5 text-xs font-medium text-[var(--error)] hover:bg-[var(--error-bg)] rounded-lg transition-colors"
                             >
-                              Bekor qilish
+                              {uz.matn.bekor_qilish}
                             </button>
                           )}
                         </div>
@@ -428,30 +430,30 @@ export default function SubscriptionsPage() {
             </div>
 
             {/* Mobile cards */}
-            <div className="lg:hidden divide-y divide-[#F2ECF0]">
+            <div className="lg:hidden divide-y divide-[var(--border-2)]">
               {subs.map((sub) => (
                 <div key={sub.id} className="px-4 py-4 space-y-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <div className="h-8 w-8 rounded-lg bg-[#FDF2F6] flex items-center justify-center text-[#8E315D] font-bold text-xs flex-shrink-0">
+                      <div className="h-8 w-8 rounded-lg bg-[var(--primary-lt)] flex items-center justify-center text-[var(--primary)] font-bold text-xs flex-shrink-0">
                         {(sub.organization?.name ?? "?").charAt(0).toUpperCase()}
                       </div>
                       <div>
-                        <p className="font-medium text-[#29232A] text-sm">{sub.organization?.name ?? "—"}</p>
-                        <p className="text-xs text-[#B8AAB2]">{sub.plan?.name ?? "—"}</p>
+                        <p className="font-medium text-[var(--text)] text-sm">{sub.organization?.name ?? "—"}</p>
+                        <p className="text-xs text-[var(--text-3)]">{sub.plan?.name ?? "—"}</p>
                       </div>
                     </div>
                     <Badge variant={subStatusVariant(sub.status)}>{subStatusLabel(sub.status)}</Badge>
                   </div>
                   <div className="flex items-center justify-between text-sm">
-                    <span className="text-[#B8AAB2]">{uz.super_admin.tugash}: {fmtDate(sub.ends_at)}</span>
+                    <span className="text-[var(--text-3)]">{uz.super_admin.tugash}: {fmtDate(sub.ends_at)}</span>
                     <DaysCell days={sub.days_remaining} status={sub.status} />
                   </div>
                   <div className="flex gap-2 flex-wrap">
-                    <Link href={`/admin/bogchalar/${sub.organization_id}`} className="text-xs px-3 py-1.5 border border-[#EDE3E8] rounded-lg text-[#3D3240] hover:bg-[#FFF9F5]">Ko&apos;rish</Link>
-                    <button onClick={() => openRenew(sub)} className="text-xs px-3 py-1.5 border border-[#EDE3E8] rounded-lg text-[#3D3240] hover:bg-[#FFF9F5]">Uzaytirish</button>
+                    <Link href={`/admin/bogchalar/${sub.organization_id}`} className="text-xs px-3 py-1.5 border border-[var(--border)] rounded-lg text-[var(--label)] hover:bg-[var(--hover)]">{uz.matn.korish}</Link>
+                    <button onClick={() => openRenew(sub)} className="text-xs px-3 py-1.5 border border-[var(--border)] rounded-lg text-[var(--label)] hover:bg-[var(--hover)]">{uz.matn.uzaytirish}</button>
                     {sub.status !== "cancelled" && (
-                      <button onClick={() => openCancel(sub)} className="text-xs px-3 py-1.5 border border-[#FEE2E2] rounded-lg text-[#991B1B] hover:bg-[#FEF2F2]">Bekor</button>
+                      <button onClick={() => openCancel(sub)} className="text-xs px-3 py-1.5 border border-[var(--error-bg)] rounded-lg text-[var(--error)] hover:bg-[var(--error-soft)]">{uz.matn.bekor}</button>
                     )}
                   </div>
                 </div>
@@ -477,9 +479,9 @@ export default function SubscriptionsPage() {
       >
         <form id="sub-renew-form" onSubmit={handleRenew} className="space-y-4">
           {selected?.organization && (
-            <div className="px-4 py-3 bg-[#FAF5F8] rounded-lg">
-              <p className="text-xs text-[#B8AAB2] mb-1">Bog&apos;cha</p>
-              <p className="text-sm font-medium text-[#29232A]">{selected.organization.name}</p>
+            <div className="px-4 py-3 bg-[var(--surface-2)] rounded-lg">
+              <p className="text-xs text-[var(--text-3)] mb-1">{uz.matn.bogcha}</p>
+              <p className="text-sm font-medium text-[var(--text)]">{selected.organization.name}</p>
             </div>
           )}
           <Select
@@ -489,10 +491,10 @@ export default function SubscriptionsPage() {
             error={renewErrors.plan_id?.[0]}
             required
           >
-            <option value="">— Tanlang —</option>
+            <option value="">{uz.matn.tanlang}</option>
             {plans.map((p) => (
               <option key={p.id} value={p.id}>
-                {p.name} — {Number(p.price_monthly).toLocaleString("uz-UZ")} UZS
+                {p.name} — {Number(p.price_monthly).toLocaleString(intlLocale())} UZS
               </option>
             ))}
           </Select>
@@ -511,14 +513,14 @@ export default function SubscriptionsPage() {
             onChange={(e) => setRenewForm({ ...renewForm, payment_status: e.target.value })}
             required
           >
-            <option value="paid">To&apos;langan</option>
-            <option value="pending">Kutilmoqda</option>
+            <option value="paid">{uz.matn.tolangan}</option>
+            <option value="pending">{uz.matn.kutilmoqda}</option>
           </Select>
           <Input
             label={uz.super_admin.eslatma}
             value={renewForm.notes}
             onChange={(e) => setRenewForm({ ...renewForm, notes: e.target.value })}
-            placeholder="Ixtiyoriy izoh..."
+            placeholder={uz.matn.ixtiyoriy_izoh}
           />
         </form>
       </Modal>
@@ -537,9 +539,9 @@ export default function SubscriptionsPage() {
       >
         <form id="sub-change-plan-form" onSubmit={handleChangePlan} className="space-y-4">
           {selected?.plan && (
-            <div className="px-4 py-3 bg-[#FAF5F8] rounded-lg">
-              <p className="text-xs text-[#B8AAB2] mb-1">{uz.super_admin.joriy_tarif}</p>
-              <p className="text-sm font-medium text-[#29232A]">{selected.plan.name}</p>
+            <div className="px-4 py-3 bg-[var(--surface-2)] rounded-lg">
+              <p className="text-xs text-[var(--text-3)] mb-1">{uz.super_admin.joriy_tarif}</p>
+              <p className="text-sm font-medium text-[var(--text)]">{selected.plan.name}</p>
             </div>
           )}
           <Select
@@ -548,14 +550,14 @@ export default function SubscriptionsPage() {
             onChange={(e) => setChangePlanForm({ plan_id: e.target.value })}
             required
           >
-            <option value="">— Tanlang —</option>
+            <option value="">{uz.matn.tanlang}</option>
             {plans.map((p) => (
               <option key={p.id} value={p.id}>
-                {p.name} — {Number(p.price_monthly).toLocaleString("uz-UZ")} UZS
+                {p.name} — {Number(p.price_monthly).toLocaleString(intlLocale())} UZS
               </option>
             ))}
           </Select>
-          <p className="text-xs text-[#B8AAB2]">{uz.super_admin.darhol} kuchga kiradi</p>
+          <p className="text-xs text-[var(--text-3)]">{uz.super_admin.darhol} {uz.matn.kuchga_kiradi}</p>
         </form>
       </Modal>
 
@@ -563,32 +565,32 @@ export default function SubscriptionsPage() {
       <Modal
         open={showCancel}
         onClose={() => setShowCancel(false)}
-        title="Obunani bekor qilish"
+        title={uz.matn.obunani_bekor_qilish}
         footer={
           <>
             <Button variant="secondary" onClick={() => setShowCancel(false)}>{uz.common.bekor_qilish}</Button>
             <Button form="sub-cancel-form" type="submit" loading={cancelling} variant="danger">
-              Bekor qilish
+              {uz.matn.bekor_qilish}
             </Button>
           </>
         }
       >
         <form id="sub-cancel-form" onSubmit={handleCancel} className="space-y-4">
           {selected?.organization && (
-            <p className="text-sm text-[#766B73]">
-              <strong>{selected.organization.name}</strong> obunasini bekor qilmoqchimisiz?
+            <p className="text-sm text-[var(--text-2)]">
+              <strong>{selected.organization.name}</strong> {uz.matn.obunasini_bekor_qilmoqchimisiz}
             </p>
           )}
           <div>
-            <label className="block text-sm font-medium text-[#3D3240] mb-1.5">
-              {uz.super_admin.bekor_qilish_sababi} (ixtiyoriy)
+            <label className="block text-sm font-medium text-[var(--label)] mb-1.5">
+              {uz.super_admin.bekor_qilish_sababi} {uz.matn.ixtiyoriy}
             </label>
             <textarea
               value={cancelForm.reason}
               onChange={(e) => setCancelForm({ reason: e.target.value })}
               rows={3}
-              placeholder="Sabab..."
-              className="w-full px-3.5 py-2.5 text-sm border border-[#EDE3E8] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#8E315D]/20 focus:border-[#8E315D] resize-none"
+              placeholder={uz.matn.sabab}
+              className="w-full px-3.5 py-2.5 text-sm border border-[var(--border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-[var(--primary)] resize-none"
             />
           </div>
         </form>

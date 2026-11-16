@@ -9,7 +9,7 @@ import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import Select from "@/components/ui/Select";
 import Modal from "@/components/ui/Modal";
-import uz from "@/i18n/uz";
+import uz from "@/i18n";
 import type { OrganizationSummary, OrgFilterOptions, OrgType } from "@/types";
 
 const t = uz.bogchalar;
@@ -219,7 +219,7 @@ export default function OrgFormModal({ open, org, onClose, onSaved, onOpenProfil
         <div data-testid="org-created" className="space-y-4">
           <p className="text-sm text-[var(--text-2)]">{t.parol_bir_marta}</p>
           {[{ label: t.login, value: created.admin!.username }, { label: t.vaqtinchalik_parol, value: created.admin!.temporary_password }].map((row) => (
-            <div key={row.label} className="flex items-center justify-between gap-3 rounded-xl border border-[var(--border)] bg-[#FAF5F8] px-4 py-3">
+            <div key={row.label} className="flex items-center justify-between gap-3 rounded-xl border border-[var(--border)] bg-[var(--surface-2)] px-4 py-3">
               <div className="min-w-0">
                 <p className="text-xs text-[var(--text-3)]">{row.label}</p>
                 <p className="font-mono text-base font-semibold text-[var(--text)] break-all">{row.value}</p>
@@ -233,7 +233,7 @@ export default function OrgFormModal({ open, org, onClose, onSaved, onOpenProfil
       ) : (
         <form id="org-form" onSubmit={submit} noValidate className="space-y-5">
           {IS_DEMO && (
-            <div className="bg-[#FFF9F5] border border-[#EDE3E8] text-[#766B73] text-sm px-4 py-3 rounded-xl">
+            <div className="bg-[var(--hover)] border border-[var(--border)] text-[var(--text-2)] text-sm px-4 py-3 rounded-xl">
               {uz.super_admin.demo_modal_xabar}
             </div>
           )}
@@ -244,7 +244,7 @@ export default function OrgFormModal({ open, org, onClose, onSaved, onOpenProfil
               <li key={label}>
                 <button type="button" disabled={i > visited} onClick={() => goTo(i)} aria-current={i === step ? "step" : undefined}
                   className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-colors
-                    ${i === step ? "bg-[#8E315D] text-white" : i <= visited ? "bg-[#FDF2F6] text-[#8E315D] hover:bg-[#F9E3EC]" : "bg-[#F2ECF0] text-[#B8AAB2]"}`}>
+                    ${i === step ? "bg-[var(--primary)] text-white" : i <= visited ? "bg-[var(--primary-lt)] text-[var(--primary)] hover:bg-[var(--primary-lt)]" : "bg-[var(--border-2)] text-[var(--text-3)]"}`}>
                   <span className={`flex h-4 w-4 items-center justify-center rounded-full text-[10px] ${i === step ? "bg-white/25" : "bg-white"}`}>{i + 1}</span>
                   {label}
                 </button>
@@ -253,7 +253,7 @@ export default function OrgFormModal({ open, org, onClose, onSaved, onOpenProfil
           </ol>
 
           {formError && (
-            <div role="alert" className="bg-[#FEF2F2] border border-[#FECACA] text-[#B91C1C] text-sm px-4 py-3 rounded-xl">{formError}</div>
+            <div role="alert" className="bg-[var(--error-soft)] border border-[var(--error-border)] text-[var(--error-text)] text-sm px-4 py-3 rounded-xl">{formError}</div>
           )}
 
           {step === 0 && (
@@ -264,10 +264,10 @@ export default function OrgFormModal({ open, org, onClose, onSaved, onOpenProfil
               </div>
               <fieldset className="sm:col-span-2">
                 <legend className="text-sm font-medium text-[var(--text)] mb-1.5">{t.f_turi} <span className="text-[#EF4444]">*</span></legend>
-                <div className="grid grid-cols-2 gap-2 rounded-xl bg-[#FAF5F8] p-1" role="radiogroup">
+                <div className="grid grid-cols-2 gap-2 rounded-xl bg-[var(--surface-2)] p-1" role="radiogroup">
                   {(["davlat", "xususiy"] as const).map((v) => (
                     <label key={v} className={`cursor-pointer rounded-lg py-2 text-center text-sm font-semibold transition
-                      ${f.type === v ? "bg-white text-[#8E315D] shadow-sm" : "text-[#766B73] hover:text-[#29232A]"}`}>
+                      ${f.type === v ? "bg-white text-[var(--primary)] shadow-sm" : "text-[var(--text-2)] hover:text-[var(--text)]"}`}>
                       <input type="radio" name="org-type" value={v} checked={f.type === v} onChange={() => set("type", v)} className="sr-only" />
                       {v === "davlat" ? t.turi_davlat : t.turi_xususiy}
                     </label>
@@ -335,10 +335,10 @@ export default function OrgFormModal({ open, org, onClose, onSaved, onOpenProfil
               <div className="flex flex-col gap-1.5">
                 <label htmlFor="org-notes" className="text-sm font-medium text-[var(--text)]">{t.f_izoh}{optional}</label>
                 <textarea id="org-notes" rows={3} maxLength={2000} value={f.notes} onChange={(e) => set("notes", e.target.value)}
-                  className="w-full rounded-lg border border-[var(--border)] bg-white px-3.5 py-2.5 text-sm outline-none focus:border-[var(--primary)] focus:ring-2 focus:ring-[#8E315D]/15 resize-y" />
+                  className="w-full rounded-lg border border-[var(--border)] bg-white px-3.5 py-2.5 text-sm outline-none focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--primary)]/15 resize-y" />
                 {errors.notes && <p className="text-xs text-[#EF4444]">{errors.notes}</p>}
               </div>
-              <p className="rounded-xl bg-[#FAF5F8] px-4 py-3 text-xs text-[var(--text-2)]">{t.f_hisoblanadi}</p>
+              <p className="rounded-xl bg-[var(--surface-2)] px-4 py-3 text-xs text-[var(--text-2)]">{t.f_hisoblanadi}</p>
             </div>
           )}
 
@@ -346,7 +346,7 @@ export default function OrgFormModal({ open, org, onClose, onSaved, onOpenProfil
             <div className="space-y-4">
               <label className="flex items-start gap-3 cursor-pointer">
                 <input type="checkbox" checked={f.create_admin} onChange={(e) => set("create_admin", e.target.checked)}
-                  className="mt-0.5 h-4 w-4 accent-[#8E315D]" />
+                  className="mt-0.5 h-4 w-4 accent-[var(--primary)]" />
                 <span>
                   <span className="text-sm font-medium text-[var(--text)]">{t.f_akkaunt_yaratish}</span>
                   <span className="block text-xs text-[var(--text-2)] mt-0.5">{t.f_akkaunt_izoh}</span>

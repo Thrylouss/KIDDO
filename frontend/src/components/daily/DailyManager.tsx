@@ -13,7 +13,7 @@ import MealPanel from "@/components/daily/MealPanel";
 import SleepPanel from "@/components/daily/SleepPanel";
 import ActivityPanel from "@/components/daily/ActivityPanel";
 import type { DailyDay } from "@/types";
-import uz from "@/i18n/uz";
+import uz from "@/i18n";
 import { useReadOnly } from "@/lib/readOnly";
 
 export type DailyBasePath = "/v1/teacher/daily" | "/v1/admin/daily";
@@ -21,10 +21,10 @@ export type DailyBasePath = "/v1/teacher/daily" | "/v1/admin/daily";
 type Tab = "hisobot" | "ovqat" | "uyqu" | "mashgulot";
 
 const TABS: { id: Tab; label: string }[] = [
-  { id: "hisobot",   label: uz.kundalik.tab_hisobot },
-  { id: "ovqat",     label: uz.kundalik.tab_ovqat },
-  { id: "uyqu",      label: uz.kundalik.tab_uyqu },
-  { id: "mashgulot", label: uz.kundalik.tab_mashgulot },
+  { id: "hisobot",   get label() { return uz.kundalik.tab_hisobot; } },
+  { id: "ovqat",     get label() { return uz.kundalik.tab_ovqat; } },
+  { id: "uyqu",      get label() { return uz.kundalik.tab_uyqu; } },
+  { id: "mashgulot", get label() { return uz.kundalik.tab_mashgulot; } },
 ];
 
 interface DailyManagerProps {
@@ -95,7 +95,7 @@ export default function DailyManager({ basePath, noGroupsText }: DailyManagerPro
           ) : (
             <div>
               <p className="text-sm font-medium text-[var(--text)] mb-1.5">{uz.kundalik.guruh}</p>
-              <p className="text-sm text-[#3D3240] py-2.5">{data.group?.name}</p>
+              <p className="text-sm text-[var(--label)] py-2.5">{data.group?.name}</p>
             </div>
           )}
           <Input
@@ -114,17 +114,17 @@ export default function DailyManager({ basePath, noGroupsText }: DailyManagerPro
           <Skeleton className="h-64" />
         </div>
       ) : error ? (
-        <div className="bg-white rounded-xl border border-[#EDE3E8] p-8 text-center">
-          <p role="alert" className="text-sm text-[#766B73] mb-3">{error}</p>
+        <div className="bg-white rounded-xl border border-[var(--border)] p-8 text-center">
+          <p role="alert" className="text-sm text-[var(--text-2)] mb-3">{error}</p>
           <Button size="sm" variant="secondary" onClick={() => load(date, groupId)}>{uz.common.qayta_urinish}</Button>
         </div>
       ) : data && data.groups.length === 0 ? (
-        <div className="bg-white rounded-xl border border-[#EDE3E8] p-8 text-center">
-          <p className="text-sm text-[#766B73]">{noGroupsText}</p>
+        <div className="bg-white rounded-xl border border-[var(--border)] p-8 text-center">
+          <p className="text-sm text-[var(--text-2)]">{noGroupsText}</p>
         </div>
       ) : data ? (
         <div className={`space-y-4 ${loading ? "opacity-60 pointer-events-none" : ""}`} aria-busy={loading}>
-          <div role="tablist" aria-label={uz.kundalik.sarlavha} className="flex gap-1 overflow-x-auto border-b border-[#EDE3E8] -mx-1 px-1">
+          <div role="tablist" aria-label={uz.kundalik.sarlavha} className="flex gap-1 overflow-x-auto border-b border-[var(--border)] -mx-1 px-1">
             {TABS.map((t) => (
               <button
                 key={t.id}
@@ -135,7 +135,7 @@ export default function DailyManager({ basePath, noGroupsText }: DailyManagerPro
                 className={`whitespace-nowrap px-3.5 py-2.5 text-sm font-medium border-b-2 -mb-px transition-colors ${
                   tab === t.id
                     ? "border-[var(--primary)] text-[var(--primary)]"
-                    : "border-transparent text-[#766B73] hover:text-[#3D3240]"
+                    : "border-transparent text-[var(--text-2)] hover:text-[var(--label)]"
                 }`}
               >
                 {t.label}
@@ -148,7 +148,7 @@ export default function DailyManager({ basePath, noGroupsText }: DailyManagerPro
           )}
 
           {!lock(data).editable && (
-            <p role="note" className="rounded-lg bg-[#FFFBEB] border border-[#FDE68A] text-[#92400E] text-sm px-4 py-2.5">
+            <p role="note" className="rounded-lg bg-[var(--warning-soft)] border border-[var(--warning-border)] text-[var(--warning-text)] text-sm px-4 py-2.5">
               {readOnly ? uz.super_admin.faqat_korish : <>{uz.kundalik.faqat_korish} {uz.kundalik.tahrir_muddati}: {data.editable_from}</>}
             </p>
           )}
