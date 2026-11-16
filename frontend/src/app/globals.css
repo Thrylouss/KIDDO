@@ -1,40 +1,47 @@
 @import "tailwindcss";
 
-/* ── Tailwind v4 theme — generates bg-*, text-*, border-* utilities ── */
-@theme {
-  --color-primary:       #8F3158;
-  --color-primary-h:     #742544;
-  --color-secondary:     #D95F87;
-  --color-app-bg:        #FFF7F2;
-  --color-surface:       #FFFFFF;
-  --color-surface-2:     #FAF5F8;
-  --color-surface-soft:  #F4DCE5;
-  --color-text:          #29232A;
-  --color-text-2:        #746873;
-  --color-text-3:        #B8AAB2;
-  --color-label:         #3D3240;
-  --color-border:        #EDE3E8;
-  --color-border-2:      #F2ECF0;
-  --color-primary-lt:    #FDF2F6;
-  --color-primary-md:    #F4DCE5;
-  --color-success:       #166534;
-  --color-success-bg:    #DCFCE7;
-  --color-warning:       #854D0E;
-  --color-warning-bg:    #FEF9C3;
-  --color-error:         #991B1B;
-  --color-error-bg:      #FEE2E2;
-  --color-error-border:  #FECACA;
-  --color-error-text:    #B91C1C;
-  --color-info-bg:       #FCE8F0;
+/* Tailwind `dark:` varianti — <html data-theme="dark"> ga bog'langan (Light / Dark / System) */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+/* ── Tailwind v4 theme — bg-*, text-*, border-* utilitalari CSS o'zgaruvchilarga bog'langan (mavzu bilan almashadi) ── */
+@theme inline {
+  --color-primary:       var(--primary);
+  --color-primary-h:     var(--primary-h);
+  --color-secondary:     var(--secondary);
+  --color-app-bg:        var(--bg);
+  --color-surface:       var(--card);
+  --color-surface-2:     var(--surface-2);
+  --color-surface-soft:  var(--surface-soft);
+  --color-text:          var(--text);
+  --color-text-2:        var(--text-2);
+  --color-text-3:        var(--text-3);
+  --color-label:         var(--label);
+  --color-border:        var(--border);
+  --color-border-2:      var(--border-2);
+  --color-primary-lt:    var(--primary-lt);
+  --color-primary-md:    var(--primary-md);
+  --color-success:       var(--success);
+  --color-success-bg:    var(--success-bg);
+  --color-warning:       var(--warning);
+  --color-warning-bg:    var(--warning-bg);
+  --color-error:         var(--error);
+  --color-error-bg:      var(--error-bg);
+  --color-error-border:  var(--error-border);
+  --color-error-text:    var(--error-text);
+  --color-info-bg:       var(--info-bg);
 }
 
-/* ── CSS custom properties — direct var() usage in CSS & arbitrary Tailwind ── */
+/* ── Light (standart) — mavjud Berry Pink dizayn ─────────────────────── */
 :root {
+  color-scheme: light;
+
   /* Backgrounds */
   --bg:           #FFF7F2;
   --card:         #FFFFFF;
   --surface-2:    #FAF5F8;
   --surface-soft: #F4DCE5;
+  --hover:        #FFF9F5;
+  --overlay:      rgba(0, 0, 0, 0.4);
 
   /* Text */
   --text:         #29232A;
@@ -43,8 +50,9 @@
   --label:        #3D3240;
 
   /* Borders */
-  --border:       #EDE3E8;
-  --border-2:     #F2ECF0;
+  --border:        #EDE3E8;
+  --border-2:      #F2ECF0;
+  --border-strong: #D9C9D1;
 
   /* Brand — Berry Pink */
   --primary:      #8F3158;
@@ -52,22 +60,98 @@
   --secondary:    #D95F87;
   --primary-lt:   #FDF2F6;
   --primary-md:   #F4DCE5;
+  --on-primary:   #FFFFFF;
+  /* Doim qorong'i elementlar (telefon maketi, tooltip) */
+  --ink:          #29232A;
 
   /* Semantic */
-  --success:      #166534;
-  --success-bg:   #DCFCE7;
-  --warning:      #854D0E;
-  --warning-bg:   #FEF9C3;
-  --error:        #991B1B;
-  --error-bg:     #FEE2E2;
-  --error-border: #FECACA;
-  --error-text:   #B91C1C;
-  --info:         #8F3158;
-  --info-bg:      #FCE8F0;
+  --success:        #166534;
+  --success-bg:     #DCFCE7;
+  --success-soft:   #F0FDF4;
+  --success-border: #BBF7D0;
+  --warning:        #854D0E;
+  --warning-text:   #92400E;
+  --warning-bg:     #FEF3C7;
+  --warning-soft:   #FFFBEB;
+  --warning-border: #FDE68A;
+  --error:          #991B1B;
+  --error-text:     #B91C1C;
+  --error-bg:       #FEE2E2;
+  --error-soft:     #FEF2F2;
+  --error-border:   #FECACA;
+  --info:           #8F3158;
+  --info-bg:        #FCE8F0;
+
+  --scrollbar:       #D4C0CC;
+  --scrollbar-hover: #BFA8B8;
+  --shadow-color:    41 35 42;
 
   /* Layout */
   --sidebar-w: 256px;
 }
+
+/* ── Dark — premium, Apple uslubidagi qorong'i dizayn; Berry Pink brend rangi saqlanadi ── */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --bg:           #0F0C0F;
+  --card:         #1A161A;
+  --surface-2:    #211C21;
+  --surface-soft: #3A2431;
+  --hover:        #251F25;
+  --overlay:      rgba(0, 0, 0, 0.62);
+
+  --text:         #F4EEF2;
+  --text-2:       #B4A7B0;
+  --text-3:       #7D717A;
+  --label:        #E3D9DF;
+
+  --border:        #2F282E;
+  --border-2:      #272126;
+  --border-strong: #463C44;
+
+  --primary:      #D0558A;
+  --primary-h:    #E06C9D;
+  --secondary:    #E880A6;
+  --primary-lt:   #2A1721;
+  --primary-md:   #3E2030;
+  --on-primary:   #FFFFFF;
+  --ink:          #0A080A;
+
+  --success:        #6EE7A0;
+  --success-bg:     #0F2E1C;
+  --success-soft:   #0C2316;
+  --success-border: #1F5135;
+  --warning:        #FACC6B;
+  --warning-text:   #F5BC5C;
+  --warning-bg:     #33270C;
+  --warning-soft:   #29200B;
+  --warning-border: #5C4515;
+  --error:          #FCA5A5;
+  --error-text:     #F98B8B;
+  --error-bg:       #3A1517;
+  --error-soft:     #2C1214;
+  --error-border:   #5E2427;
+  --info:           #E880A6;
+  --info-bg:        #2E1A25;
+
+  --scrollbar:       #3F363D;
+  --scrollbar-hover: #554A52;
+  --shadow-color:    0 0 0;
+}
+
+/* Hardcoded `bg-white` sirtlar (kartochka, modal, jadval, dropdown) qorong'i rejimda karta rangini oladi.
+   Rangli fon ustidagi shaffof oq qatlamlar (bg-white/10 … /30) va text-white o'zgarmaydi. */
+:root[data-theme="dark"] .bg-white { background-color: var(--card); }
+:root[data-theme="dark"] .bg-white\/90 { background-color: color-mix(in srgb, var(--card) 90%, transparent); }
+:root[data-theme="dark"] .bg-white\/80 { background-color: color-mix(in srgb, var(--card) 80%, transparent); }
+:root[data-theme="dark"] .bg-white\/70 { background-color: color-mix(in srgb, var(--card) 70%, transparent); }
+:root[data-theme="dark"] .hover\:bg-white:hover { background-color: var(--hover); }
+:root[data-theme="dark"] .border-white { border-color: var(--card); }
+:root[data-theme="dark"] .to-white { --tw-gradient-to: var(--card); }
+:root[data-theme="dark"] .bg-black\/40 { background-color: var(--overlay); }
+:root[data-theme="dark"] .text-gray-400 { color: var(--text-3); }
+:root[data-theme="dark"] .text-gray-500 { color: var(--text-2); }
 
 /* ── Base ──────────────────────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; }
@@ -76,6 +160,7 @@ html { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; 
 
 body {
   background: var(--bg);
+  transition: background-color 0.2s ease, color 0.2s ease;
   color: var(--text);
   font-family: var(--font-geist), ui-sans-serif, system-ui, -apple-system, sans-serif;
   line-height: 1.5;
@@ -84,8 +169,8 @@ body {
 /* ── Scrollbar ─────────────────────────────────────────────────────────── */
 ::-webkit-scrollbar          { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track    { background: transparent; }
-::-webkit-scrollbar-thumb    { background: #D4C0CC; border-radius: 9px; }
-::-webkit-scrollbar-thumb:hover { background: #BFA8B8; }
+::-webkit-scrollbar-thumb    { background: var(--scrollbar); border-radius: 9px; }
+::-webkit-scrollbar-thumb:hover { background: var(--scrollbar-hover); }
 
 /* ── Animations ────────────────────────────────────────────────────────── */
 @keyframes fade-in {
@@ -111,8 +196,8 @@ body {
 .kiddo-input:-webkit-autofill,
 .kiddo-input:-webkit-autofill:hover,
 .kiddo-input:-webkit-autofill:focus {
-  -webkit-text-fill-color: #29232A;
-  -webkit-box-shadow: 0 0 0px 1000px #fff inset;
+  -webkit-text-fill-color: var(--text);
+  -webkit-box-shadow: 0 0 0px 1000px var(--card) inset;
   transition: background-color 9999s ease-in-out 0s;
 }
 
@@ -133,7 +218,7 @@ body {
 .landing-float  { animation: landing-float 7s ease-in-out infinite; }
 .landing-drift  { animation: landing-drift 16s ease-in-out infinite; }
 .landing-text-gradient {
-  background: linear-gradient(120deg, #8F3158 0%, #D95F87 55%, #8F3158 100%);
+  background: linear-gradient(120deg, var(--primary) 0%, var(--secondary) 55%, var(--primary) 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -144,4 +229,9 @@ body {
 html:has(.kiddo-landing) { scroll-behavior: smooth; }
 @media (prefers-reduced-motion: reduce) {
   html:has(.kiddo-landing) { scroll-behavior: auto; }
+}
+
+/* Mavzu almashganda faqat ranglar silliq o'tadi (layout animatsiyasiz) */
+@media (prefers-reduced-motion: reduce) {
+  body { transition: none; }
 }
