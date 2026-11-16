@@ -121,6 +121,35 @@ class DemoRequestService
     }
 
     /**
+     * O'chirishga to'sqinlik qiluvchi bog'lanish: tayyorlangan demo tashkilot yoki faol demo muddati.
+     * Ariza o'chirilsa ham tashkilot o'chmaydi, lakin bog'lanish izi yo'qolmasligi uchun avval uzish talab qilinadi.
+     */
+    public function deletionBlocker(DemoRequest $request): ?string
+    {
+        if ($request->organization_id !== null) {
+            return "Arizaga demo tashkilot bog'langan. O'chirishdan oldin bog'lanishni uzing.";
+        }
+        if ($request->status === DemoRequest::STATUS_ACTIVE) {
+            return "Demo faol holatdagi arizani o'chirib bo'lmaydi. Avval holatini o'zgartiring.";
+        }
+
+        return null;
+    }
+
+    /** Faqat shu arizani o'chiradi va faollik jurnaliga yozadi (boshqa yozuvlarga tegilmaydi). */
+    public function delete(DemoRequest $request, User $by, ?string $ip): void
+    {
+        DB::transaction(function () use ($request, $by, $ip) {
+            $id   = $request->id;
+            $name = $request->kindergarten_name;
+            $request->delete();
+
+            ActivityLog::record('demo_request.deleted', "DEMO arizasi o'chirildi: #{$id} {$name}",
+                $by->id, null, ['demo_request_id' => $id, 'status' => $request->status], $ip);
+        });
+    }
+
+    /**
      * Log yozib bo'lmasa ham (masalan, storage/logs yozishga yopiq) ariza oqimi to'xtamaydi:
      * ariza allaqachon bazada, Telegram holati va xatosi esa demo_requests jadvalida saqlanadi.
      */

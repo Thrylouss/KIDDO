@@ -281,4 +281,65 @@ class DemoRequestTest extends TestCase
         $this->actingAs($sa, 'sanctum')->postJson("/api/v1/super-admin/demo-requests/{$id}/retry-telegram")
             ->assertOk()->assertJsonPath('data.telegram.status', DemoRequest::TELEGRAM_SENT);
     }
+
+    public function test_super_admin_arizani_ochiradi_boshqalari_ozgarmaydi(): void
+    {
+        $this->postJson('/api/v1/demo-requests', $this->payload())->assertCreated();
+        $this->postJson('/api/v1/demo-requests', $this->payload(['kindergarten_name' => 'Lola', 'phone' => '+998901112233']))->assertCreated();
+        [$keep, $drop] = DemoRequest::orderBy('id')->get()->all();
+        $org      = Organization::factory()->create();
+        $orgCount = Organization::count();
+        $sa       = User::factory()->create(['role' => User::ROLE_SUPER_ADMIN, 'organization_id' => null]);
+        $users    = User::count();
+
+        $this->actingAs($sa, 'sanctum')->deleteJson("/api/v1/super-admin/demo-requests/{$drop->id}")
+            ->assertOk()->assertJsonPath('message', "Ariza o'chirildi.");
+
+        $this->assertDatabaseMissing('demo_requests', ['id' => $drop->id]);
+        $this->assertDatabaseHas('demo_requests', ['id' => $keep->id, 'kindergarten_name' => 'Quyoshcha']);
+        $this->assertSame($orgCount, Organization::count());
+        $this->assertSame($users, User::count());
+        $this->assertDatabaseHas('activity_logs', ['action' => 'demo_request.deleted', 'user_id' => $sa->id]);
+
+        $this->actingAs($sa, 'sanctum')->getJson('/api/v1/super-admin/demo-requests')
+            ->assertOk()->assertJsonPath('meta.total', 1)->assertJsonPath('meta.counts.new', 1);
+        $this->actingAs($sa, 'sanctum')->deleteJson("/api/v1/super-admin/demo-requests/{$drop->id}")->assertNotFound();
+        $this->assertNotNull($org->fresh());
+    }
+
+    public function test_faqat_super_admin_ochira_oladi(): void
+    {
+        $this->postJson('/api/v1/demo-requests', $this->payload())->assertCreated();
+        $id  = DemoRequest::sole()->id;
+        $org = Organization::factory()->create();
+
+        $this->deleteJson("/api/v1/super-admin/demo-requests/{$id}")->assertUnauthorized();
+        foreach ([User::factory()->create(['role' => User::ROLE_ADMIN, 'organization_id' => $org->id]),
+                  User::factory()->teacher()->create(['organization_id' => $org->id])] as $user) {
+            $this->app['auth']->forgetGuards();
+            $this->actingAs($user, 'sanctum')->deleteJson("/api/v1/super-admin/demo-requests/{$id}")->assertForbidden();
+        }
+        $this->app['auth']->forgetGuards();
+        $this->actingAsParent(User::factory()->create(['role' => User::ROLE_PARENT, 'organization_id' => $org->id]))
+            ->deleteJson("/api/v1/super-admin/demo-requests/{$id}")->assertForbidden();
+        $this->assertSame(1, DemoRequest::count());
+    }
+
+    public function test_boglangan_yoki_faol_ariza_ochirilmaydi(): void
+    {
+        $this->postJson('/api/v1/demo-requests', $this->payload())->assertCreated();
+        $demo = DemoRequest::sole();
+        $org  = Organization::factory()->create();
+        $sa   = User::factory()->create(['role' => User::ROLE_SUPER_ADMIN, 'organization_id' => null]);
+
+        $demo->update(['organization_id' => $org->id]);
+        $this->actingAs($sa, 'sanctum')->deleteJson("/api/v1/super-admin/demo-requests/{$demo->id}")
+            ->assertStatus(409)->assertJsonPath('code', 'demo_request_linked');
+
+        $demo->update(['organization_id' => null, 'status' => DemoRequest::STATUS_ACTIVE]);
+        $this->actingAs($sa, 'sanctum')->deleteJson("/api/v1/super-admin/demo-requests/{$demo->id}")->assertStatus(409);
+
+        $this->assertSame(1, DemoRequest::count());
+        $this->assertNotNull($org->fresh());
+    }
 }
