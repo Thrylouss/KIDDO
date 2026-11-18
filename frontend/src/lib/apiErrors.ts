@@ -1,4 +1,4 @@
-import uz from "@/i18n/uz";
+import uz from "@/i18n";
 import type { ParentRelation } from "@/types";
 
 interface ApiError {
@@ -21,12 +21,14 @@ export function errorMessage(err: unknown): string {
     case 404:       return e.data?.message ?? uz.common.topilmadi;
     // Maydon xatolarisiz 422 — biznes qoidasi (masalan, «Guruhda bolalar bor»): server xabari o'zbekcha
     case 422:       return e.data?.errors ? uz.auth.validatsiya_xatosi : e.data?.message ?? uz.auth.validatsiya_xatosi;
+    // 409 — holat ziddiyati (masalan, bog'langan yozuvni o'chirish): server sababni tushuntiradi
+    case 409:       return e.data?.message ?? uz.auth.server_xatosi;
     default:        return uz.auth.server_xatosi;
   }
 }
 
 export const RELATION_LABELS: Record<ParentRelation, string> = {
-  ona:   uz.ota_onalar.rel_ona,
-  ota:   uz.ota_onalar.rel_ota,
-  vasiy: uz.ota_onalar.rel_vasiy,
+  get ona() { return uz.ota_onalar.rel_ona; },
+  get ota() { return uz.ota_onalar.rel_ota; },
+  get vasiy() { return uz.ota_onalar.rel_vasiy; },
 };

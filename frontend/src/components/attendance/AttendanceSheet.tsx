@@ -7,7 +7,7 @@ import Button from "@/components/ui/Button";
 import Modal from "@/components/ui/Modal";
 import Select from "@/components/ui/Select";
 import type { AttendanceChild, AttendanceDay, AttendanceRecordInput, AttendanceState, ExcuseReason } from "@/types";
-import uz from "@/i18n/uz";
+import uz from "@/i18n";
 
 interface AttendanceSheetProps {
   /** Berilsa — tahrirlash muddati o'rniga shu izoh ko'rsatiladi (masalan, Super Admin ko'rish rejimi) */
@@ -17,15 +17,15 @@ interface AttendanceSheetProps {
 }
 
 const OPTIONS: { value: AttendanceState; label: string; on: string }[] = [
-  { value: "present", label: uz.davomat.keldi,   on: "bg-[#DCFCE7] text-[#166534] border-[#BBF7D0]" },
-  { value: "absent",  label: uz.davomat.kelmadi, on: "bg-[#FEE2E2] text-[#991B1B] border-[#FECACA]" },
-  { value: "excused", label: uz.davomat.sababli, on: "bg-[#FEF3C7] text-[#92400E] border-[#FDE68A]" },
+  { value: "present", get label() { return uz.davomat.keldi; },   on: "bg-[var(--success-bg)] text-[var(--success)] border-[var(--success-border)]" },
+  { value: "absent",  get label() { return uz.davomat.kelmadi; }, on: "bg-[var(--error-bg)] text-[var(--error)] border-[var(--error-border)]" },
+  { value: "excused", get label() { return uz.davomat.sababli; }, on: "bg-[var(--warning-bg)] text-[var(--warning-text)] border-[var(--warning-border)]" },
 ];
 
 export const EXCUSE_REASON_LABELS: Record<ExcuseReason, string> = {
-  kasallik: uz.davomat.sabab_kasallik,
-  oilaviy:  uz.davomat.sabab_oilaviy,
-  boshqa:   uz.davomat.sabab_boshqa,
+  get kasallik() { return uz.davomat.sabab_kasallik; },
+  get oilaviy() { return uz.davomat.sabab_oilaviy; },
+  get boshqa() { return uz.davomat.sabab_boshqa; },
 };
 
 interface Entry {
@@ -141,8 +141,8 @@ export default function AttendanceSheet({ day, onSave, lockedNote }: AttendanceS
   }
 
   return (
-    <div className="bg-white rounded-xl border border-[#EDE3E8] overflow-hidden">
-      <div className="grid grid-cols-2 sm:grid-cols-5 gap-px bg-[#EDE3E8] border-b border-[#EDE3E8]">
+    <div className="bg-white rounded-xl border border-[var(--border)] overflow-hidden">
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-px bg-[var(--border)] border-b border-[var(--border)]">
         {[
           { label: uz.davomat.jami,          value: saved.total,    id: "total"    },
           { label: uz.davomat.keldi,         value: saved.present,  id: "present"  },
@@ -151,22 +151,22 @@ export default function AttendanceSheet({ day, onSave, lockedNote }: AttendanceS
           { label: uz.davomat.belgilanmagan, value: saved.unmarked, id: "unmarked" },
         ].map((s) => (
           <div key={s.id} className="bg-white px-4 py-3">
-            <p className="text-[11px] text-[#B8AAB2] font-medium uppercase tracking-wide">{s.label}</p>
-            <p data-testid={`count-${s.id}`} className="text-2xl font-bold text-[#29232A] leading-tight">{s.value}</p>
+            <p className="text-[11px] text-[var(--text-3)] font-medium uppercase tracking-wide">{s.label}</p>
+            <p data-testid={`count-${s.id}`} className="text-2xl font-bold text-[var(--text)] leading-tight">{s.value}</p>
           </div>
         ))}
       </div>
 
       {!day.editable && (
-        <p role="note" className="px-5 py-2.5 bg-[#FFFBEB] border-b border-[#FDE68A] text-xs text-[#92400E]">
+        <p role="note" className="px-5 py-2.5 bg-[var(--warning-soft)] border-b border-[var(--warning-border)] text-xs text-[var(--warning-text)]">
           {lockedNote ?? <>{uz.davomat.faqat_korish} {uz.davomat.tahrir_muddati}: {day.editable_from}</>}
         </p>
       )}
 
       {day.children.length === 0 ? (
-        <p className="px-5 py-8 text-center text-sm text-[#766B73]">{uz.davomat.bola_yoq}</p>
+        <p className="px-5 py-8 text-center text-sm text-[var(--text-2)]">{uz.davomat.bola_yoq}</p>
       ) : (
-        <ul className="divide-y divide-[#F2ECF0]">
+        <ul className="divide-y divide-[var(--border-2)]">
           {day.children.map((child) => {
             const entry   = draft[child.id];
             const current = entry?.status ?? null;
@@ -174,13 +174,13 @@ export default function AttendanceSheet({ day, onSave, lockedNote }: AttendanceS
             return (
               <li key={child.id} className="flex flex-wrap items-center justify-between gap-2 px-5 py-3">
                 <div className="min-w-0">
-                  <p className="text-sm font-medium text-[#29232A] truncate">{name}</p>
+                  <p className="text-sm font-medium text-[var(--text)] truncate">{name}</p>
                   {current === "excused" && entry?.note ? (
-                    <p data-testid={`excuse-${child.id}`} className="text-xs text-[#92400E] truncate">
+                    <p data-testid={`excuse-${child.id}`} className="text-xs text-[var(--warning-text)] truncate">
                       {entry.reason ? `${EXCUSE_REASON_LABELS[entry.reason]}: ` : ""}{entry.note}
                     </p>
                   ) : entry?.note ? (
-                    <p className="text-xs text-[#766B73] truncate">{entry.note}</p>
+                    <p className="text-xs text-[var(--text-2)] truncate">{entry.note}</p>
                   ) : null}
                 </div>
                 <div role="group" aria-label={name} className="flex gap-1.5">
@@ -193,7 +193,7 @@ export default function AttendanceSheet({ day, onSave, lockedNote }: AttendanceS
                       disabled={!day.editable || saving}
                       onClick={() => setStatus(child, o.value)}
                       className={`text-xs font-medium px-2.5 py-1 rounded-full border transition-colors disabled:cursor-not-allowed ${
-                        current === o.value ? o.on : "bg-white text-[#766B73] border-[#EDE3E8] hover:bg-[#FAF5F8]"
+                        current === o.value ? o.on : "bg-white text-[var(--text-2)] border-[var(--border)] hover:bg-[var(--surface-2)]"
                       }`}
                     >
                       {o.label}
@@ -207,13 +207,13 @@ export default function AttendanceSheet({ day, onSave, lockedNote }: AttendanceS
       )}
 
       {day.editable && day.children.length > 0 && (
-        <div className="flex flex-wrap items-center gap-3 px-5 py-4 border-t border-[#EDE3E8] bg-[#FAF5F8]">
+        <div className="flex flex-wrap items-center gap-3 px-5 py-4 border-t border-[var(--border)] bg-[var(--surface-2)]">
           <Button size="sm" variant="secondary" disabled={saving || unmarkedInDraft === 0} onClick={markUnmarkedPresent}>
             {uz.davomat.barchasi_keldi}
           </Button>
           <span className="flex-1" />
           {changed.length > 0 && (
-            <span data-testid="unsaved" className="text-xs text-[#92400E]">{uz.davomat.ozgarishlar}: {changed.length}</span>
+            <span data-testid="unsaved" className="text-xs text-[var(--warning-text)]">{uz.davomat.ozgarishlar}: {changed.length}</span>
           )}
           <Button size="sm" loading={saving} disabled={changed.length === 0} onClick={save}>
             {uz.davomat.saqlash}
@@ -235,9 +235,9 @@ export default function AttendanceSheet({ day, onSave, lockedNote }: AttendanceS
       >
         {excuse && (
           <form id="excuse-form" onSubmit={confirmExcuse} className="space-y-4" noValidate>
-            <div className="rounded-lg bg-[#FAF5F8] px-3 py-2 text-sm">
-              <p className="font-medium text-[#29232A]">{excuse.child.last_name} {excuse.child.first_name}</p>
-              <p className="text-xs text-[#766B73]">{formatUzDate(day.date)}</p>
+            <div className="rounded-lg bg-[var(--surface-2)] px-3 py-2 text-sm">
+              <p className="font-medium text-[var(--text)]">{excuse.child.last_name} {excuse.child.first_name}</p>
+              <p className="text-xs text-[var(--text-2)]">{formatUzDate(day.date)}</p>
             </div>
             <Select
               id="excuse-reason"
@@ -264,16 +264,16 @@ export default function AttendanceSheet({ day, onSave, lockedNote }: AttendanceS
                 placeholder={uz.davomat.izoh_placeholder}
                 onChange={(e) => setExcuse({ ...excuse, note: e.target.value, errors: { ...excuse.errors, note: undefined } })}
                 aria-invalid={!!excuse.errors.note}
-                className={`w-full rounded-lg border bg-white px-3 py-2 text-sm text-[#29232A] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/30 ${excuse.errors.note ? "border-[#EF4444]" : "border-[#EDE3E8]"}`}
+                className={`w-full rounded-lg border bg-white px-3 py-2 text-sm text-[var(--text)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/30 ${excuse.errors.note ? "border-[#EF4444]" : "border-[var(--border)]"}`}
               />
-              {excuse.errors.note && <p className="text-xs text-[#B91C1C]">{excuse.errors.note}</p>}
+              {excuse.errors.note && <p className="text-xs text-[var(--error-text)]">{excuse.errors.note}</p>}
             </div>
           </form>
         )}
       </Modal>
 
       {(success || error) && (
-        <p role={error ? "alert" : "status"} className={`px-5 py-2.5 text-sm ${error ? "text-[#B91C1C]" : "text-[var(--success)]"}`}>
+        <p role={error ? "alert" : "status"} className={`px-5 py-2.5 text-sm ${error ? "text-[var(--error-text)]" : "text-[var(--success)]"}`}>
           {error || success}
         </p>
       )}

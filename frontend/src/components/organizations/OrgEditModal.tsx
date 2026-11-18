@@ -6,7 +6,7 @@ import { errorMessage } from "@/lib/apiErrors";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import Modal from "@/components/ui/Modal";
-import uz from "@/i18n/uz";
+import uz from "@/i18n";
 import type { OrganizationDetail } from "@/types";
 
 interface OrgEditModalProps {
@@ -19,15 +19,15 @@ interface OrgEditModalProps {
 type Field = "name" | "address" | "phone" | "district" | "number" | "mfy" | "capacity" | "director_name" | "director_phone";
 
 const FIELDS: { key: Field; label: string; type?: string; placeholder?: string }[] = [
-  { key: "name",           label: uz.bogcha_import.nomi },
-  { key: "number",         label: uz.bogcha_import.raqami },
-  { key: "district",       label: uz.bogcha_import.tuman },
-  { key: "mfy",            label: uz.bogcha_import.mfy },
-  { key: "address",        label: uz.bogcha_import.manzili },
-  { key: "capacity",       label: uz.bogcha_import.quvvati, type: "number" },
-  { key: "director_name",  label: uz.bogcha_import.rahbar },
-  { key: "director_phone", label: uz.bogcha_import.rahbar_tel, placeholder: "+998XXXXXXXXX" },
-  { key: "phone",          label: uz.auth.telefon, placeholder: "+998XXXXXXXXX" },
+  { key: "name",           get label() { return uz.bogcha_import.nomi; } },
+  { key: "number",         get label() { return uz.bogcha_import.raqami; } },
+  { key: "district",       get label() { return uz.bogcha_import.tuman; } },
+  { key: "mfy",            get label() { return uz.bogcha_import.mfy; } },
+  { key: "address",        get label() { return uz.bogcha_import.manzili; } },
+  { key: "capacity",       get label() { return uz.bogcha_import.quvvati; }, type: "number" },
+  { key: "director_name",  get label() { return uz.bogcha_import.rahbar; } },
+  { key: "director_phone", get label() { return uz.bogcha_import.rahbar_tel; }, placeholder: "+998XXXXXXXXX" },
+  { key: "phone",          get label() { return uz.auth.telefon; }, placeholder: "+998XXXXXXXXX" },
 ];
 
 const initial = (org: OrganizationDetail): Record<Field, string> =>
@@ -75,7 +75,7 @@ export default function OrgEditModal({ org, open, onClose, onSaved }: OrgEditMod
       }
     >
       <form id="org-edit-form" onSubmit={submit} className="grid grid-cols-1 gap-3 sm:grid-cols-2" noValidate>
-        {error && <p role="alert" className="sm:col-span-2 text-sm text-[#B91C1C]">{error}</p>}
+        {error && <p role="alert" className="sm:col-span-2 text-sm text-[var(--error-text)]">{error}</p>}
         {FIELDS.map(({ key, label, type, placeholder }) => (
           <div key={key} className={key === "name" || key === "address" ? "sm:col-span-2" : ""}>
             <Input id={`org-${key}`} label={label} type={type ?? "text"} value={form[key]} placeholder={placeholder}

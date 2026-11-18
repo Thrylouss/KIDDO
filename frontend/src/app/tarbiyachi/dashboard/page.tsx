@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { api } from "@/lib/api";
 import { useAuth } from "@/contexts/AuthContext";
-import uz from "@/i18n/uz";
+import uz, { plural } from "@/i18n";
+import { formatUzDate, localIsoDate } from "@/lib/dates";
 import {
   IS_DEMO,
   getDemoAttendance,
@@ -14,41 +15,38 @@ import {
 import type { TeacherDashboardData, AttendanceStatus } from "@/lib/demo-data";
 import AttendanceManager from "@/components/attendance/AttendanceManager";
 import type { TeacherDashboard } from "@/types";
+import { useLocale } from "@/contexts/PreferencesContext";
 
-const UZ_MONTHS = [
-  "yanvar","fevral","mart","aprel","may","iyun",
-  "iyul","avgust","sentabr","oktabr","noyabr","dekabr",
-];
 function todayLabel(): string {
-  const d = new Date();
-  return `${d.getDate()} ${UZ_MONTHS[d.getMonth()]} ${d.getFullYear()}`;
+  return formatUzDate(localIsoDate());
 }
 
 function Skeleton({ className }: { className?: string }) {
-  return <div className={`animate-pulse bg-[#EDE3E8] rounded-lg ${className ?? ""}`} />;
+  return <div className={`animate-pulse bg-[var(--border)] rounded-lg ${className ?? ""}`} />;
 }
 
 export default function TarbiyachiDashboardPage() {
+  useLocale(); // til almashganda holat saqlangan holda qayta render
   return IS_DEMO ? <DemoTeacherDashboard /> : <RealTeacherDashboard />;
 }
 
 /** Real rejim: davomat backend orqali (GET /v1/teacher/dashboard, PUT /v1/teacher/attendance). */
 function RealTeacherDashboard() {
   const { user } = useAuth();
-  const firstName = user?.name?.split(" ")[0] ?? "Tarbiyachi";
+  const firstName = user?.name?.split(" ")[0] ?? uz.matn.tarbiyachi;
   const [info, setInfo] = useState<TeacherDashboard | null>(null);   // setInfo — barqaror callback
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-[#29232A]">
+        <h1 className="text-2xl font-bold text-[var(--text)]">
           {uz.tarbiyachi_panel.xayrli_kun}, {firstName}!
         </h1>
-        <p className="text-[#B8AAB2] mt-1 text-sm">{todayLabel()}</p>
+        <p className="text-[var(--text-3)] mt-1 text-sm">{todayLabel()}</p>
       </div>
 
       {info?.group && (
-        <div data-testid="group-card" className="bg-[#8E315D] rounded-2xl p-5 text-white">
+        <div data-testid="group-card" className="bg-[var(--primary)] rounded-2xl p-5 text-white">
           <p className="text-white/70 text-xs font-medium uppercase tracking-wide mb-1">
             {uz.tarbiyachi_panel.mening_guruhim}
           </p>
@@ -73,14 +71,14 @@ function RealTeacherDashboard() {
           <Link
             key={a.href}
             href={a.href}
-            className="px-3.5 py-2 rounded-lg border border-[#EDE3E8] bg-white text-sm font-medium text-[#3D3240] hover:border-[#8E315D] hover:bg-[#FDF2F6] hover:text-[#8E315D] transition-colors"
+            className="px-3.5 py-2 rounded-lg border border-[var(--border)] bg-white text-sm font-medium text-[var(--label)] hover:border-[var(--primary)] hover:bg-[var(--primary-lt)] hover:text-[var(--primary)] transition-colors"
           >
             {a.label}
           </Link>
         ))}
       </nav>
 
-      <h2 id="davomat" className="text-sm font-semibold text-[#29232A] scroll-mt-4">{uz.tarbiyachi_panel.bugungi_davomat}</h2>
+      <h2 id="davomat" className="text-sm font-semibold text-[var(--text)] scroll-mt-4">{uz.tarbiyachi_panel.bugungi_davomat}</h2>
       <AttendanceManager<TeacherDashboard>
         loadPath="/v1/teacher/dashboard"
         savePath="/v1/teacher/attendance"
@@ -167,17 +165,17 @@ function DemoTeacherDashboard() {
     setSaveStatus("idle");
   }
 
-  const firstName = user?.name?.split(" ")[0] ?? "Tarbiyachi";
+  const firstName = user?.name?.split(" ")[0] ?? uz.matn.tarbiyachi;
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
 
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-[#29232A]">
+        <h1 className="text-2xl font-bold text-[var(--text)]">
           {uz.tarbiyachi_panel.xayrli_kun}, {firstName}!
         </h1>
-        <p className="text-[#B8AAB2] mt-1 text-sm">{todayLabel()}</p>
+        <p className="text-[var(--text-3)] mt-1 text-sm">{todayLabel()}</p>
       </div>
 
       {loading ? (
@@ -191,16 +189,16 @@ function DemoTeacherDashboard() {
           <Skeleton className="h-48" />
         </div>
       ) : error ? (
-        <div className="bg-white rounded-xl border border-[#EDE3E8] p-10 text-center">
-          <p className="text-sm text-[#766B73] mb-3">{uz.common.yuklash_xatosi}</p>
-          <button onClick={load} className="text-sm text-[#8E315D] hover:underline font-medium">
+        <div className="bg-white rounded-xl border border-[var(--border)] p-10 text-center">
+          <p className="text-sm text-[var(--text-2)] mb-3">{uz.common.yuklash_xatosi}</p>
+          <button onClick={load} className="text-sm text-[var(--primary)] hover:underline font-medium">
             {uz.common.qayta_urinish}
           </button>
         </div>
       ) : data && (
         <>
           {/* Group card */}
-          <div className="bg-[#8E315D] rounded-2xl p-5 text-white relative overflow-hidden">
+          <div className="bg-[var(--primary)] rounded-2xl p-5 text-white relative overflow-hidden">
             <div
               className="absolute inset-0 opacity-[0.06]"
               style={{ backgroundImage: "radial-gradient(circle, #fff 1.5px, transparent 1.5px)", backgroundSize: "24px 24px" }}
@@ -223,7 +221,7 @@ function DemoTeacherDashboard() {
                 </div>
               </div>
               <p className="text-white/60 text-xs mt-3">
-                {data.group.capacity} {uz.tarbiyachi_panel.bolalar_soni} · {data.teacher.position}
+                {data.group.capacity} {plural(data.group.capacity, uz.tarbiyachi_panel.bolalar_soni)} · {data.teacher.position}
               </p>
             </div>
           </div>
@@ -231,31 +229,31 @@ function DemoTeacherDashboard() {
           {/* Stats row */}
           <div className="grid grid-cols-3 gap-4">
             {[
-              { label: uz.tarbiyachi_panel.jami_bolalar, value: data.today.total, color: "text-[#29232A]",  bg: "bg-white",      testId: "stat-total"   },
-              { label: uz.tarbiyachi_panel.keldi,         value: presentCount,      color: "text-[#166534]", bg: "bg-[#DCFCE7]", testId: "stat-present" },
-              { label: uz.tarbiyachi_panel.kelmadi,       value: absentCount,       color: "text-[#991B1B]", bg: "bg-[#FEE2E2]", testId: "stat-absent"  },
+              { label: uz.tarbiyachi_panel.jami_bolalar, value: data.today.total, color: "text-[var(--text)]",  bg: "bg-white",      testId: "stat-total"   },
+              { label: uz.tarbiyachi_panel.keldi,         value: presentCount,      color: "text-[var(--success)]", bg: "bg-[var(--success-bg)]", testId: "stat-present" },
+              { label: uz.tarbiyachi_panel.kelmadi,       value: absentCount,       color: "text-[var(--error)]", bg: "bg-[var(--error-bg)]", testId: "stat-absent"  },
             ].map(({ label, value, color, bg, testId }) => (
-              <div key={label} className={`${bg} rounded-xl border border-[#EDE3E8] p-4 flex flex-col gap-1`}>
-                <p className="text-xs text-[#B8AAB2] font-medium uppercase tracking-wide">{label}</p>
+              <div key={label} className={`${bg} rounded-xl border border-[var(--border)] p-4 flex flex-col gap-1`}>
+                <p className="text-xs text-[var(--text-3)] font-medium uppercase tracking-wide">{label}</p>
                 <p data-testid={testId} className={`text-3xl font-bold leading-none ${color}`}>{value}</p>
               </div>
             ))}
           </div>
 
           {/* Attendance section */}
-          <div className="bg-white rounded-xl border border-[#EDE3E8] overflow-hidden">
+          <div className="bg-white rounded-xl border border-[var(--border)] overflow-hidden">
             {/* Card header */}
-            <div className="px-5 py-4 border-b border-[#EDE3E8]">
+            <div className="px-5 py-4 border-b border-[var(--border)]">
               <div className="flex items-center justify-between gap-2 flex-wrap">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <h2 className="text-sm font-semibold text-[#29232A]">
+                  <h2 className="text-sm font-semibold text-[var(--text)]">
                     {uz.tarbiyachi_panel.bugungi_davomat}
                   </h2>
                   {IS_DEMO && (
                     saveStatus === "saved" ? (
                       <span
                         data-testid="save-status-saved"
-                        className="inline-flex items-center gap-1 text-[10px] font-semibold text-[#166534] bg-[#DCFCE7] border border-[#BBF7D0] px-2 py-0.5 rounded-full"
+                        className="inline-flex items-center gap-1 text-[10px] font-semibold text-[var(--success)] bg-[var(--success-bg)] border border-[var(--success-border)] px-2 py-0.5 rounded-full"
                       >
                         <svg className="h-3 w-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                           <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
@@ -265,18 +263,18 @@ function DemoTeacherDashboard() {
                     ) : (
                       <span
                         data-testid="save-status-idle"
-                        className="inline-flex items-center gap-1 text-[10px] font-semibold text-[#92400E] bg-[#FEF3C7] border border-[#FDE68A] px-2 py-0.5 rounded-full"
+                        className="inline-flex items-center gap-1 text-[10px] font-semibold text-[var(--warning-text)] bg-[var(--warning-bg)] border border-[var(--warning-border)] px-2 py-0.5 rounded-full"
                       >
                         {uz.tarbiyachi_panel.saqlanmadi}
                       </span>
                     )
                   )}
                 </div>
-                <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-[#92400E] bg-[#FEF3C7] border border-[#FDE68A] px-2 py-0.5 rounded-full">
+                <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-[var(--warning-text)] bg-[var(--warning-bg)] border border-[var(--warning-border)] px-2 py-0.5 rounded-full">
                   <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
-                  Demo
+                  {uz.matn.demo}
                 </span>
               </div>
 
@@ -286,7 +284,7 @@ function DemoTeacherDashboard() {
                   <button
                     type="button"
                     onClick={markAllPresent}
-                    className="inline-flex items-center gap-1.5 text-xs font-medium text-[#166534] bg-[#DCFCE7] hover:bg-[#BBF7D0] border border-[#BBF7D0] px-3 py-1.5 rounded-lg transition-colors"
+                    className="inline-flex items-center gap-1.5 text-xs font-medium text-[var(--success)] bg-[var(--success-bg)] hover:bg-[var(--success-border)] border border-[var(--success-border)] px-3 py-1.5 rounded-lg transition-colors"
                   >
                     <svg className="h-3.5 w-3.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
@@ -296,7 +294,7 @@ function DemoTeacherDashboard() {
                   <button
                     type="button"
                     onClick={resetAttendance}
-                    className="inline-flex items-center gap-1.5 text-xs font-medium text-[#766B73] bg-[#F5F0F3] hover:bg-[#EDE3E8] border border-[#EDE3E8] px-3 py-1.5 rounded-lg transition-colors"
+                    className="inline-flex items-center gap-1.5 text-xs font-medium text-[var(--text-2)] bg-[var(--border-2)] hover:bg-[var(--border)] border border-[var(--border)] px-3 py-1.5 rounded-lg transition-colors"
                   >
                     <svg className="h-3.5 w-3.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -308,12 +306,12 @@ function DemoTeacherDashboard() {
             </div>
 
             {/* Demo notice */}
-            <div className="px-5 py-2.5 bg-[#FFFBEB] border-b border-[#FDE68A]">
-              <p className="text-xs text-[#92400E]">{uz.tarbiyachi_panel.demo_xabar}</p>
+            <div className="px-5 py-2.5 bg-[var(--warning-soft)] border-b border-[var(--warning-border)]">
+              <p className="text-xs text-[var(--warning-text)]">{uz.tarbiyachi_panel.demo_xabar}</p>
             </div>
 
             {/* Children list */}
-            <div className="divide-y divide-[#F2ECF0]">
+            <div className="divide-y divide-[var(--border-2)]">
               {data.today.children.map((child) => {
                 const status: AttendanceStatus = IS_DEMO
                   ? (statuses[child.id] ?? child.status)
@@ -321,10 +319,10 @@ function DemoTeacherDashboard() {
                 return (
                   <div key={child.id} className="flex items-center justify-between px-5 py-3">
                     <div className="flex items-center gap-3">
-                      <div className="h-7 w-7 rounded-full bg-[#FDF2F6] flex items-center justify-center text-[#8E315D] font-semibold text-xs flex-shrink-0">
+                      <div className="h-7 w-7 rounded-full bg-[var(--primary-lt)] flex items-center justify-center text-[var(--primary)] font-semibold text-xs flex-shrink-0">
                         {child.first_name.charAt(0)}
                       </div>
-                      <span className="text-sm text-[#29232A] font-medium">
+                      <span className="text-sm text-[var(--text)] font-medium">
                         {child.first_name} {child.last_name}
                       </span>
                     </div>
@@ -336,8 +334,8 @@ function DemoTeacherDashboard() {
                         aria-label={`${child.first_name} ${child.last_name} holatini almashtirish`}
                         className={`inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-full transition-colors ${
                           status === "present"
-                            ? "text-[#166534] bg-[#DCFCE7] hover:bg-[#BBF7D0]"
-                            : "text-[#991B1B] bg-[#FEE2E2] hover:bg-[#FCA5A5]/40"
+                            ? "text-[var(--success)] bg-[var(--success-bg)] hover:bg-[var(--success-border)]"
+                            : "text-[var(--error)] bg-[var(--error-bg)] hover:bg-[var(--error-border)]/40"
                         }`}
                       >
                         {status === "present" ? (
@@ -358,14 +356,14 @@ function DemoTeacherDashboard() {
                       </button>
                     ) : (
                       status === "present" ? (
-                        <span className="inline-flex items-center gap-1 text-xs font-medium text-[#166534] bg-[#DCFCE7] px-2.5 py-1 rounded-full">
+                        <span className="inline-flex items-center gap-1 text-xs font-medium text-[var(--success)] bg-[var(--success-bg)] px-2.5 py-1 rounded-full">
                           <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                           </svg>
                           {uz.tarbiyachi_panel.keldi}
                         </span>
                       ) : (
-                        <span className="inline-flex items-center gap-1 text-xs font-medium text-[#991B1B] bg-[#FEE2E2] px-2.5 py-1 rounded-full">
+                        <span className="inline-flex items-center gap-1 text-xs font-medium text-[var(--error)] bg-[var(--error-bg)] px-2.5 py-1 rounded-full">
                           <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                           </svg>
@@ -380,13 +378,13 @@ function DemoTeacherDashboard() {
           </div>
 
           {/* Daily schedule */}
-          <div className="bg-white rounded-xl border border-[#EDE3E8] overflow-hidden">
-            <div className="px-5 py-4 border-b border-[#EDE3E8]">
-              <h2 className="text-sm font-semibold text-[#29232A]">{uz.tarbiyachi_panel.kun_tartibi}</h2>
+          <div className="bg-white rounded-xl border border-[var(--border)] overflow-hidden">
+            <div className="px-5 py-4 border-b border-[var(--border)]">
+              <h2 className="text-sm font-semibold text-[var(--text)]">{uz.tarbiyachi_panel.kun_tartibi}</h2>
             </div>
             <div className="p-5">
               <div className="relative">
-                <div className="absolute left-[52px] top-2 bottom-2 w-px bg-[#EDE3E8]" />
+                <div className="absolute left-[52px] top-2 bottom-2 w-px bg-[var(--border)]" />
                 <div className="space-y-3">
                   {data.schedule.map((item, i) => {
                     const now = new Date();
@@ -404,23 +402,23 @@ function DemoTeacherDashboard() {
                     return (
                       <div key={i} className="flex items-center gap-4 relative">
                         <span className={`text-xs font-mono w-11 text-right flex-shrink-0 ${
-                          isCurrent ? "text-[#8E315D] font-bold" : isPast ? "text-[#B8AAB2]" : "text-[#766B73]"
+                          isCurrent ? "text-[var(--primary)] font-bold" : isPast ? "text-[var(--text-3)]" : "text-[var(--text-2)]"
                         }`}>
                           {item.time}
                         </span>
                         <div className={`relative z-10 h-2.5 w-2.5 rounded-full flex-shrink-0 border-2 ${
-                          isCurrent ? "bg-[#8E315D] border-[#8E315D] ring-2 ring-[#8E315D]/20" :
-                          isPast    ? "bg-[#EDE3E8] border-[#EDE3E8]" :
-                                      "bg-white border-[#EDE3E8]"
+                          isCurrent ? "bg-[var(--primary)] border-[var(--primary)] ring-2 ring-[var(--primary)]/20" :
+                          isPast    ? "bg-[var(--border)] border-[var(--border)]" :
+                                      "bg-white border-[var(--border)]"
                         }`} />
                         <span className={`text-sm ${
-                          isCurrent ? "font-semibold text-[#8E315D]" : isPast ? "text-[#B8AAB2]" : "text-[#3D3240]"
+                          isCurrent ? "font-semibold text-[var(--primary)]" : isPast ? "text-[var(--text-3)]" : "text-[var(--label)]"
                         }`}>
                           {item.activity}
                         </span>
                         {isCurrent && (
-                          <span className="ml-auto text-[10px] font-semibold text-[#8E315D] bg-[#FDF2F6] px-1.5 py-0.5 rounded-full flex-shrink-0">
-                            Hozir
+                          <span className="ml-auto text-[10px] font-semibold text-[var(--primary)] bg-[var(--primary-lt)] px-1.5 py-0.5 rounded-full flex-shrink-0">
+                            {uz.matn.hozir}
                           </span>
                         )}
                       </div>
@@ -432,21 +430,21 @@ function DemoTeacherDashboard() {
           </div>
 
           {/* Meals — coming soon */}
-          <div className="bg-white rounded-xl border border-[#EDE3E8] overflow-hidden">
-            <div className="px-5 py-4 border-b border-[#EDE3E8] flex items-center justify-between">
-              <h2 className="text-sm font-semibold text-[#29232A]">{uz.tarbiyachi_panel.ovqatlanish_jadvali}</h2>
+          <div className="bg-white rounded-xl border border-[var(--border)] overflow-hidden">
+            <div className="px-5 py-4 border-b border-[var(--border)] flex items-center justify-between">
+              <h2 className="text-sm font-semibold text-[var(--text)]">{uz.tarbiyachi_panel.ovqatlanish_jadvali}</h2>
               <span className="text-[10px] font-medium text-[var(--text-3)] bg-[var(--border-2)] px-1.5 py-0.5 rounded-full leading-none">
                 {uz.common.tez_kunda}
               </span>
             </div>
             <div className="px-5 py-8 text-center">
-              <div className="h-10 w-10 rounded-xl bg-[#FDF2F6] flex items-center justify-center mx-auto mb-3">
-                <svg className="h-5 w-5 text-[#8E315D]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+              <div className="h-10 w-10 rounded-xl bg-[var(--primary-lt)] flex items-center justify-center mx-auto mb-3">
+                <svg className="h-5 w-5 text-[var(--primary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
                 </svg>
               </div>
-              <p className="text-sm font-medium text-[#3D3240]">Ovqatlanish moduli</p>
-              <p className="text-xs text-[#B8AAB2] mt-1">Tez kunda qo&apos;shiladi</p>
+              <p className="text-sm font-medium text-[var(--label)]">{uz.matn.ovqatlanish_moduli}</p>
+              <p className="text-xs text-[var(--text-3)] mt-1">{uz.matn.tez_kunda_qoshiladi}</p>
             </div>
           </div>
         </>

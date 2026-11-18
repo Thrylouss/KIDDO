@@ -23,8 +23,9 @@ import OrgStatusDialog from "@/components/organizations/OrgStatusDialog";
 import OrgDeleteDialog from "@/components/organizations/OrgDeleteDialog";
 import OrgBulkStatusDialog from "@/components/organizations/OrgBulkStatusDialog";
 import type { OrgActionHandlers } from "@/components/organizations/OrgActionsMenu";
-import uz from "@/i18n/uz";
+import uz, { plural } from "@/i18n";
 import type { OrganizationSummary, OrgFilterOptions, OrgStats, OrgStatus } from "@/types";
+import { useLocale } from "@/contexts/PreferencesContext";
 
 const t = uz.bogchalar;
 const VIEW_KEY = "kiddo.bogchalar.view";
@@ -45,6 +46,7 @@ function readView(params: URLSearchParams): "table" | "cards" {
 }
 
 export default function BogchalarPage() {
+  useLocale(); // til almashganda holat saqlangan holda qayta render
   const router = useRouter();
   const toast  = useToast();
 
@@ -214,29 +216,29 @@ export default function BogchalarPage() {
 
       {/* Ko'rinish va tanlov */}
       <div className="mb-3 flex flex-wrap items-center gap-3">
-        <p className="text-sm text-[#766B73]" aria-live="polite">
-          {meta ? <><span className="font-semibold text-[#29232A]">{meta.total}</span> {t.natija}</> : " "}
+        <p className="text-sm text-[var(--text-2)]" aria-live="polite">
+          {meta ? <><span className="font-semibold text-[var(--text)]">{meta.total}</span> {plural(meta.total, t.natija)}</> : " "}
         </p>
         {selected.size > 0 && (
-          <div className="flex flex-wrap items-center gap-2 rounded-lg bg-[#FDF2F6] px-3 py-1.5 text-sm text-[#8E315D]">
-            <span className="font-medium">{selected.size} {t.tanlangan}</span>
+          <div className="flex flex-wrap items-center gap-2 rounded-lg bg-[var(--primary-lt)] px-3 py-1.5 text-sm text-[var(--primary)]">
+            <span className="font-medium">{selected.size} {plural(selected.size, t.tanlangan)}</span>
             <button type="button" onClick={() => exportExcel(true)} disabled={exporting} className="font-semibold hover:underline disabled:opacity-50">{t.eksport_tanlangan}</button>
             <button type="button" onClick={() => setBulkAction("archived")} className="font-semibold hover:underline">{t.ommaviy_arxiv}</button>
             <button type="button" onClick={() => setBulkAction("active")} className="font-semibold hover:underline">{t.ommaviy_tiklash}</button>
-            <button type="button" onClick={() => setSelected(new Set())} className="text-[#766B73] hover:underline">{t.tanlovni_bekor}</button>
+            <button type="button" onClick={() => setSelected(new Set())} className="text-[var(--text-2)] hover:underline">{t.tanlovni_bekor}</button>
           </div>
         )}
-        <div role="group" aria-label={t.korinish} className="ml-auto inline-flex rounded-lg border border-[#EDE3E8] bg-white p-0.5">
+        <div role="group" aria-label={t.korinish} className="ml-auto inline-flex rounded-lg border border-[var(--border)] bg-white p-0.5">
           {(["table", "cards"] as const).map((v) => (
             <button key={v} type="button" onClick={() => changeView(v)} aria-pressed={view === v}
-              className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${view === v ? "bg-[#8E315D] text-white" : "text-[#766B73] hover:text-[#29232A]"}`}>
+              className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${view === v ? "bg-[var(--primary)] text-white" : "text-[var(--text-2)] hover:text-[var(--text)]"}`}>
               {v === "table" ? t.jadval : t.kartochka}
             </button>
           ))}
         </div>
       </div>
 
-      <div className="bg-white rounded-xl border border-[#EDE3E8] overflow-hidden">
+      <div className="bg-white rounded-xl border border-[var(--border)] overflow-hidden">
         {loading && orgs.length === 0 ? (
           <SkeletonTable rows={6} />
         ) : error ? (

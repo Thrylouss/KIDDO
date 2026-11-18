@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
 import { api, impersonation } from "@/lib/api";
 import { formatUzDate } from "@/lib/dates";
-import uz from "@/i18n/uz";
+import uz from "@/i18n";
 
 interface Item { id: number; title: string; message: string; type: string; read_at: string | null; created_at: string }
 
@@ -80,35 +80,35 @@ export default function NotificationBell() {
       <button type="button" className={btn} aria-label={t.ochish} aria-expanded={open} onClick={() => setOpen((v) => !v)}>
         {bellIcon}
         {unread > 0 && (
-          <span data-testid="bell-count" className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 rounded-full bg-[#8E315D] text-white text-[10px] font-bold flex items-center justify-center">
+          <span data-testid="bell-count" className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 rounded-full bg-[var(--primary)] text-white text-[10px] font-bold flex items-center justify-center">
             {unread > 9 ? "9+" : unread}
           </span>
         )}
       </button>
       {open && (
         <div role="dialog" aria-label={t.sarlavha}
-          className="absolute right-0 mt-2 w-[min(22rem,calc(100vw-2rem))] bg-white rounded-xl border border-[#EDE3E8] shadow-lg z-50 overflow-hidden">
-          <div className="flex items-center justify-between px-4 py-3 border-b border-[#EDE3E8]">
-            <p className="text-sm font-semibold text-[#29232A]">{t.sarlavha}</p>
+          className="absolute right-0 mt-2 w-[min(22rem,calc(100vw-2rem))] bg-white rounded-xl border border-[var(--border)] shadow-lg z-50 overflow-hidden">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--border)]">
+            <p className="text-sm font-semibold text-[var(--text)]">{t.sarlavha}</p>
             {canMark && unread > 0 && (
-              <button type="button" onClick={markAll} className="text-xs font-medium text-[#8E315D] hover:underline">{t.barchasi}</button>
+              <button type="button" onClick={markAll} className="text-xs font-medium text-[var(--primary)] hover:underline">{t.barchasi}</button>
             )}
           </div>
-          <ul className="max-h-96 overflow-y-auto divide-y divide-[#F2ECF0]">
+          <ul className="max-h-96 overflow-y-auto divide-y divide-[var(--border-2)]">
             {error ? (
-              <li className="px-4 py-6 text-center text-sm text-[#B91C1C]">{t.yuklash_xato}</li>
+              <li className="px-4 py-6 text-center text-sm text-[var(--error-text)]">{t.yuklash_xato}</li>
             ) : items.length === 0 ? (
-              <li className="px-4 py-6 text-center text-sm text-[#B8AAB2]">{t.yoq}</li>
+              <li className="px-4 py-6 text-center text-sm text-[var(--text-3)]">{t.yoq}</li>
             ) : items.map((n) => (
               <li key={n.id}>
                 <button type="button" onClick={() => markRead(n)}
-                  className={`w-full text-left px-4 py-3 hover:bg-[#FAF5F8] ${n.read_at ? "" : "bg-[#FDF2F6]/60"}`}>
-                  <p className="flex items-center gap-2 text-sm font-medium text-[#29232A]">
-                    {!n.read_at && <span className="h-2 w-2 rounded-full bg-[#8E315D] flex-shrink-0" aria-hidden="true" />}
+                  className={`w-full text-left px-4 py-3 hover:bg-[var(--surface-2)] ${n.read_at ? "" : "bg-[var(--primary-lt)]/60"}`}>
+                  <p className="flex items-center gap-2 text-sm font-medium text-[var(--text)]">
+                    {!n.read_at && <span className="h-2 w-2 rounded-full bg-[var(--primary)] flex-shrink-0" aria-hidden="true" />}
                     {n.title}
                   </p>
-                  <p className="text-xs text-[#766B73] mt-0.5 whitespace-pre-line">{n.message}</p>
-                  <p className="text-[11px] text-[#B8AAB2] mt-1">{formatUzDate(n.created_at.slice(0, 10))}</p>
+                  <p className="text-xs text-[var(--text-2)] mt-0.5 whitespace-pre-line">{n.message}</p>
+                  <p className="text-[11px] text-[var(--text-3)] mt-1">{formatUzDate(n.created_at.slice(0, 10))}</p>
                 </button>
               </li>
             ))}

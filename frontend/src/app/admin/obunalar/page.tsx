@@ -11,7 +11,7 @@ import Select from "@/components/ui/Select";
 import Modal from "@/components/ui/Modal";
 import EmptyState from "@/components/ui/EmptyState";
 import { SkeletonTable } from "@/components/ui/Skeleton";
-import uz from "@/i18n/uz";
+import uz, { intlLocale, plural } from "@/i18n";
 import type {
   FullSubscription,
   SubscriptionDetail,
@@ -21,18 +21,19 @@ import type {
   ApiResponse,
   OrganizationSummary,
 } from "@/types";
+import { useLocale } from "@/contexts/PreferencesContext";
 
 // ── Helpers ────────────────────────────────────────────────────────
 
 function fmtDate(iso: string | null): string {
   if (!iso) return "—";
-  return new Date(iso).toLocaleDateString("uz-UZ", {
+  return new Date(iso).toLocaleDateString(intlLocale(), {
     year: "numeric", month: "short", day: "numeric",
   });
 }
 
 function fmtMoney(val: number): string {
-  return val.toLocaleString("uz-UZ") + " UZS";
+  return val.toLocaleString(intlLocale()) + " UZS";
 }
 
 function subStatusVariant(status: string): "success" | "info" | "warning" | "error" | "neutral" {
@@ -55,14 +56,14 @@ function subStatusLabel(status: string): string {
 
 function DaysCell({ days, status }: { days: number; status: string }) {
   if (status === "expired" || status === "cancelled") {
-    return <span className="text-[#EF4444] text-sm">Tugagan</span>;
+    return <span className="text-[#EF4444] text-sm">{uz.matn.tugagan}</span>;
   }
-  if (days === 0) return <span className="text-[#EF4444] text-sm font-semibold">Bugun tugaydi</span>;
+  if (days === 0) return <span className="text-[#EF4444] text-sm font-semibold">{uz.matn.bugun_tugaydi}</span>;
   const cls =
     days < 7  ? "text-[#EF4444] font-semibold" :
     days <= 14 ? "text-[#F59E0B] font-semibold" :
-                 "text-[#766B73]";
-  return <span className={`text-sm ${cls}`}>{days} {uz.super_admin.qolgan_kun}</span>;
+                 "text-[var(--text-2)]";
+  return <span className={`text-sm ${cls}`}>{days} {plural(days, uz.super_admin.qolgan_kun)}</span>;
 }
 
 // ── Pagination ─────────────────────────────────────────────────────
@@ -77,15 +78,15 @@ function Pagination({
   if (meta.last_page <= 1) return null;
   const pages = Array.from({ length: Math.min(5, meta.last_page) }, (_, i) => i + 1);
   return (
-    <div className="flex items-center justify-between px-5 py-3.5 border-t border-[#EDE3E8]">
-      <p className="text-sm text-[#766B73]">{uz.super_admin.jami} {meta.total} ta</p>
+    <div className="flex items-center justify-between px-5 py-3.5 border-t border-[var(--border)]">
+      <p className="text-sm text-[var(--text-2)]">{uz.super_admin.jami} {meta.total} {uz.matn.ta}</p>
       <div className="flex items-center gap-1">
         <button
           onClick={() => onPage(meta.current_page - 1)}
           disabled={meta.current_page === 1}
-          className="px-3 py-1.5 text-sm rounded-lg border border-[#EDE3E8] text-[#3D3240] disabled:opacity-40 hover:bg-[#FFF9F5] transition-colors"
+          className="px-3 py-1.5 text-sm rounded-lg border border-[var(--border)] text-[var(--label)] disabled:opacity-40 hover:bg-[var(--hover)] transition-colors"
         >
-          Oldingi
+          {uz.matn.oldingi}
         </button>
         {pages.map((p) => (
           <button
@@ -93,8 +94,8 @@ function Pagination({
             onClick={() => onPage(p)}
             className={`px-3 py-1.5 text-sm rounded-lg transition-colors ${
               p === meta.current_page
-                ? "bg-[#8E315D] text-white"
-                : "border border-[#EDE3E8] text-[#3D3240] hover:bg-[#FFF9F5]"
+                ? "bg-[var(--primary)] text-white"
+                : "border border-[var(--border)] text-[var(--label)] hover:bg-[var(--hover)]"
             }`}
           >
             {p}
@@ -103,9 +104,9 @@ function Pagination({
         <button
           onClick={() => onPage(meta.current_page + 1)}
           disabled={meta.current_page === meta.last_page}
-          className="px-3 py-1.5 text-sm rounded-lg border border-[#EDE3E8] text-[#3D3240] disabled:opacity-40 hover:bg-[#FFF9F5] transition-colors"
+          className="px-3 py-1.5 text-sm rounded-lg border border-[var(--border)] text-[var(--label)] disabled:opacity-40 hover:bg-[var(--hover)] transition-colors"
         >
-          Keyingi
+          {uz.matn.keyingi}
         </button>
       </div>
     </div>
@@ -151,6 +152,7 @@ const emptyRenew: RenewForm = {
 // ── Page ───────────────────────────────────────────────────────────
 
 export default function ObunalarPage() {
+  useLocale(); // til almashganda holat saqlangan holda qayta render
   // ── Data ──────────────────────────────────────────────────────
   const [subs,    setSubs]    = useState<FullSubscription[]>([]);
   const [plans,   setPlans]   = useState<Plan[]>([]);
@@ -418,11 +420,11 @@ export default function ObunalarPage() {
 
   const kpiTiles = metrics
     ? [
-        { key: "active",    label: uz.super_admin.faol_obunalar,   color: "bg-[#DCFCE7] text-[#166534]", value: metrics.active },
-        { key: "trial",     label: uz.super_admin.trial_obunalar,  color: "bg-[#FCE8F0] text-[#8E315D]", value: metrics.trial },
-        { key: "past_due",  label: uz.super_admin.past_due,        color: "bg-[#FEF3C7] text-[#92400E]", value: metrics.past_due },
-        { key: "expired",   label: uz.super_admin.tugagan_obunalar,color: "bg-[#FEE2E2] text-[#991B1B]", value: metrics.expired },
-        { key: "cancelled", label: uz.super_admin.bekor,           color: "bg-[#F2ECF0] text-[#3D3240]", value: metrics.cancelled },
+        { key: "active",    label: uz.super_admin.faol_obunalar,   color: "bg-[var(--success-bg)] text-[var(--success)]", value: metrics.active },
+        { key: "trial",     label: uz.super_admin.trial_obunalar,  color: "bg-[var(--info-bg)] text-[var(--primary)]", value: metrics.trial },
+        { key: "past_due",  label: uz.super_admin.past_due,        color: "bg-[var(--warning-bg)] text-[var(--warning-text)]", value: metrics.past_due },
+        { key: "expired",   label: uz.super_admin.tugagan_obunalar,color: "bg-[var(--error-bg)] text-[var(--error)]", value: metrics.expired },
+        { key: "cancelled", label: uz.super_admin.bekor,           color: "bg-[var(--border-2)] text-[var(--label)]", value: metrics.cancelled },
       ]
     : [];
 
@@ -439,8 +441,8 @@ export default function ObunalarPage() {
       {/* Header */}
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-[#29232A]">{uz.super_admin.obunalar}</h1>
-          <p className="text-sm text-[#B8AAB2] mt-0.5">Barcha bog&apos;chalar obunalarini boshqaring</p>
+          <h1 className="text-2xl font-bold text-[var(--text)]">{uz.super_admin.obunalar}</h1>
+          <p className="text-sm text-[var(--text-3)] mt-0.5">{uz.matn.barcha_bogchalar_obunalarini_boshqaring}</p>
         </div>
         <Button onClick={() => setShowCreate(true)}>
           {uz.super_admin.obuna_qoshish}
@@ -448,11 +450,11 @@ export default function ObunalarPage() {
       </div>
 
       {IS_DEMO && (
-        <div data-testid="demo-banner" className="flex items-center gap-2.5 rounded-xl bg-[#FDF2F6] border border-[#EDE3E8] px-4 py-3 text-sm text-[#742548]">
+        <div data-testid="demo-banner" className="flex items-center gap-2.5 rounded-xl bg-[var(--primary-lt)] border border-[var(--border)] px-4 py-3 text-sm text-[var(--primary-h)]">
           <svg className="h-4 w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
-          Demo rejimi — ma&apos;lumotlar saqlanmaydi, amallar simulyatsiya qilinadi.
+          {uz.matn.demo_rejimi_malumotlar_saqlanmaydi_amall}
         </div>
       )}
 
@@ -468,34 +470,34 @@ export default function ObunalarPage() {
               }}
               className={`rounded-xl border p-4 text-center transition-all bg-white ${
                 filterStatus === key
-                  ? "border-[#8E315D] ring-1 ring-[#8E315D]"
-                  : "border-[#EDE3E8] hover:border-[#D9C9D1]"
+                  ? "border-[var(--primary)] ring-1 ring-[var(--primary)]"
+                  : "border-[var(--border)] hover:border-[var(--border-strong)]"
               }`}
             >
               <div className={`text-xl font-bold mb-1 px-2 py-1 rounded-lg inline-block ${color}`}>
                 {value}
               </div>
-              <p className="text-xs text-[#766B73] mt-1">{label}</p>
+              <p className="text-xs text-[var(--text-2)] mt-1">{label}</p>
             </button>
           ))}
           {/* MRR tile */}
-          <div className="rounded-xl border border-[#EDE3E8] bg-white p-4 text-center">
+          <div className="rounded-xl border border-[var(--border)] bg-white p-4 text-center">
             <div className="text-lg font-bold mb-1 px-2 py-1 rounded-lg inline-block bg-[#EDE9FE] text-[#4C1D95]">
               {(metrics.mrr / 1_000_000).toFixed(1)}M
             </div>
-            <p className="text-xs text-[#766B73] mt-1">{uz.super_admin.mrr}</p>
+            <p className="text-xs text-[var(--text-2)] mt-1">{uz.super_admin.mrr}</p>
           </div>
         </div>
       )}
 
       {/* Filters */}
-      <div className="bg-white rounded-xl border border-[#EDE3E8] px-5 py-4">
+      <div className="bg-white rounded-xl border border-[var(--border)] px-5 py-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           <Input
             label={uz.common.izlash}
             value={searchInput}
             onChange={(e) => handleSearchChange(e.target.value)}
-            placeholder="Bog'cha nomi..."
+            placeholder={uz.matn.bogcha_nomi}
           />
           <Select
             label={uz.super_admin.filter_status}
@@ -510,7 +512,7 @@ export default function ObunalarPage() {
             <option value="cancelled">{uz.super_admin.bekor}</option>
           </Select>
           <Select
-            label="Tarif bo'yicha"
+            label={uz.matn.tarif_boyicha}
             value={filterPlan}
             onChange={(e) => { setFilterPlan(e.target.value); setPage(1); }}
           >
@@ -526,7 +528,7 @@ export default function ObunalarPage() {
           >
             <option value="newest">{uz.super_admin.sort_yangi}</option>
             <option value="oldest">{uz.super_admin.sort_eski}</option>
-            <option value="ending_soon">Muddati yaqin</option>
+            <option value="ending_soon">{uz.matn.muddati_yaqin}</option>
           </Select>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-3">
@@ -541,13 +543,13 @@ export default function ObunalarPage() {
             ))}
           </Select>
           <Input
-            label="Boshlang'ich sana"
+            label={uz.matn.boshlangich_sana}
             type="date"
             value={dateFrom}
             onChange={(e) => { setDateFrom(e.target.value); setPage(1); }}
           />
           <Input
-            label="Tugash sanasi"
+            label={uz.matn.tugash_sanasi}
             type="date"
             value={dateTo}
             onChange={(e) => { setDateTo(e.target.value); setPage(1); }}
@@ -557,60 +559,60 @@ export default function ObunalarPage() {
           <div className="mt-3">
             <button
               onClick={resetFilters}
-              className="text-sm text-[#766B73] hover:text-[#3D3240] border border-[#EDE3E8] px-4 py-1.5 rounded-lg hover:bg-[#FFF9F5] transition-colors"
+              className="text-sm text-[var(--text-2)] hover:text-[var(--label)] border border-[var(--border)] px-4 py-1.5 rounded-lg hover:bg-[var(--hover)] transition-colors"
             >
-              Filtrlarni tozalash
+              {uz.matn.filtrlarni_tozalash}
             </button>
           </div>
         )}
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-xl border border-[#EDE3E8] overflow-hidden">
+      <div className="bg-white rounded-xl border border-[var(--border)] overflow-hidden">
         {loading ? (
           <SkeletonTable rows={8} />
         ) : subs.length === 0 ? (
           <EmptyState
             title={uz.common.malumot_yoq}
-            description={hasFilters ? "Qidiruv mezonlarini o'zgartiring." : "Hali obuna mavjud emas."}
+            description={hasFilters ? uz.matn.qidiruv_mezonlarini_ozgartiring : uz.matn.hali_obuna_mavjud_emas}
           />
         ) : (
           <>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="bg-[#FAF5F8] border-b border-[#EDE3E8]">
-                    <th className="text-left px-5 py-3.5 text-xs font-semibold text-[#766B73] uppercase tracking-wide">Bog&apos;cha</th>
-                    <th className="text-left px-5 py-3.5 text-xs font-semibold text-[#766B73] uppercase tracking-wide">{uz.super_admin.tarif}</th>
-                    <th className="text-left px-5 py-3.5 text-xs font-semibold text-[#766B73] uppercase tracking-wide">{uz.super_admin.holat}</th>
-                    <th className="text-left px-5 py-3.5 text-xs font-semibold text-[#766B73] uppercase tracking-wide">Boshlanish</th>
-                    <th className="text-left px-5 py-3.5 text-xs font-semibold text-[#766B73] uppercase tracking-wide">{uz.super_admin.tugash}</th>
-                    <th className="text-left px-5 py-3.5 text-xs font-semibold text-[#766B73] uppercase tracking-wide">{uz.super_admin.qolgan}</th>
-                    <th className="text-left px-5 py-3.5 text-xs font-semibold text-[#766B73] uppercase tracking-wide">{uz.super_admin.avto_yangilash}</th>
-                    <th className="text-right px-5 py-3.5 text-xs font-semibold text-[#766B73] uppercase tracking-wide">{uz.super_admin.amallar}</th>
+                  <tr className="bg-[var(--surface-2)] border-b border-[var(--border)]">
+                    <th className="text-left px-5 py-3.5 text-xs font-semibold text-[var(--text-2)] uppercase tracking-wide">{uz.matn.bogcha}</th>
+                    <th className="text-left px-5 py-3.5 text-xs font-semibold text-[var(--text-2)] uppercase tracking-wide">{uz.super_admin.tarif}</th>
+                    <th className="text-left px-5 py-3.5 text-xs font-semibold text-[var(--text-2)] uppercase tracking-wide">{uz.super_admin.holat}</th>
+                    <th className="text-left px-5 py-3.5 text-xs font-semibold text-[var(--text-2)] uppercase tracking-wide">{uz.matn.boshlanish}</th>
+                    <th className="text-left px-5 py-3.5 text-xs font-semibold text-[var(--text-2)] uppercase tracking-wide">{uz.super_admin.tugash}</th>
+                    <th className="text-left px-5 py-3.5 text-xs font-semibold text-[var(--text-2)] uppercase tracking-wide">{uz.super_admin.qolgan}</th>
+                    <th className="text-left px-5 py-3.5 text-xs font-semibold text-[var(--text-2)] uppercase tracking-wide">{uz.super_admin.avto_yangilash}</th>
+                    <th className="text-right px-5 py-3.5 text-xs font-semibold text-[var(--text-2)] uppercase tracking-wide">{uz.super_admin.amallar}</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#F2ECF0]">
+                <tbody className="divide-y divide-[var(--border-2)]">
                   {subs.map((sub) => (
-                    <tr key={sub.id} className="hover:bg-[#FAF5F8] transition-colors">
+                    <tr key={sub.id} className="hover:bg-[var(--surface-2)] transition-colors">
                       <td className="px-5 py-3.5">
                         <div className="flex items-center gap-3">
-                          <div className="h-8 w-8 rounded-lg bg-[#FDF2F6] flex items-center justify-center text-[#8E315D] font-bold text-xs flex-shrink-0">
+                          <div className="h-8 w-8 rounded-lg bg-[var(--primary-lt)] flex items-center justify-center text-[var(--primary)] font-bold text-xs flex-shrink-0">
                             {(sub.organization?.name ?? "?").charAt(0).toUpperCase()}
                           </div>
                           <Link
                             href={`/admin/bogchalar/${sub.organization_id}`}
-                            className="font-medium text-[#29232A] hover:text-[#8E315D] transition-colors truncate max-w-[140px]"
+                            className="font-medium text-[var(--text)] hover:text-[var(--primary)] transition-colors truncate max-w-[140px]"
                           >
                             {sub.organization?.name ?? "—"}
                           </Link>
                         </div>
                       </td>
-                      <td className="px-5 py-3.5 text-[#766B73]">
+                      <td className="px-5 py-3.5 text-[var(--text-2)]">
                         {sub.plan?.name ?? "—"}
                         {sub.plan?.price_monthly && (
-                          <div className="text-xs text-[#B8AAB2]">
-                            {Number(sub.plan.price_monthly).toLocaleString("uz-UZ")} UZS/oy
+                          <div className="text-xs text-[var(--text-3)]">
+                            {Number(sub.plan.price_monthly).toLocaleString(intlLocale())} {uz.matn.uzs_oy}
                           </div>
                         )}
                       </td>
@@ -619,8 +621,8 @@ export default function ObunalarPage() {
                           {subStatusLabel(sub.status)}
                         </Badge>
                       </td>
-                      <td className="px-5 py-3.5 text-[#766B73] text-xs">{fmtDate(sub.starts_at)}</td>
-                      <td className="px-5 py-3.5 text-[#766B73] text-xs">{fmtDate(sub.ends_at)}</td>
+                      <td className="px-5 py-3.5 text-[var(--text-2)] text-xs">{fmtDate(sub.starts_at)}</td>
+                      <td className="px-5 py-3.5 text-[var(--text-2)] text-xs">{fmtDate(sub.ends_at)}</td>
                       <td className="px-5 py-3.5">
                         <DaysCell days={sub.days_remaining} status={sub.status} />
                       </td>
@@ -629,7 +631,7 @@ export default function ObunalarPage() {
                           onClick={() => handleToggleAutoRenew(sub)}
                           title={uz.super_admin.avto_yangilash}
                           className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none ${
-                            sub.auto_renew ? "bg-[#8E315D]" : "bg-[#EDE3E8]"
+                            sub.auto_renew ? "bg-[var(--primary)]" : "bg-[var(--border)]"
                           }`}
                         >
                           <span
@@ -643,12 +645,12 @@ export default function ObunalarPage() {
                         <div className="flex justify-end">
                           <div className="relative">
                             <button
-                              aria-label="Amallar"
+                              aria-label={uz.matn.amallar}
                               onClick={(e) => {
                                 e.stopPropagation();
                                 setOpenMenuId(openMenuId === sub.id ? null : sub.id);
                               }}
-                              className="p-1.5 rounded-lg text-[#766B73] hover:bg-[#F2ECF0] hover:text-[#3D3240] transition-colors"
+                              className="p-1.5 rounded-lg text-[var(--text-2)] hover:bg-[var(--border-2)] hover:text-[var(--label)] transition-colors"
                             >
                               <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
                                 <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
@@ -657,31 +659,31 @@ export default function ObunalarPage() {
                             {openMenuId === sub.id && (
                               <div
                                 onClick={(e) => e.stopPropagation()}
-                                className="absolute right-0 top-8 z-20 w-52 bg-white rounded-xl shadow-lg border border-[#EDE3E8] py-1"
+                                className="absolute right-0 top-8 z-20 w-52 bg-white rounded-xl shadow-lg border border-[var(--border)] py-1"
                               >
                                 <button
                                   onClick={() => { setOpenMenuId(null); openDetail(sub); }}
-                                  className="w-full text-left px-4 py-2 text-sm text-[#3D3240] hover:bg-[#FFF9F5]"
+                                  className="w-full text-left px-4 py-2 text-sm text-[var(--label)] hover:bg-[var(--hover)]"
                                 >
                                   {uz.super_admin.batafsil}
                                 </button>
                                 <button
                                   onClick={() => { setOpenMenuId(null); openRenew(sub); }}
-                                  className="w-full text-left px-4 py-2 text-sm text-[#3D3240] hover:bg-[#FFF9F5]"
+                                  className="w-full text-left px-4 py-2 text-sm text-[var(--label)] hover:bg-[var(--hover)]"
                                 >
                                   {uz.super_admin.obuna_uzaytirish}
                                 </button>
                                 {sub.status !== "cancelled" && sub.status !== "expired" && (
                                   <button
                                     onClick={() => { setOpenMenuId(null); openChangePlan(sub); }}
-                                    className="w-full text-left px-4 py-2 text-sm text-[#3D3240] hover:bg-[#FFF9F5]"
+                                    className="w-full text-left px-4 py-2 text-sm text-[var(--label)] hover:bg-[var(--hover)]"
                                   >
                                     {uz.super_admin.tarif_almashtirish}
                                   </button>
                                 )}
                                 <button
                                   onClick={() => { setOpenMenuId(null); handleToggleAutoRenew(sub); }}
-                                  className="w-full text-left px-4 py-2 text-sm text-[#3D3240] hover:bg-[#FFF9F5]"
+                                  className="w-full text-left px-4 py-2 text-sm text-[var(--label)] hover:bg-[var(--hover)]"
                                 >
                                   {sub.auto_renew
                                     ? uz.super_admin.avto_yangilash_ochirildi
@@ -690,9 +692,9 @@ export default function ObunalarPage() {
                                 {sub.status !== "cancelled" && (
                                   <button
                                     onClick={() => { setOpenMenuId(null); openCancel(sub); }}
-                                    className="w-full text-left px-4 py-2 text-sm text-[#EF4444] hover:bg-[#FEF2F2]"
+                                    className="w-full text-left px-4 py-2 text-sm text-[#EF4444] hover:bg-[var(--error-soft)]"
                                   >
-                                    Bekor qilish
+                                    {uz.matn.bekor_qilish}
                                   </button>
                                 )}
                               </div>
@@ -724,30 +726,30 @@ export default function ObunalarPage() {
         {detailLoading ? (
           <div className="space-y-3">
             {[...Array(5)].map((_, i) => (
-              <div key={i} className="h-5 bg-[#F2ECF0] rounded animate-pulse" />
+              <div key={i} className="h-5 bg-[var(--border-2)] rounded animate-pulse" />
             ))}
           </div>
         ) : detail ? (
           <div className="space-y-5">
             {/* Org + Plan summary */}
             <div className="grid grid-cols-2 gap-4">
-              <div className="bg-[#FAF5F8] rounded-lg px-4 py-3">
-                <p className="text-xs text-[#B8AAB2] mb-1">Bog&apos;cha</p>
-                <p className="text-sm font-medium text-[#29232A]">
+              <div className="bg-[var(--surface-2)] rounded-lg px-4 py-3">
+                <p className="text-xs text-[var(--text-3)] mb-1">{uz.matn.bogcha}</p>
+                <p className="text-sm font-medium text-[var(--text)]">
                   {detail.organization_detail?.name ?? "—"}
                 </p>
                 {detail.organization_detail?.phone && (
-                  <p className="text-xs text-[#766B73]">{detail.organization_detail.phone}</p>
+                  <p className="text-xs text-[var(--text-2)]">{detail.organization_detail.phone}</p>
                 )}
               </div>
-              <div className="bg-[#FAF5F8] rounded-lg px-4 py-3">
-                <p className="text-xs text-[#B8AAB2] mb-1">Tarif</p>
-                <p className="text-sm font-medium text-[#29232A]">
+              <div className="bg-[var(--surface-2)] rounded-lg px-4 py-3">
+                <p className="text-xs text-[var(--text-3)] mb-1">{uz.matn.tarif}</p>
+                <p className="text-sm font-medium text-[var(--text)]">
                   {detail.plan_detail?.name ?? "—"}
                 </p>
                 {detail.plan_detail && (
-                  <p className="text-xs text-[#766B73]">
-                    {Number(detail.plan_detail.price_monthly).toLocaleString("uz-UZ")} {detail.plan_detail.currency}/oy
+                  <p className="text-xs text-[var(--text-2)]">
+                    {Number(detail.plan_detail.price_monthly).toLocaleString(intlLocale())} {detail.plan_detail.currency}{uz.matn.oy}
                   </p>
                 )}
               </div>
@@ -756,14 +758,14 @@ export default function ObunalarPage() {
             {/* Status row */}
             <div className="flex items-center gap-4 flex-wrap">
               <Badge variant={subStatusVariant(detail.status)}>{subStatusLabel(detail.status)}</Badge>
-              <span className="text-sm text-[#766B73]">
+              <span className="text-sm text-[var(--text-2)]">
                 {uz.super_admin.boshlanish}: {fmtDate(detail.starts_at)}
               </span>
-              <span className="text-sm text-[#766B73]">
+              <span className="text-sm text-[var(--text-2)]">
                 {uz.super_admin.tugash}: {fmtDate(detail.ends_at)}
               </span>
               {detail.auto_renew && (
-                <span className="text-xs font-medium text-[#8E315D] bg-[#EDE9FE] px-2 py-0.5 rounded-full">
+                <span className="text-xs font-medium text-[var(--primary)] bg-[#EDE9FE] px-2 py-0.5 rounded-full">
                   {uz.super_admin.avto_yangilash}
                 </span>
               )}
@@ -771,21 +773,21 @@ export default function ObunalarPage() {
 
             {/* Payment summary */}
             <div className="grid grid-cols-3 gap-3">
-              <div className="rounded-lg border border-[#EDE3E8] px-4 py-3 text-center">
-                <p className="text-xs text-[#B8AAB2] mb-1">{uz.super_admin.tolov_jami_tulangan}</p>
+              <div className="rounded-lg border border-[var(--border)] px-4 py-3 text-center">
+                <p className="text-xs text-[var(--text-3)] mb-1">{uz.super_admin.tolov_jami_tulangan}</p>
                 <p className="text-base font-bold text-[#059669]">
                   {fmtMoney(detail.payment_summary.total_paid)}
                 </p>
               </div>
-              <div className="rounded-lg border border-[#EDE3E8] px-4 py-3 text-center">
-                <p className="text-xs text-[#B8AAB2] mb-1">{uz.super_admin.kutilayotgan_hisob}</p>
+              <div className="rounded-lg border border-[var(--border)] px-4 py-3 text-center">
+                <p className="text-xs text-[var(--text-3)] mb-1">{uz.super_admin.kutilayotgan_hisob}</p>
                 <p className="text-base font-bold text-[#F59E0B]">
                   {fmtMoney(detail.payment_summary.total_pending)}
                 </p>
               </div>
-              <div className="rounded-lg border border-[#EDE3E8] px-4 py-3 text-center">
-                <p className="text-xs text-[#B8AAB2] mb-1">Oxirgi to&apos;lov</p>
-                <p className="text-sm font-medium text-[#3D3240]">
+              <div className="rounded-lg border border-[var(--border)] px-4 py-3 text-center">
+                <p className="text-xs text-[var(--text-3)] mb-1">{uz.matn.oxirgi_tolov}</p>
+                <p className="text-sm font-medium text-[var(--label)]">
                   {fmtDate(detail.payment_summary.latest_payment_at)}
                 </p>
               </div>
@@ -793,39 +795,39 @@ export default function ObunalarPage() {
 
             {/* Plan limits */}
             {detail.plan_detail && (
-              <div className="bg-[#FAF5F8] rounded-lg px-4 py-3">
-                <p className="text-xs font-semibold text-[#B8AAB2] uppercase tracking-wide mb-2">Tarif chegaralari</p>
-                <div className="flex flex-wrap gap-3 text-sm text-[#3D3240]">
+              <div className="bg-[var(--surface-2)] rounded-lg px-4 py-3">
+                <p className="text-xs font-semibold text-[var(--text-3)] uppercase tracking-wide mb-2">{uz.matn.tarif_chegaralari}</p>
+                <div className="flex flex-wrap gap-3 text-sm text-[var(--label)]">
                   {detail.plan_detail.max_children != null && (
-                    <span>Max bolalar: <strong>{detail.plan_detail.max_children}</strong></span>
+                    <span>{uz.matn.max_bolalar} <strong>{detail.plan_detail.max_children}</strong></span>
                   )}
                   {detail.plan_detail.max_teachers != null && (
-                    <span>Max tarbiyachilar: <strong>{detail.plan_detail.max_teachers}</strong></span>
+                    <span>{uz.matn.max_tarbiyachilar} <strong>{detail.plan_detail.max_teachers}</strong></span>
                   )}
                   {detail.plan_detail.max_groups != null && (
-                    <span>Max guruhlar: <strong>{detail.plan_detail.max_groups}</strong></span>
+                    <span>{uz.matn.max_guruhlar} <strong>{detail.plan_detail.max_groups}</strong></span>
                   )}
-                  <span>Sinov: <strong>{detail.plan_detail.trial_days} kun</strong></span>
+                  <span>{uz.matn.sinov} <strong>{detail.plan_detail.trial_days} {plural(detail.plan_detail.trial_days, uz.matn.kun)}</strong></span>
                 </div>
               </div>
             )}
 
             {/* Recent invoices */}
             <div>
-              <p className="text-xs font-semibold text-[#B8AAB2] uppercase tracking-wide mb-2">
-                So&apos;nggi invoicelar
+              <p className="text-xs font-semibold text-[var(--text-3)] uppercase tracking-wide mb-2">
+                {uz.matn.songgi_invoicelar}
               </p>
               {detail.recent_invoices.length === 0 ? (
-                <p className="text-sm text-[#B8AAB2]">{uz.super_admin.hech_invoice_yoq}</p>
+                <p className="text-sm text-[var(--text-3)]">{uz.super_admin.hech_invoice_yoq}</p>
               ) : (
                 <div className="space-y-1.5">
                   {detail.recent_invoices.map((inv) => (
                     <div
                       key={inv.id}
-                      className="flex items-center justify-between text-sm py-2 px-3 bg-[#FAF5F8] rounded-lg"
+                      className="flex items-center justify-between text-sm py-2 px-3 bg-[var(--surface-2)] rounded-lg"
                     >
-                      <span className="text-[#766B73]">{inv.invoice_number}</span>
-                      <span className="font-medium">{Number(inv.amount).toLocaleString("uz-UZ")} {inv.currency}</span>
+                      <span className="text-[var(--text-2)]">{inv.invoice_number}</span>
+                      <span className="font-medium">{Number(inv.amount).toLocaleString(intlLocale())} {inv.currency}</span>
                       <Badge variant={inv.status === "paid" ? "success" : inv.status === "overdue" ? "error" : "warning"}>
                         {inv.status}
                       </Badge>
@@ -836,9 +838,9 @@ export default function ObunalarPage() {
             </div>
 
             {detail.cancelled_reason && (
-              <div className="bg-[#FEF2F2] border border-[#FEE2E2] rounded-lg px-4 py-3">
-                <p className="text-xs font-semibold text-[#991B1B] mb-1">Bekor qilish sababi</p>
-                <p className="text-sm text-[#3D3240]">{detail.cancelled_reason}</p>
+              <div className="bg-[var(--error-soft)] border border-[var(--error-bg)] rounded-lg px-4 py-3">
+                <p className="text-xs font-semibold text-[var(--error)] mb-1">{uz.matn.bekor_qilish_sababi}</p>
+                <p className="text-sm text-[var(--label)]">{detail.cancelled_reason}</p>
               </div>
             )}
           </div>
@@ -866,10 +868,10 @@ export default function ObunalarPage() {
       >
         <form id="sub-create-form" onSubmit={handleCreate} className="space-y-4">
           {createError && (
-            <p className="text-sm text-[#EF4444] bg-[#FEF2F2] px-3 py-2 rounded-lg">{createError}</p>
+            <p className="text-sm text-[#EF4444] bg-[var(--error-soft)] px-3 py-2 rounded-lg">{createError}</p>
           )}
           <Select
-            label="Bog'cha"
+            label={uz.matn.bogcha}
             value={createForm.organization_id}
             onChange={(e) => setCreateForm({ ...createForm, organization_id: e.target.value })}
             required
@@ -888,7 +890,7 @@ export default function ObunalarPage() {
             <option value="">{uz.common.tanlang}</option>
             {plans.map((p) => (
               <option key={p.id} value={p.id}>
-                {p.name} — {Number(p.price_monthly).toLocaleString("uz-UZ")} UZS
+                {p.name} — {Number(p.price_monthly).toLocaleString(intlLocale())} UZS
               </option>
             ))}
           </Select>
@@ -915,15 +917,15 @@ export default function ObunalarPage() {
             value={createForm.payment_status}
             onChange={(e) => setCreateForm({ ...createForm, payment_status: e.target.value })}
           >
-            <option value="pending">Kutilmoqda</option>
-            <option value="paid">To&apos;langan</option>
+            <option value="pending">{uz.matn.kutilmoqda}</option>
+            <option value="paid">{uz.matn.tolangan}</option>
           </Select>
           <div className="flex items-center gap-3">
             <button
               type="button"
               onClick={() => setCreateForm({ ...createForm, auto_renew: !createForm.auto_renew })}
               className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none ${
-                createForm.auto_renew ? "bg-[#8E315D]" : "bg-[#EDE3E8]"
+                createForm.auto_renew ? "bg-[var(--primary)]" : "bg-[var(--border)]"
               }`}
             >
               <span
@@ -932,13 +934,13 @@ export default function ObunalarPage() {
                 }`}
               />
             </button>
-            <span className="text-sm text-[#3D3240]">{uz.super_admin.avto_yangilash}</span>
+            <span className="text-sm text-[var(--label)]">{uz.super_admin.avto_yangilash}</span>
           </div>
           <Input
             label={uz.super_admin.eslatma}
             value={createForm.notes}
             onChange={(e) => setCreateForm({ ...createForm, notes: e.target.value })}
-            placeholder="Ixtiyoriy izoh..."
+            placeholder={uz.matn.ixtiyoriy_izoh}
           />
         </form>
       </Modal>
@@ -957,9 +959,9 @@ export default function ObunalarPage() {
       >
         <form id="sub-renew-form" onSubmit={handleRenew} className="space-y-4">
           {selected?.organization && (
-            <div className="px-4 py-3 bg-[#FAF5F8] rounded-lg">
-              <p className="text-xs text-[#B8AAB2] mb-1">Bog&apos;cha</p>
-              <p className="text-sm font-medium text-[#29232A]">{selected.organization.name}</p>
+            <div className="px-4 py-3 bg-[var(--surface-2)] rounded-lg">
+              <p className="text-xs text-[var(--text-3)] mb-1">{uz.matn.bogcha}</p>
+              <p className="text-sm font-medium text-[var(--text)]">{selected.organization.name}</p>
             </div>
           )}
           <Select
@@ -972,7 +974,7 @@ export default function ObunalarPage() {
             <option value="">{uz.common.tanlang}</option>
             {plans.map((p) => (
               <option key={p.id} value={p.id}>
-                {p.name} — {Number(p.price_monthly).toLocaleString("uz-UZ")} UZS
+                {p.name} — {Number(p.price_monthly).toLocaleString(intlLocale())} UZS
               </option>
             ))}
           </Select>
@@ -990,14 +992,14 @@ export default function ObunalarPage() {
             value={renewForm.payment_status}
             onChange={(e) => setRenewForm({ ...renewForm, payment_status: e.target.value })}
           >
-            <option value="paid">To&apos;langan</option>
-            <option value="pending">Kutilmoqda</option>
+            <option value="paid">{uz.matn.tolangan}</option>
+            <option value="pending">{uz.matn.kutilmoqda}</option>
           </Select>
           <Input
             label={uz.super_admin.eslatma}
             value={renewForm.notes}
             onChange={(e) => setRenewForm({ ...renewForm, notes: e.target.value })}
-            placeholder="Ixtiyoriy izoh..."
+            placeholder={uz.matn.ixtiyoriy_izoh}
           />
         </form>
       </Modal>
@@ -1023,9 +1025,9 @@ export default function ObunalarPage() {
       >
         <form id="sub-change-plan-form" onSubmit={handleChangePlan} className="space-y-4">
           {selected?.plan && (
-            <div className="px-4 py-3 bg-[#FAF5F8] rounded-lg">
-              <p className="text-xs text-[#B8AAB2] mb-1">{uz.super_admin.joriy_tarif}</p>
-              <p className="text-sm font-medium text-[#29232A]">{selected.plan.name}</p>
+            <div className="px-4 py-3 bg-[var(--surface-2)] rounded-lg">
+              <p className="text-xs text-[var(--text-3)] mb-1">{uz.super_admin.joriy_tarif}</p>
+              <p className="text-sm font-medium text-[var(--text)]">{selected.plan.name}</p>
             </div>
           )}
           <Select
@@ -1037,11 +1039,11 @@ export default function ObunalarPage() {
             <option value="">{uz.common.tanlang}</option>
             {plans.map((p) => (
               <option key={p.id} value={p.id}>
-                {p.name} — {Number(p.price_monthly).toLocaleString("uz-UZ")} UZS
+                {p.name} — {Number(p.price_monthly).toLocaleString(intlLocale())} UZS
               </option>
             ))}
           </Select>
-          <p className="text-xs text-[#B8AAB2]">{uz.super_admin.darhol} kuchga kiradi</p>
+          <p className="text-xs text-[var(--text-3)]">{uz.super_admin.darhol} {uz.matn.kuchga_kiradi}</p>
         </form>
       </Modal>
 
@@ -1049,7 +1051,7 @@ export default function ObunalarPage() {
       <Modal
         open={showCancel}
         onClose={() => setShowCancel(false)}
-        title="Obunani bekor qilish"
+        title={uz.matn.obunani_bekor_qilish}
         footer={
           <>
             <Button variant="secondary" onClick={() => setShowCancel(false)}>{uz.common.bekor_qilish}</Button>
@@ -1059,28 +1061,27 @@ export default function ObunalarPage() {
               loading={cancelling}
               variant="danger"
             >
-              Bekor qilish
+              {uz.matn.bekor_qilish}
             </Button>
           </>
         }
       >
         <form id="sub-cancel-form" onSubmit={handleCancel} className="space-y-4">
           {selected?.organization && (
-            <p className="text-sm text-[#766B73]">
-              <strong className="text-[#29232A]">{selected.organization.name}</strong> obunasini bekor
-              qilmoqchimisiz?
+            <p className="text-sm text-[var(--text-2)]">
+              <strong className="text-[var(--text)]">{selected.organization.name}</strong> {uz.matn.obunasini_bekor_qilmoqchimisiz}
             </p>
           )}
           <div>
-            <label className="block text-sm font-medium text-[#3D3240] mb-1.5">
-              {uz.super_admin.bekor_qilish_sababi} (ixtiyoriy)
+            <label className="block text-sm font-medium text-[var(--label)] mb-1.5">
+              {uz.super_admin.bekor_qilish_sababi} {uz.matn.ixtiyoriy}
             </label>
             <textarea
               value={cancelReason}
               onChange={(e) => setCancelReason(e.target.value)}
               rows={3}
-              placeholder="Sabab..."
-              className="w-full px-3.5 py-2.5 text-sm border border-[#EDE3E8] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#8E315D]/20 focus:border-[#8E315D] resize-none"
+              placeholder={uz.matn.sabab}
+              className="w-full px-3.5 py-2.5 text-sm border border-[var(--border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-[var(--primary)] resize-none"
             />
           </div>
         </form>

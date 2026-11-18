@@ -10,7 +10,7 @@ import Input from "@/components/ui/Input";
 import { Skeleton } from "@/components/ui/Skeleton";
 import AttendanceSheet from "@/components/attendance/AttendanceSheet";
 import type { AttendanceDay, AttendanceRecordInput } from "@/types";
-import uz from "@/i18n/uz";
+import uz from "@/i18n";
 import { useReadOnly } from "@/lib/readOnly";
 
 interface AttendanceManagerProps<T extends AttendanceDay> {
@@ -78,7 +78,7 @@ export default function AttendanceManager<T extends AttendanceDay>({
           ) : (
             <div>
               <p className="text-sm font-medium text-[var(--text)] mb-1.5">{uz.davomat.guruh}</p>
-              <p className="text-sm text-[#3D3240] py-2.5">{data.group?.name}</p>
+              <p className="text-sm text-[var(--label)] py-2.5">{data.group?.name}</p>
             </div>
           )}
           <Input
@@ -97,13 +97,13 @@ export default function AttendanceManager<T extends AttendanceDay>({
           <Skeleton className="h-64" />
         </div>
       ) : error ? (
-        <div className="bg-white rounded-xl border border-[#EDE3E8] p-8 text-center">
-          <p role="alert" className="text-sm text-[#766B73] mb-3">{error}</p>
+        <div className="bg-white rounded-xl border border-[var(--border)] p-8 text-center">
+          <p role="alert" className="text-sm text-[var(--text-2)] mb-3">{error}</p>
           <Button size="sm" variant="secondary" onClick={() => load(date, groupId)}>{uz.common.qayta_urinish}</Button>
         </div>
       ) : data && data.groups.length === 0 ? (
-        <div className="bg-white rounded-xl border border-[#EDE3E8] p-8 text-center">
-          <p className="text-sm text-[#766B73]">{noGroupsText}</p>
+        <div className="bg-white rounded-xl border border-[var(--border)] p-8 text-center">
+          <p className="text-sm text-[var(--text-2)]">{noGroupsText}</p>
         </div>
       ) : data ? (
         <div className={loading ? "opacity-60 pointer-events-none" : ""} aria-busy={loading}>

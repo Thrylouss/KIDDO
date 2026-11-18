@@ -7,7 +7,7 @@ import { IS_DEMO } from "@/lib/demo-data";
 import Button from "@/components/ui/Button";
 import Modal from "@/components/ui/Modal";
 import type { ApiResponse, Group, TeacherProfile } from "@/types";
-import uz from "@/i18n/uz";
+import uz from "@/i18n";
 
 interface TeacherGroupsModalProps {
   teacher: TeacherProfile | null;
@@ -82,24 +82,24 @@ export default function TeacherGroupsModal({ teacher, onClose, onSaved }: Teache
     >
       <div className="space-y-4">
         {IS_DEMO && (
-          <p role="note" className="rounded-lg bg-[#FFFBEB] border border-[#FDE68A] text-[#92400E] text-sm px-3 py-2">{uz.common.demo_saqlanmaydi}</p>
+          <p role="note" className="rounded-lg bg-[var(--warning-soft)] border border-[var(--warning-border)] text-[var(--warning-text)] text-sm px-3 py-2">{uz.common.demo_saqlanmaydi}</p>
         )}
         {loading ? (
-          <p className="text-sm text-[#766B73]">{uz.common.yuklanmoqda}</p>
+          <p className="text-sm text-[var(--text-2)]">{uz.common.yuklanmoqda}</p>
         ) : loadError ? (
           <div className="text-sm">
-            <p role="alert" className="text-[#B91C1C] mb-2">{loadError}</p>
+            <p role="alert" className="text-[var(--error-text)] mb-2">{loadError}</p>
             <Button variant="secondary" size="sm" onClick={load}>{uz.common.qayta_urinish}</Button>
           </div>
         ) : groups.length === 0 ? (
-          <p className="text-sm text-[#766B73]">{uz.tarbiyachilar.guruh_yoq}</p>
+          <p className="text-sm text-[var(--text-2)]">{uz.tarbiyachilar.guruh_yoq}</p>
         ) : (
           <>
-            <p className="text-xs text-[#766B73]">{uz.tarbiyachilar.guruhlar_izoh}</p>
+            <p className="text-xs text-[var(--text-2)]">{uz.tarbiyachilar.guruhlar_izoh}</p>
             <ul className="space-y-1.5">
               {groups.map((g) => (
                 <li key={g.id}>
-                  <label className="flex items-center gap-2 text-sm text-[#29232A]">
+                  <label className="flex items-center gap-2 text-sm text-[var(--text)]">
                     <input type="checkbox" checked={selected.includes(g.id)} onChange={() => toggle(g.id)} />
                     {g.name}
                   </label>
@@ -108,7 +108,7 @@ export default function TeacherGroupsModal({ teacher, onClose, onSaved }: Teache
             </ul>
           </>
         )}
-        {saveError && <p role="alert" className="text-sm text-[#B91C1C]">{saveError}</p>}
+        {saveError && <p role="alert" className="text-sm text-[var(--error-text)]">{saveError}</p>}
       </div>
     </Modal>
   );

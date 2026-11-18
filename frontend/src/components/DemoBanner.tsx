@@ -1,11 +1,13 @@
+import uz from "@/i18n";
+
 export default function DemoBanner() {
   return (
     <div
       className="flex items-center justify-center gap-2.5 flex-shrink-0 px-4 py-2.5 text-sm font-medium z-10"
       style={{
-        background: "linear-gradient(90deg, #FEF3C7 0%, #FDE68A 50%, #FEF3C7 100%)",
+        background: "linear-gradient(90deg, var(--warning-bg) 0%, var(--warning-border) 50%, var(--warning-bg) 100%)",
         borderBottom: "2px solid #F59E0B",
-        color: "#92400E",
+        color: "var(--warning-text)",
       }}
     >
       <svg
@@ -23,9 +25,9 @@ export default function DemoBanner() {
         />
       </svg>
       <span>
-        <strong>DEMO REJIMI</strong>
+        <strong>{uz.ui.demo_rejimi_katta}</strong>
         {" "}—{" "}
-        namoyish ma&apos;lumotlari, haqiqiy ma&apos;lumotlar emas
+        {uz.ui.demo_banner}
       </span>
     </div>
   );

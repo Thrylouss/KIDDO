@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import uz from "@/i18n/uz";
+import uz from "@/i18n";
 
 type Tab = "kunlik" | "oylik";
 
@@ -11,7 +11,7 @@ export default function AttendanceTabs({ daily, monthly }: { daily: React.ReactN
 
   return (
     <div className="space-y-4">
-      <div role="tablist" aria-label={uz.davomat.sarlavha} className="flex gap-1 overflow-x-auto border-b border-[#EDE3E8]">
+      <div role="tablist" aria-label={uz.davomat.sarlavha} className="flex gap-1 overflow-x-auto border-b border-[var(--border)]">
         {([["kunlik", uz.davomat.tab_kunlik], ["oylik", uz.davomat.tab_oylik]] as [Tab, string][]).map(([id, label]) => (
           <button
             key={id}
@@ -20,7 +20,7 @@ export default function AttendanceTabs({ daily, monthly }: { daily: React.ReactN
             aria-selected={tab === id}
             onClick={() => setTab(id)}
             className={`whitespace-nowrap px-3.5 py-2.5 text-sm font-medium border-b-2 -mb-px transition-colors ${
-              tab === id ? "border-[var(--primary)] text-[var(--primary)]" : "border-transparent text-[#766B73] hover:text-[#3D3240]"
+              tab === id ? "border-[var(--primary)] text-[var(--primary)]" : "border-transparent text-[var(--text-2)] hover:text-[var(--label)]"
             }`}
           >
             {label}

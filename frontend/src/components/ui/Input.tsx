@@ -29,7 +29,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
               "placeholder:text-[var(--text-3)] outline-none transition-all duration-150 kiddo-input",
               error
                 ? "border-[#EF4444] focus:ring-2 focus:ring-[#EF4444]/20"
-                : "border-[var(--border)] focus:border-[var(--primary)] focus:ring-2 focus:ring-[#8E315D]/15",
+                : "border-[var(--border)] focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--primary)]/15",
               suffix ? "pr-11" : "",
               className,
             ].join(" ")}

@@ -6,14 +6,14 @@ import { errorMessage } from "@/lib/apiErrors";
 import { IS_DEMO } from "@/lib/demo-data";
 import Button from "@/components/ui/Button";
 import Modal from "@/components/ui/Modal";
-import uz from "@/i18n/uz";
+import uz from "@/i18n";
 import type { OrganizationSummary } from "@/types";
 
 const t = uz.bogchalar;
 
 const LINKED_LABELS: Record<string, string> = {
-  bolalar: uz.bogchalar.st_bolalar, guruhlar: uz.bogchalar.st_guruhlar, foydalanuvchilar: uz.bogchalar.st_foydalanuvchilar,
-  tarbiyachilar: uz.bogchalar.st_tarbiyachilar, ota_onalar: uz.bogchalar.st_ota_onalar,
+  get bolalar() { return uz.bogchalar.st_bolalar; }, get guruhlar() { return uz.bogchalar.st_guruhlar; }, get foydalanuvchilar() { return uz.bogchalar.st_foydalanuvchilar; },
+  get tarbiyachilar() { return uz.bogchalar.st_tarbiyachilar; }, get ota_onalar() { return uz.bogchalar.st_ota_onalar; },
 };
 
 interface Props {
@@ -66,20 +66,20 @@ export default function OrgDeleteDialog({ org, onClose, onDeleted, onArchive }: 
       </>}>
       {org && (
         <form id="org-delete-form" onSubmit={submit} className="space-y-4">
-          <p className="rounded-xl border border-[#FDE68A] bg-[#FFFBEB] px-4 py-3 text-sm text-[#92400E]">{t.ochir_ogoh}</p>
+          <p className="rounded-xl border border-[var(--warning-border)] bg-[var(--warning-soft)] px-4 py-3 text-sm text-[var(--warning-text)]">{t.ochir_ogoh}</p>
           <p className="font-semibold text-[var(--text)]">{org.name}</p>
           <div className="flex flex-col gap-1.5">
             <label htmlFor="org-delete-name" className="text-sm font-medium text-[var(--text)]">{t.ochir_tasdiq_label}</label>
             <input id="org-delete-name" autoComplete="off" value={name} onChange={(e) => setName(e.target.value)}
               className="w-full rounded-lg border border-[var(--border)] bg-white px-3.5 py-2.5 text-sm outline-none focus:border-[#EF4444] focus:ring-2 focus:ring-[#EF4444]/15" />
           </div>
-          {error && <p role="alert" className="rounded-lg bg-[#FEF2F2] px-4 py-3 text-sm text-[#B91C1C]">{error}</p>}
+          {error && <p role="alert" className="rounded-lg bg-[var(--error-soft)] px-4 py-3 text-sm text-[var(--error-text)]">{error}</p>}
           {linked && (
             <div>
               <p className="text-xs font-semibold text-[var(--text-2)] mb-1.5">{t.boglangan}</p>
               <ul className="flex flex-wrap gap-2">
                 {Object.entries(linked).map(([k, v]) => (
-                  <li key={k} className="rounded-full bg-[#F2ECF0] px-3 py-1 text-xs text-[var(--text)]">{LINKED_LABELS[k] ?? k}: {v}</li>
+                  <li key={k} className="rounded-full bg-[var(--border-2)] px-3 py-1 text-xs text-[var(--text)]">{LINKED_LABELS[k] ?? k}: {v}</li>
                 ))}
               </ul>
             </div>

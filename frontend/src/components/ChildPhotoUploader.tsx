@@ -6,7 +6,7 @@ import { errorMessage, fieldErrors } from "@/lib/apiErrors";
 import Button from "@/components/ui/Button";
 import ChildPhoto from "@/components/ChildPhoto";
 import ConfirmDialog from "@/components/ConfirmDialog";
-import uz from "@/i18n/uz";
+import uz from "@/i18n";
 
 const ALLOWED = ["image/jpeg", "image/png", "image/webp"];
 const MAX_BYTES = 2 * 1024 * 1024;
@@ -65,7 +65,7 @@ export default function ChildPhotoUploader({ childId, firstName, lastName, photo
   return (
     <div className="flex flex-col items-center gap-2 w-[150px]">
       <ChildPhoto firstName={firstName} lastName={lastName} photoUrl={photoUrl} size="xl" />
-      {!photoUrl && <p className="text-[11px] text-[#B8AAB2] text-center">{uz.guruh.rasm_yoq}</p>}
+      {!photoUrl && <p className="text-[11px] text-[var(--text-3)] text-center">{uz.guruh.rasm_yoq}</p>}
       <input
         ref={inputRef}
         type="file"
@@ -82,8 +82,8 @@ export default function ChildPhotoUploader({ childId, firstName, lastName, photo
           {uz.guruh.rasm_ochirish}
         </Button>
       )}
-      <p className="text-[11px] text-[#B8AAB2] text-center">{uz.guruh.rasm_talab}</p>
-      {error && <p role="alert" className="text-xs text-[#B91C1C] text-center">{error}</p>}
+      <p className="text-[11px] text-[var(--text-3)] text-center">{uz.guruh.rasm_talab}</p>
+      {error && <p role="alert" className="text-xs text-[var(--error-text)] text-center">{error}</p>}
       {success && <p role="status" className="text-xs text-[var(--success)] text-center">{success}</p>}
 
       <ConfirmDialog

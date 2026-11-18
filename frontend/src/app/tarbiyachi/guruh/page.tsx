@@ -14,7 +14,8 @@ import PageHeader from "@/components/ui/PageHeader";
 import { Skeleton } from "@/components/ui/Skeleton";
 import ChildPhoto from "@/components/ChildPhoto";
 import type { TeacherChild } from "@/types";
-import uz from "@/i18n/uz";
+import uz from "@/i18n";
+import { useLocale } from "@/contexts/PreferencesContext";
 
 interface ChildrenResponse {
   groups: { id: number; name: string; age_category: string | null; capacity: number | null }[];
@@ -27,6 +28,7 @@ const genderLabel = (g: TeacherChild["gender"]) => (g === "erkak" ? uz.bolalar.j
 
 /** Tarbiyachiga biriktirilgan guruh(lar) bolalari: qidiruv, filtrlar, kartochka/jadval ko'rinishi. */
 export default function MeningGuruhimPage() {
+  useLocale(); // til almashganda holat saqlangan holda qayta render
   const [res,     setRes]     = useState<ChildrenResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error,   setError]   = useState("");
@@ -65,7 +67,7 @@ export default function MeningGuruhimPage() {
     return (
       <div className="max-w-6xl mx-auto">
         <PageHeader title={uz.guruh.sarlavha} description={uz.guruh.tavsif} />
-        <p role="note" className="rounded-lg bg-[#FFFBEB] border border-[#FDE68A] text-[#92400E] text-sm px-4 py-3">{uz.kundalik.demo}</p>
+        <p role="note" className="rounded-lg bg-[var(--warning-soft)] border border-[var(--warning-border)] text-[var(--warning-text)] text-sm px-4 py-3">{uz.kundalik.demo}</p>
       </div>
     );
   }
@@ -75,7 +77,7 @@ export default function MeningGuruhimPage() {
       <PageHeader title={uz.guruh.sarlavha} description={uz.guruh.tavsif} />
 
       {group && (
-        <div data-testid="group-summary" className="bg-[#8E315D] rounded-2xl p-5 text-white flex flex-wrap items-end justify-between gap-3">
+        <div data-testid="group-summary" className="bg-[var(--primary)] rounded-2xl p-5 text-white flex flex-wrap items-end justify-between gap-3">
           <div>
             <p className="text-white/70 text-xs font-medium uppercase tracking-wide">{uz.guruh.guruh}</p>
             <h2 className="text-xl font-bold">{group.name}</h2>
@@ -107,10 +109,10 @@ export default function MeningGuruhimPage() {
           <option value="erkak">{uz.bolalar.jins_erkak}</option>
           <option value="ayol">{uz.bolalar.jins_qiz}</option>
         </Select>
-        <div role="group" aria-label={uz.guruh.kartochka} className="inline-flex rounded-lg border border-[#EDE3E8] bg-white p-0.5">
+        <div role="group" aria-label={uz.guruh.kartochka} className="inline-flex rounded-lg border border-[var(--border)] bg-white p-0.5">
           {([["card", uz.guruh.kartochka], ["table", uz.guruh.jadval]] as [View, string][]).map(([v, label]) => (
             <button key={v} type="button" aria-pressed={view === v} onClick={() => setView(v)}
-              className={`px-3 py-1.5 text-sm rounded-md ${view === v ? "bg-[#FDF2F6] text-[var(--primary)] font-medium" : "text-[#766B73]"}`}>
+              className={`px-3 py-1.5 text-sm rounded-md ${view === v ? "bg-[var(--primary-lt)] text-[var(--primary)] font-medium" : "text-[var(--text-2)]"}`}>
               {label}
             </button>
           ))}
@@ -122,14 +124,14 @@ export default function MeningGuruhimPage() {
           {Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-28" />)}
         </div>
       ) : error ? (
-        <div className="bg-white rounded-xl border border-[#EDE3E8] p-8 text-center">
-          <p role="alert" className="text-sm text-[#766B73] mb-3">{error}</p>
+        <div className="bg-white rounded-xl border border-[var(--border)] p-8 text-center">
+          <p role="alert" className="text-sm text-[var(--text-2)] mb-3">{error}</p>
           <Button size="sm" variant="secondary" onClick={load}>{uz.common.qayta_urinish}</Button>
         </div>
       ) : res && res.groups.length === 0 ? (
-        <p className="bg-white rounded-xl border border-[#EDE3E8] p-8 text-center text-sm text-[#766B73]">{uz.guruh.guruh_yoq}</p>
+        <p className="bg-white rounded-xl border border-[var(--border)] p-8 text-center text-sm text-[var(--text-2)]">{uz.guruh.guruh_yoq}</p>
       ) : children.length === 0 ? (
-        <p className="bg-white rounded-xl border border-[#EDE3E8] p-8 text-center text-sm text-[#766B73]">
+        <p className="bg-white rounded-xl border border-[var(--border)] p-8 text-center text-sm text-[var(--text-2)]">
           {res?.data.length ? uz.guruh.natija_yoq : uz.guruh.bola_yoq}
         </p>
       ) : view === "card" ? (
@@ -137,25 +139,25 @@ export default function MeningGuruhimPage() {
           {children.map((c) => (
             <li key={c.id}>
               <Link href={`/tarbiyachi/bolalar/${c.id}`}
-                className="flex gap-3 bg-white rounded-xl border border-[#EDE3E8] p-4 hover:shadow-sm hover:border-[#D9C9D1] transition">
+                className="flex gap-3 bg-white rounded-xl border border-[var(--border)] p-4 hover:shadow-sm hover:border-[var(--border-strong)] transition">
                 <ChildPhoto firstName={c.first_name} lastName={c.last_name} photoUrl={c.photo_url} />
                 <div className="min-w-0 flex-1">
                   <div className="flex items-start justify-between gap-2">
-                    <p className="font-semibold text-[#29232A] truncate">{c.last_name} {c.first_name}</p>
+                    <p className="font-semibold text-[var(--text)] truncate">{c.last_name} {c.first_name}</p>
                     {!c.is_active && <Badge variant="neutral">{uz.common.nofaol}</Badge>}
                   </div>
-                  <p className="text-xs text-[#766B73] mt-0.5">{formatAge(c.birth_date)} · {genderLabel(c.gender)}</p>
-                  {c.contact && <p className="text-xs text-[#B8AAB2] mt-1 truncate">{c.contact.name} · {c.contact.phone}</p>}
+                  <p className="text-xs text-[var(--text-2)] mt-0.5">{formatAge(c.birth_date)} · {genderLabel(c.gender)}</p>
+                  {c.contact && <p className="text-xs text-[var(--text-3)] mt-1 truncate">{c.contact.name} · {c.contact.phone}</p>}
                 </div>
               </Link>
             </li>
           ))}
         </ul>
       ) : (
-        <div className="relative bg-white rounded-xl border border-[#EDE3E8] overflow-x-auto">
+        <div className="relative bg-white rounded-xl border border-[var(--border)] overflow-x-auto">
           <table className="w-full text-sm" data-testid="children-table">
             <thead>
-              <tr className="border-b border-[#EDE3E8] bg-[#FAF5F8] text-left text-xs font-semibold text-[#766B73] uppercase tracking-wide">
+              <tr className="border-b border-[var(--border)] bg-[var(--surface-2)] text-left text-xs font-semibold text-[var(--text-2)] uppercase tracking-wide">
                 <th className="px-4 py-3">{uz.guruh.fish}</th>
                 <th className="px-4 py-3">{uz.guruh.tugilgan}</th>
                 <th className="px-4 py-3">{uz.guruh.yosh}</th>
@@ -164,18 +166,18 @@ export default function MeningGuruhimPage() {
                 <th className="px-4 py-3">{uz.guruh.holat}</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#F2ECF0]">
+            <tbody className="divide-y divide-[var(--border-2)]">
               {children.map((c) => (
-                <tr key={c.id} className="hover:bg-[#FAF5F8]">
+                <tr key={c.id} className="hover:bg-[var(--surface-2)]">
                   <td className="px-4 py-3">
-                    <Link href={`/tarbiyachi/bolalar/${c.id}`} className="font-medium text-[#29232A] hover:text-[var(--primary)] whitespace-nowrap">
+                    <Link href={`/tarbiyachi/bolalar/${c.id}`} className="font-medium text-[var(--text)] hover:text-[var(--primary)] whitespace-nowrap">
                       {c.last_name} {c.first_name}
                     </Link>
                   </td>
-                  <td className="px-4 py-3 text-[#766B73] whitespace-nowrap">{formatUzDate(c.birth_date)}</td>
-                  <td className="px-4 py-3 text-[#766B73] whitespace-nowrap">{formatAge(c.birth_date)}</td>
-                  <td className="px-4 py-3 text-[#766B73]">{genderLabel(c.gender)}</td>
-                  <td className="px-4 py-3 text-[#766B73] whitespace-nowrap">{c.contact ? `${c.contact.name} · ${c.contact.phone}` : "—"}</td>
+                  <td className="px-4 py-3 text-[var(--text-2)] whitespace-nowrap">{formatUzDate(c.birth_date)}</td>
+                  <td className="px-4 py-3 text-[var(--text-2)] whitespace-nowrap">{formatAge(c.birth_date)}</td>
+                  <td className="px-4 py-3 text-[var(--text-2)]">{genderLabel(c.gender)}</td>
+                  <td className="px-4 py-3 text-[var(--text-2)] whitespace-nowrap">{c.contact ? `${c.contact.name} · ${c.contact.phone}` : "—"}</td>
                   <td className="px-4 py-3">
                     <Badge variant={c.is_active ? "success" : "neutral"}>{c.is_active ? uz.common.faol : uz.common.nofaol}</Badge>
                   </td>

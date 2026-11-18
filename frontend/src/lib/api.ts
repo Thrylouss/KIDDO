@@ -1,4 +1,5 @@
 import { IS_DEMO, handleDemoRequest } from "./demo-data";
+import uz from "@/i18n";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/api";
 
@@ -65,13 +66,13 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
     if (res.status === 401 && !AUTH_ENDPOINTS.includes(path.split("?")[0])) {
       unauthorizedHandler?.();
     }
-    const error = await res.json().catch(() => ({ message: "Server xatosi" }));
+    const error = await res.json().catch(() => ({ message: uz.matn.server_xatosi }));
     // Vaqtinchalik parol almashtirilmagan — backend boshqa API'larni yopadi
     if (res.status === 403 && error?.code === "password_change_required"
         && typeof window !== "undefined" && window.location.pathname !== "/parol-almashtirish") {
       window.location.replace("/parol-almashtirish");
     }
-    throw Object.assign(new Error(error.message ?? "So'rov bajarilmadi"), {
+    throw Object.assign(new Error(error.message ?? uz.ui.sorov_bajarilmadi), {
       status: res.status,
       data: error,
     });
@@ -108,7 +109,7 @@ export async function submitDemoRequest(body: Record<string, unknown>): Promise<
     body: JSON.stringify(body),
   });
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw Object.assign(new Error(data.message ?? "So'rov bajarilmadi"), { status: res.status, data });
+  if (!res.ok) throw Object.assign(new Error(data.message ?? uz.ui.sorov_bajarilmadi), { status: res.status, data });
   return data as { message: string };
 }
 
@@ -138,7 +139,7 @@ export async function uploadFile<T>(path: string, form: FormData): Promise<T> {
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
     if (res.status === 401) unauthorizedHandler?.();
-    throw Object.assign(new Error(data.message ?? "Yuklab bo'lmadi"), { status: res.status, data });
+    throw Object.assign(new Error(data.message ?? uz.ui.yuklab_bolmadi), { status: res.status, data });
   }
   return data as T;
 }
@@ -151,8 +152,8 @@ export async function downloadFile(path: string, fallbackName: string): Promise<
   const res = await fetch(`${API_URL}${path}`, { credentials: "include", headers: { Accept: "*/*" } });
   if (!res.ok) {
     if (res.status === 401) unauthorizedHandler?.();
-    const error = await res.json().catch(() => ({ message: "Server xatosi" }));
-    throw Object.assign(new Error(error.message ?? "Yuklab bo'lmadi"), { status: res.status, data: error });
+    const error = await res.json().catch(() => ({ message: uz.matn.server_xatosi }));
+    throw Object.assign(new Error(error.message ?? uz.ui.yuklab_bolmadi), { status: res.status, data: error });
   }
   const name = /filename="?([^";]+)"?/.exec(res.headers.get("Content-Disposition") ?? "")?.[1] ?? fallbackName;
   const url  = URL.createObjectURL(await res.blob());

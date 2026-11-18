@@ -144,6 +144,7 @@ Route::prefix('v1')->group(function () {
             Route::get('/demo-requests/{id}',                 [SuperDemoRequestController::class, 'show'])->whereNumber('id');
             Route::patch('/demo-requests/{id}',               [SuperDemoRequestController::class, 'update'])->whereNumber('id');
             Route::post('/demo-requests/{id}/retry-telegram', [SuperDemoRequestController::class, 'retryTelegram'])->whereNumber('id')->middleware('throttle:20,1');
+            Route::delete('/demo-requests/{id}',              [SuperDemoRequestController::class, 'destroy'])->whereNumber('id')->middleware('throttle:30,1');
 
             // ── Billing (BILLING_ENABLED=false bo'lsa 404) ──
             Route::middleware('billing')->group(function () {

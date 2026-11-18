@@ -4,7 +4,7 @@ import Badge from "@/components/ui/Badge";
 import { attendanceBadge, childName, MEAL_LABELS } from "@/components/daily/dailyRules";
 import { formatDuration } from "@/lib/dates";
 import type { DailyChild, DailyDay } from "@/types";
-import uz from "@/i18n/uz";
+import uz from "@/i18n";
 
 function mealsText(child: DailyChild): string {
   return child.meals.length > 0
@@ -34,30 +34,30 @@ export default function DailySummary({ day }: { day: DailyDay }) {
     <div className="space-y-4">
       <dl className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
         {stats.map((s) => (
-          <div key={s.label} className="bg-white rounded-xl border border-[#EDE3E8] px-4 py-3">
-            <dt className="text-xs text-[#766B73]">{s.label}</dt>
-            <dd className="text-xl font-semibold text-[#29232A] mt-0.5">{s.value}</dd>
+          <div key={s.label} className="bg-white rounded-xl border border-[var(--border)] px-4 py-3">
+            <dt className="text-xs text-[var(--text-2)]">{s.label}</dt>
+            <dd className="text-xl font-semibold text-[var(--text)] mt-0.5">{s.value}</dd>
           </div>
         ))}
       </dl>
 
-      <div className="bg-white rounded-xl border border-[#EDE3E8] overflow-hidden">
+      <div className="bg-white rounded-xl border border-[var(--border)] overflow-hidden">
         {day.children.length === 0 ? (
-          <p className="p-8 text-center text-sm text-[#766B73]">{uz.kundalik.bola_yoq}</p>
+          <p className="p-8 text-center text-sm text-[var(--text-2)]">{uz.kundalik.bola_yoq}</p>
         ) : (
           <>
             {/* Mobil (< sm) */}
-            <ul className="sm:hidden divide-y divide-[#F2ECF0]">
+            <ul className="sm:hidden divide-y divide-[var(--border-2)]">
               {day.children.map((c) => {
                 const badge = attendanceBadge(c.attendance);
                 return (
                   <li key={c.id} className="px-4 py-3 space-y-1">
                     <div className="flex items-center justify-between gap-2">
-                      <p className="font-medium text-[#29232A]">{childName(c)}</p>
+                      <p className="font-medium text-[var(--text)]">{childName(c)}</p>
                       <Badge variant={badge.variant}>{badge.label}</Badge>
                     </div>
-                    <p className="text-xs text-[#766B73]">{uz.kundalik.ovqatlar}: {mealsText(c)}</p>
-                    <p className="text-xs text-[#766B73]">{uz.kundalik.uyqu}: {sleepText(c)}</p>
+                    <p className="text-xs text-[var(--text-2)]">{uz.kundalik.ovqatlar}: {mealsText(c)}</p>
+                    <p className="text-xs text-[var(--text-2)]">{uz.kundalik.uyqu}: {sleepText(c)}</p>
                   </li>
                 );
               })}
@@ -66,22 +66,22 @@ export default function DailySummary({ day }: { day: DailyDay }) {
             {/* Kompyuter (sm+) */}
             <table className="hidden sm:table w-full text-sm">
               <thead>
-                <tr className="border-b border-[#EDE3E8] bg-[#FAF5F8]">
-                  <th className="text-left px-5 py-3 text-xs font-semibold text-[#766B73] uppercase tracking-wide">{uz.kundalik.bola}</th>
-                  <th className="text-left px-5 py-3 text-xs font-semibold text-[#766B73] uppercase tracking-wide">{uz.kundalik.davomat}</th>
-                  <th className="text-left px-5 py-3 text-xs font-semibold text-[#766B73] uppercase tracking-wide">{uz.kundalik.ovqatlar}</th>
-                  <th className="text-left px-5 py-3 text-xs font-semibold text-[#766B73] uppercase tracking-wide">{uz.kundalik.uyqu}</th>
+                <tr className="border-b border-[var(--border)] bg-[var(--surface-2)]">
+                  <th className="text-left px-5 py-3 text-xs font-semibold text-[var(--text-2)] uppercase tracking-wide">{uz.kundalik.bola}</th>
+                  <th className="text-left px-5 py-3 text-xs font-semibold text-[var(--text-2)] uppercase tracking-wide">{uz.kundalik.davomat}</th>
+                  <th className="text-left px-5 py-3 text-xs font-semibold text-[var(--text-2)] uppercase tracking-wide">{uz.kundalik.ovqatlar}</th>
+                  <th className="text-left px-5 py-3 text-xs font-semibold text-[var(--text-2)] uppercase tracking-wide">{uz.kundalik.uyqu}</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#F2ECF0]">
+              <tbody className="divide-y divide-[var(--border-2)]">
                 {day.children.map((c) => {
                   const badge = attendanceBadge(c.attendance);
                   return (
                     <tr key={c.id}>
-                      <td className="px-5 py-3 font-medium text-[#29232A]">{childName(c)}</td>
+                      <td className="px-5 py-3 font-medium text-[var(--text)]">{childName(c)}</td>
                       <td className="px-5 py-3"><Badge variant={badge.variant}>{badge.label}</Badge></td>
-                      <td className="px-5 py-3 text-[#766B73]">{mealsText(c)}</td>
-                      <td className="px-5 py-3 text-[#766B73]">{sleepText(c)}</td>
+                      <td className="px-5 py-3 text-[var(--text-2)]">{mealsText(c)}</td>
+                      <td className="px-5 py-3 text-[var(--text-2)]">{sleepText(c)}</td>
                     </tr>
                   );
                 })}
@@ -92,9 +92,9 @@ export default function DailySummary({ day }: { day: DailyDay }) {
       </div>
 
       {day.activities.length > 0 && (
-        <div className="bg-white rounded-xl border border-[#EDE3E8] p-4">
-          <p className="text-sm font-semibold text-[#29232A] mb-2">{uz.kundalik.tab_mashgulot}</p>
-          <ul className="space-y-1 text-sm text-[#3D3240]">
+        <div className="bg-white rounded-xl border border-[var(--border)] p-4">
+          <p className="text-sm font-semibold text-[var(--text)] mb-2">{uz.kundalik.tab_mashgulot}</p>
+          <ul className="space-y-1 text-sm text-[var(--label)]">
             {day.activities.map((a) => (
               <li key={a.id}>{a.starts_at ? `${a.starts_at} — ` : ""}{a.title}</li>
             ))}

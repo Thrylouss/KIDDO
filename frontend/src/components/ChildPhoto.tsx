@@ -5,7 +5,7 @@ const sizes = {
 } as const;
 
 const palette: [string, string][] = [
-  ["#FDF2F6", "#8E315D"], ["#DCFCE7", "#166534"], ["#FEF3C7", "#92400E"], ["#E0F2FE", "#075985"], ["#F3E8FF", "#6B21A8"],
+  ["var(--primary-lt)", "var(--primary)"], ["var(--success-bg)", "var(--success)"], ["var(--warning-bg)", "var(--warning-text)"], ["#E0F2FE", "#075985"], ["#F3E8FF", "#6B21A8"],
 ];
 
 interface ChildPhotoProps {
@@ -28,7 +28,7 @@ export default function ChildPhoto({ firstName, lastName, photoUrl, size = "md" 
       <div
         role="img"
         aria-label={name}
-        className={`${sizes[size]} flex-shrink-0 rounded-2xl bg-cover bg-center bg-[#F2ECF0]`}
+        className={`${sizes[size]} flex-shrink-0 rounded-2xl bg-cover bg-center bg-[var(--border-2)]`}
         style={{ backgroundImage: `url("${photoUrl.replace(/"/g, "%22")}")` }}
       />
     );

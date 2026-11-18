@@ -13,7 +13,7 @@ import ConfirmDialog from "@/components/ConfirmDialog";
 import { canRecord, childName, DIRECTION_LABELS, recordErrors } from "@/components/daily/dailyRules";
 import type { DailyBasePath } from "@/components/daily/DailyManager";
 import type { ActivityDirection, DailyActivity, DailyDay } from "@/types";
-import uz from "@/i18n/uz";
+import uz from "@/i18n";
 
 interface ActivityPanelProps {
   day:      DailyDay;
@@ -33,7 +33,7 @@ interface ActivityForm {
 
 const emptyForm: ActivityForm = { title: "", direction: "", starts_at: "", ends_at: "", description: "", result: "", child_ids: [] };
 
-const textareaCls = "w-full rounded-lg border border-[#EDE3E8] bg-white px-3 py-2 text-sm text-[#29232A] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/30";
+const textareaCls = "w-full rounded-lg border border-[var(--border)] bg-white px-3 py-2 text-sm text-[var(--text)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/30";
 
 /** Guruh mashg'ulotlari: yo'nalish, vaqt va davomiylik, ishtirokchilar («Keldi» bolalar), tavsif va natija. */
 export default function ActivityPanel({ day, basePath, onSaved }: ActivityPanelProps) {
@@ -133,25 +133,25 @@ export default function ActivityPanel({ day, basePath, onSaved }: ActivityPanelP
       )}
 
       {day.activities.length === 0 ? (
-        <p className="bg-white rounded-xl border border-[#EDE3E8] p-8 text-center text-sm text-[#766B73]">{uz.kundalik.mashgulot_yoq}</p>
+        <p className="bg-white rounded-xl border border-[var(--border)] p-8 text-center text-sm text-[var(--text-2)]">{uz.kundalik.mashgulot_yoq}</p>
       ) : (
-        <ul className="bg-white rounded-xl border border-[#EDE3E8] divide-y divide-[#F2ECF0]">
+        <ul className="bg-white rounded-xl border border-[var(--border)] divide-y divide-[var(--border-2)]">
           {day.activities.map((a) => {
             const d = a.starts_at ? formatDuration(a.starts_at, a.ends_at) : null;
             return (
               <li key={a.id} className="px-4 py-3 flex flex-col sm:flex-row sm:items-start gap-2">
                 <div className="flex-1 min-w-0 space-y-1">
-                  <p className="font-medium text-[#29232A] text-sm">
+                  <p className="font-medium text-[var(--text)] text-sm">
                     {a.starts_at && <span className="text-[var(--primary)] mr-2">{a.starts_at}{a.ends_at ? `–${a.ends_at}` : ""}</span>}
                     {a.title}
                   </p>
                   <div className="flex flex-wrap gap-1.5 text-xs">
                     {a.direction && <Badge variant="info">{DIRECTION_LABELS[a.direction]}</Badge>}
-                    {d && <span className="text-[#766B73]">{uz.kundalik.davomiyligi}: {d}</span>}
-                    <span className="text-[#766B73]">{uz.kundalik.ishtirokchilar}: {(a.participants ?? []).length} {uz.kundalik.nafar}</span>
+                    {d && <span className="text-[var(--text-2)]">{uz.kundalik.davomiyligi}: {d}</span>}
+                    <span className="text-[var(--text-2)]">{uz.kundalik.ishtirokchilar}: {(a.participants ?? []).length} {uz.kundalik.nafar}</span>
                   </div>
-                  {a.description && <p className="text-sm text-[#766B73] whitespace-pre-line break-words">{a.description}</p>}
-                  {a.result && <p className="text-sm text-[#3D3240] whitespace-pre-line break-words"><span className="font-medium">{uz.kundalik.natija.replace(" (ixtiyoriy)", "")}:</span> {a.result}</p>}
+                  {a.description && <p className="text-sm text-[var(--text-2)] whitespace-pre-line break-words">{a.description}</p>}
+                  {a.result && <p className="text-sm text-[var(--label)] whitespace-pre-line break-words"><span className="font-medium">{uz.kundalik.natija.replace(" (ixtiyoriy)", "")}:</span> {a.result}</p>}
                 </div>
                 {day.editable && (
                   <div className="flex gap-1.5">
@@ -195,14 +195,14 @@ export default function ActivityPanel({ day, basePath, onSaved }: ActivityPanelP
 
           <div role="group" aria-labelledby="activity-children-label">
             <p id="activity-children-label" className="text-sm font-medium text-[var(--text)]">{uz.kundalik.ishtirokchilar}</p>
-            <p className="text-xs text-[#766B73] mb-2">{uz.kundalik.ishtirokchi_izoh}</p>
+            <p className="text-xs text-[var(--text-2)] mb-2">{uz.kundalik.ishtirokchi_izoh}</p>
             {present.length === 0 ? (
-              <p className="text-sm text-[#B8AAB2]">{uz.kundalik.qoida}</p>
+              <p className="text-sm text-[var(--text-3)]">{uz.kundalik.qoida}</p>
             ) : (
               <ul className="grid grid-cols-1 sm:grid-cols-2 gap-1 max-h-48 overflow-y-auto">
                 {present.map((c) => (
                   <li key={c.id}>
-                    <label className="flex items-center gap-2 rounded-lg px-2 py-1 text-sm text-[#29232A]">
+                    <label className="flex items-center gap-2 rounded-lg px-2 py-1 text-sm text-[var(--text)]">
                       <input type="checkbox" checked={form.child_ids.includes(c.id)} onChange={() => toggleChild(c.id)} />
                       {childName(c)}
                     </label>
@@ -221,10 +221,10 @@ export default function ActivityPanel({ day, basePath, onSaved }: ActivityPanelP
             <label htmlFor="activity-result" className="text-sm font-medium text-[var(--text)]">{uz.kundalik.natija}</label>
             <textarea id="activity-result" rows={2} maxLength={1000} value={form.result}
               onChange={(e) => setForm({ ...form, result: e.target.value })} className={textareaCls} />
-            {errors.result?.[0] && <p className="text-xs text-[#B91C1C]">{errors.result[0]}</p>}
+            {errors.result?.[0] && <p className="text-xs text-[var(--error-text)]">{errors.result[0]}</p>}
           </div>
           {(error || rules.length > 0) && (
-            <div role="alert" className="text-sm text-[#B91C1C] space-y-1">
+            <div role="alert" className="text-sm text-[var(--error-text)] space-y-1">
               {error && <p>{error}</p>}
               {rules.map((r) => <p key={r}>{r}</p>)}
             </div>

@@ -7,7 +7,7 @@ import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import Modal from "@/components/ui/Modal";
 import Select from "@/components/ui/Select";
-import uz from "@/i18n/uz";
+import uz from "@/i18n";
 
 const t = uz.bildirishnoma;
 
@@ -60,15 +60,15 @@ export default function SendNotificationModal({ orgId, open, onClose, onSent }: 
         <div className="flex flex-col gap-1.5">
           <label htmlFor="notif-message" className="text-sm font-medium text-[var(--text)]">{t.matn} <span className="text-[#EF4444]">*</span></label>
           <textarea id="notif-message" rows={4} maxLength={2000} value={message} onChange={(e) => setMessage(e.target.value)}
-            className="w-full rounded-lg border border-[#EDE3E8] bg-white px-3 py-2 text-sm text-[#29232A] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/30" />
-          {errors.message?.[0] && <p className="text-xs text-[#B91C1C]">{errors.message[0]}</p>}
+            className="w-full rounded-lg border border-[var(--border)] bg-white px-3 py-2 text-sm text-[var(--text)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/30" />
+          {errors.message?.[0] && <p className="text-xs text-[var(--error-text)]">{errors.message[0]}</p>}
         </div>
         <Select id="notif-type" label={t.tur} value={type} onChange={(e) => setType(e.target.value)}>
           <option value="info">{t.tur_info}</option>
           <option value="warning">{t.tur_warning}</option>
           <option value="alert">{t.tur_alert}</option>
         </Select>
-        {error && <p role="alert" className="text-sm text-[#B91C1C]">{error}</p>}
+        {error && <p role="alert" className="text-sm text-[var(--error-text)]">{error}</p>}
       </form>
     </Modal>
   );

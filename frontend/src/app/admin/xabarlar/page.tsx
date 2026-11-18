@@ -11,8 +11,9 @@ import Modal from "@/components/ui/Modal";
 import Badge from "@/components/ui/Badge";
 import EmptyState from "@/components/ui/EmptyState";
 import Pagination from "@/components/ui/Pagination";
-import uz from "@/i18n/uz";
+import uz, { intlLocale } from "@/i18n";
 import type { Notification, OrganizationSummary } from "@/types";
+import { useLocale } from "@/contexts/PreferencesContext";
 
 const PER_PAGE = 50;
 
@@ -25,7 +26,7 @@ interface NotificationsResponse {
 // ── Helpers ────────────────────────────────────────────────────────────────
 
 function fmtDate(iso: string): string {
-  return new Date(iso).toLocaleString("uz-UZ", {
+  return new Date(iso).toLocaleString(intlLocale(), {
     year: "numeric", month: "short", day: "numeric",
     hour: "2-digit", minute: "2-digit",
   });
@@ -125,7 +126,7 @@ function SendModal({
           required
         />
         <div>
-          <label className="block text-sm font-medium text-[#3D3240] mb-1.5">
+          <label className="block text-sm font-medium text-[var(--label)] mb-1.5">
             {uz.super_admin.xabar_matni} <span className="text-[#EF4444]">*</span>
           </label>
           <textarea
@@ -133,8 +134,8 @@ function SendModal({
             onChange={(e) => setForm({ ...form, message: e.target.value })}
             required
             rows={4}
-            className="w-full rounded-xl border border-[#EDE3E8] bg-white px-4 py-3 text-sm text-[#29232A] placeholder:text-[#B8AAB2] outline-none transition-all focus:border-[#8E315D] focus:ring-2 focus:ring-[#8E315D]/15 resize-none"
-            placeholder="Xabar matnini kiriting..."
+            className="w-full rounded-xl border border-[var(--border)] bg-white px-4 py-3 text-sm text-[var(--text)] placeholder:text-[var(--text-3)] outline-none transition-all focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--primary)]/15 resize-none"
+            placeholder={uz.matn.xabar_matnini_kiriting}
           />
           {errors.message?.[0] && (
             <p className="mt-1 text-xs text-[#EF4444]">{errors.message[0]}</p>
@@ -162,7 +163,7 @@ function SendModal({
             <option key={o.id} value={o.id}>{o.name}</option>
           ))}
         </Select>
-        {formError && <p role="alert" className="text-sm text-[#B91C1C]">{formError}</p>}
+        {formError && <p role="alert" className="text-sm text-[var(--error-text)]">{formError}</p>}
       </form>
     </Modal>
   );
@@ -171,6 +172,7 @@ function SendModal({
 // ── Page ───────────────────────────────────────────────────────────────────
 
 export default function XabarlarPage() {
+  useLocale(); // til almashganda holat saqlangan holda qayta render
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount,   setUnreadCount]   = useState(0);
   const [orgs,          setOrgs]          = useState<OrganizationSummary[]>([]);
@@ -248,9 +250,9 @@ export default function XabarlarPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <h1 className="text-2xl font-bold text-[#29232A]">{uz.super_admin.xabarlar}</h1>
+          <h1 className="text-2xl font-bold text-[var(--text)]">{uz.super_admin.xabarlar}</h1>
           {unreadCount > 0 && (
-            <span className="inline-flex items-center justify-center h-6 min-w-[24px] px-1.5 rounded-full bg-[#8E315D] text-white text-xs font-bold">
+            <span className="inline-flex items-center justify-center h-6 min-w-[24px] px-1.5 rounded-full bg-[var(--primary)] text-white text-xs font-bold">
               {unreadCount}
             </span>
           )}
@@ -272,33 +274,33 @@ export default function XabarlarPage() {
       </div>
 
       {IS_DEMO && (
-        <div data-testid="demo-banner" className="flex items-center gap-2.5 rounded-xl bg-[#FDF2F6] border border-[#EDE3E8] px-4 py-3 text-sm text-[#742548]">
+        <div data-testid="demo-banner" className="flex items-center gap-2.5 rounded-xl bg-[var(--primary-lt)] border border-[var(--border)] px-4 py-3 text-sm text-[var(--primary-h)]">
           <svg className="h-4 w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-          <span><strong>Demo rejimi</strong> — xabarlar saqlanmaydi, yuborish simulyatsiya qilinadi.</span>
+          <span><strong>{uz.matn.demo_rejimi_2}</strong> {uz.matn.xabarlar_saqlanmaydi_yuborish_simulyatsi}</span>
         </div>
       )}
 
-      {orgsError && <p role="alert" className="text-xs text-[#B45309]">{uz.common.bogchalar_yuklanmadi}</p>}
-      {actionError && <p role="alert" className="rounded-lg bg-[#FEF2F2] px-4 py-3 text-sm text-[#B91C1C]">{actionError}</p>}
+      {orgsError && <p role="alert" className="text-xs text-[var(--warning-text)]">{uz.common.bogchalar_yuklanmadi}</p>}
+      {actionError && <p role="alert" className="rounded-lg bg-[var(--error-soft)] px-4 py-3 text-sm text-[var(--error-text)]">{actionError}</p>}
 
       {/* List */}
-      <div className="bg-white rounded-xl border border-[#EDE3E8] overflow-hidden">
+      <div className="bg-white rounded-xl border border-[var(--border)] overflow-hidden">
         {loading ? (
-          <div className="animate-pulse divide-y divide-[#F2ECF0]">
+          <div className="animate-pulse divide-y divide-[var(--border-2)]">
             {[...Array(5)].map((_, i) => (
               <div key={i} className="flex items-start gap-4 px-5 py-4">
-                <div className="h-9 w-9 rounded-lg bg-[#F2ECF0] flex-shrink-0" />
+                <div className="h-9 w-9 rounded-lg bg-[var(--border-2)] flex-shrink-0" />
                 <div className="flex-1 space-y-2">
-                  <div className="h-4 w-48 bg-[#F2ECF0] rounded" />
-                  <div className="h-3 w-64 bg-[#F2ECF0] rounded" />
+                  <div className="h-4 w-48 bg-[var(--border-2)] rounded" />
+                  <div className="h-3 w-64 bg-[var(--border-2)] rounded" />
                 </div>
               </div>
             ))}
           </div>
         ) : error ? (
           <div role="alert" data-testid="xabarlar-error" className="py-12 px-5 text-center">
-            <p className="text-sm text-[#B91C1C]">{error}</p>
-            <button onClick={load} className="mt-3 px-4 py-2 text-sm font-medium text-[#8E315D] border border-[#EDE3E8] rounded-lg hover:bg-[#FFF9F5] transition-colors">
+            <p className="text-sm text-[var(--error-text)]">{error}</p>
+            <button onClick={load} className="mt-3 px-4 py-2 text-sm font-medium text-[var(--primary)] border border-[var(--border)] rounded-lg hover:bg-[var(--hover)] transition-colors">
               {uz.common.qayta_urinish}
             </button>
           </div>
@@ -308,20 +310,20 @@ export default function XabarlarPage() {
           </div>
         ) : (
           <>
-          <ul className="divide-y divide-[#F2ECF0]">
+          <ul className="divide-y divide-[var(--border-2)]">
             {notifications.map((n) => (
               <li
                 key={n.id}
                 className={`flex items-start gap-4 px-5 py-4 transition-colors ${
-                  n.is_read ? "bg-white" : "bg-[#FAFAFF]"
+                  n.is_read ? "bg-white" : "bg-[var(--surface-2)]"
                 }`}
               >
                 {/* Type icon */}
                 <div className={`h-9 w-9 rounded-lg flex items-center justify-center flex-shrink-0 ${
-                  n.type === "alert"   ? "bg-[#FEF2F2] text-[#EF4444]" :
-                  n.type === "warning" ? "bg-[#FFFBEB] text-[#F59E0B]" :
-                  n.type === "payment" ? "bg-[#F0FDF4] text-[#22C55E]" :
-                                        "bg-[#FDF2F6] text-[#8E315D]"
+                  n.type === "alert"   ? "bg-[var(--error-soft)] text-[#EF4444]" :
+                  n.type === "warning" ? "bg-[var(--warning-soft)] text-[#F59E0B]" :
+                  n.type === "payment" ? "bg-[var(--success-soft)] text-[#22C55E]" :
+                                        "bg-[var(--primary-lt)] text-[var(--primary)]"
                 }`}>
                   {n.type === "alert" ? (
                     <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -346,23 +348,23 @@ export default function XabarlarPage() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <p className={`text-sm font-semibold ${n.is_read ? "text-[#3D3240]" : "text-[#29232A]"}`}>
+                      <p className={`text-sm font-semibold ${n.is_read ? "text-[var(--label)]" : "text-[var(--text)]"}`}>
                         {n.title}
                       </p>
                       <Badge variant={typeVariant(n.type)}>{typeLabel(n.type)}</Badge>
                       {!n.is_read && (
-                        <span className="h-2 w-2 rounded-full bg-[#8E315D] flex-shrink-0" />
+                        <span className="h-2 w-2 rounded-full bg-[var(--primary)] flex-shrink-0" />
                       )}
                     </div>
-                    <span className="text-xs text-[#B8AAB2] flex-shrink-0">{fmtDate(n.created_at)}</span>
+                    <span className="text-xs text-[var(--text-3)] flex-shrink-0">{fmtDate(n.created_at)}</span>
                   </div>
-                  <p className="text-sm text-[#766B73] mt-0.5 leading-relaxed">{n.message}</p>
+                  <p className="text-sm text-[var(--text-2)] mt-0.5 leading-relaxed">{n.message}</p>
                   {!n.is_read && (
                     <button
                       onClick={() => markRead(n.id)}
-                      className="mt-2 text-xs text-[#8E315D] hover:text-[#742548] font-medium transition-colors"
+                      className="mt-2 text-xs text-[var(--primary)] hover:text-[var(--primary-h)] font-medium transition-colors"
                     >
-                      {uz.super_admin.o_qildi} deb belgilash
+                      {uz.super_admin.o_qildi} {uz.matn.deb_belgilash}
                     </button>
                   )}
                 </div>

@@ -7,7 +7,7 @@ import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import Select from "@/components/ui/Select";
 import Modal from "@/components/ui/Modal";
-import uz from "@/i18n/uz";
+import uz, { intlLocale, plural } from "@/i18n";
 import type { OrganizationDetail, OrgPayment, ApiResponse, Plan } from "@/types";
 
 /**
@@ -51,12 +51,12 @@ function payLabel(status: string): string {
 }
 
 function formatMoney(amount: string | number, currency = "UZS"): string {
-  return `${Number(amount).toLocaleString("uz-UZ")} ${currency}`;
+  return `${Number(amount).toLocaleString(intlLocale())} ${currency}`;
 }
 
 function fmtDate(iso: string | null): string {
   if (!iso) return "—";
-  return new Date(iso).toLocaleDateString("uz-UZ", { year: "numeric", month: "short", day: "numeric" });
+  return new Date(iso).toLocaleDateString(intlLocale(), { year: "numeric", month: "short", day: "numeric" });
 }
 
 function SectionCard({ title, children, action }: {
@@ -64,9 +64,9 @@ function SectionCard({ title, children, action }: {
   action?: React.ReactNode;
 }) {
   return (
-    <div className="bg-white rounded-xl border border-[#EDE3E8]">
-      <div className="flex items-center justify-between px-6 py-4 border-b border-[#EDE3E8]">
-        <h2 className="text-sm font-semibold text-[#29232A]">{title}</h2>
+    <div className="bg-white rounded-xl border border-[var(--border)]">
+      <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--border)]">
+        <h2 className="text-sm font-semibold text-[var(--text)]">{title}</h2>
         {action}
       </div>
       {children}
@@ -76,9 +76,9 @@ function SectionCard({ title, children, action }: {
 
 function Row({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <div className="flex items-center justify-between py-2.5 border-b border-[#F2ECF0] last:border-0">
-      <span className="text-sm text-[#766B73]">{label}</span>
-      <div className="text-sm font-medium text-[#29232A]">{children}</div>
+    <div className="flex items-center justify-between py-2.5 border-b border-[var(--border-2)] last:border-0">
+      <span className="text-sm text-[var(--text-2)]">{label}</span>
+      <div className="text-sm font-medium text-[var(--text)]">{children}</div>
     </div>
   );
 }
@@ -197,7 +197,7 @@ export default function OrgBillingPanel({ org, onChanged }: { org: OrganizationD
             action={
               <button
                 onClick={() => setShowRenew(true)}
-                className="text-xs text-[#8E315D] hover:text-[#742548] font-medium transition-colors"
+                className="text-xs text-[var(--primary)] hover:text-[var(--primary-h)] font-medium transition-colors"
               >
                 {uz.super_admin.obuna_uzaytirish}
               </button>
@@ -217,12 +217,12 @@ export default function OrgBillingPanel({ org, onChanged }: { org: OrganizationD
                   </Row>
                   <Row label={uz.super_admin.qolgan}>
                     <span className={daysLeft <= 7 ? "text-[#EF4444] font-semibold" : daysLeft <= 14 ? "text-[#F59E0B] font-semibold" : ""}>
-                      {daysLeft} {uz.super_admin.qolgan_kun}
+                      {daysLeft} {plural(daysLeft, uz.super_admin.qolgan_kun)}
                     </span>
                   </Row>
                   {sub.ends_at && (
                     <div className="pt-3">
-                      <div className="w-full h-1.5 bg-[#F2ECF0] rounded-full overflow-hidden">
+                      <div className="w-full h-1.5 bg-[var(--border-2)] rounded-full overflow-hidden">
                         <div
                           className={`h-full rounded-full transition-all duration-500 ${daysBarColor}`}
                           style={{ width: `${daysBarPct}%` }}
@@ -232,7 +232,7 @@ export default function OrgBillingPanel({ org, onChanged }: { org: OrganizationD
                   )}
                 </div>
               ) : (
-                <p className="text-sm text-[#B8AAB2] py-2">{uz.super_admin.obuna_yoq}</p>
+                <p className="text-sm text-[var(--text-3)] py-2">{uz.super_admin.obuna_yoq}</p>
               )}
             </div>
           </SectionCard>
@@ -240,33 +240,33 @@ export default function OrgBillingPanel({ org, onChanged }: { org: OrganizationD
           {/* Payment history */}
           <SectionCard title={uz.super_admin.tolov_tarixi}>
             {payments.length === 0 ? (
-              <div className="px-6 py-8 text-center text-sm text-[#B8AAB2]">
+              <div className="px-6 py-8 text-center text-sm text-[var(--text-3)]">
                 {uz.super_admin.hech_tolov_yoq}
               </div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b border-[#F2ECF0] bg-[#FAF5F8]">
-                      <th className="text-left px-5 py-3 text-xs font-semibold text-[#766B73] uppercase tracking-wide">{uz.super_admin.sana}</th>
-                      <th className="text-left px-5 py-3 text-xs font-semibold text-[#766B73] uppercase tracking-wide">{uz.super_admin.summa}</th>
-                      <th className="text-left px-5 py-3 text-xs font-semibold text-[#766B73] uppercase tracking-wide hidden sm:table-cell">{uz.super_admin.tarif}</th>
-                      <th className="text-left px-5 py-3 text-xs font-semibold text-[#766B73] uppercase tracking-wide">{uz.super_admin.holat}</th>
+                    <tr className="border-b border-[var(--border-2)] bg-[var(--surface-2)]">
+                      <th className="text-left px-5 py-3 text-xs font-semibold text-[var(--text-2)] uppercase tracking-wide">{uz.super_admin.sana}</th>
+                      <th className="text-left px-5 py-3 text-xs font-semibold text-[var(--text-2)] uppercase tracking-wide">{uz.super_admin.summa}</th>
+                      <th className="text-left px-5 py-3 text-xs font-semibold text-[var(--text-2)] uppercase tracking-wide hidden sm:table-cell">{uz.super_admin.tarif}</th>
+                      <th className="text-left px-5 py-3 text-xs font-semibold text-[var(--text-2)] uppercase tracking-wide">{uz.super_admin.holat}</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-[#F2ECF0]">
+                  <tbody className="divide-y divide-[var(--border-2)]">
                     {payments.map((p) => (
-                      <tr key={p.id} className="hover:bg-[#FAF5F8] transition-colors">
+                      <tr key={p.id} className="hover:bg-[var(--surface-2)] transition-colors">
                         <td className="px-5 py-3.5">
-                          <p className="text-[#29232A]">{fmtDate(p.paid_at ?? p.created_at)}</p>
+                          <p className="text-[var(--text)]">{fmtDate(p.paid_at ?? p.created_at)}</p>
                           {p.invoice_number && (
                             <p className="text-xs text-[#C9B8C0] font-mono mt-0.5">{p.invoice_number}</p>
                           )}
                         </td>
-                        <td className="px-5 py-3.5 font-medium text-[#29232A]">
+                        <td className="px-5 py-3.5 font-medium text-[var(--text)]">
                           {formatMoney(p.amount, p.currency)}
                         </td>
-                        <td className="px-5 py-3.5 text-[#766B73] hidden sm:table-cell">
+                        <td className="px-5 py-3.5 text-[var(--text-2)] hidden sm:table-cell">
                           {p.plan_name ?? "—"}
                         </td>
                         <td className="px-5 py-3.5">
@@ -281,10 +281,10 @@ export default function OrgBillingPanel({ org, onChanged }: { org: OrganizationD
           </SectionCard>
 
 
-      <div className="bg-white rounded-xl border border-[#EDE3E8] p-5 space-y-2">
+      <div className="bg-white rounded-xl border border-[var(--border)] p-5 space-y-2">
             <button
               onClick={() => setShowRenew(true)}
-              className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-xl border border-[#EDE3E8] text-sm font-medium text-[#3D3240] hover:bg-[#FFF9F5] transition-colors"
+              className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-xl border border-[var(--border)] text-sm font-medium text-[var(--label)] hover:bg-[var(--hover)] transition-colors"
             >
               <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -295,7 +295,7 @@ export default function OrgBillingPanel({ org, onChanged }: { org: OrganizationD
             {sub && sub.status !== "cancelled" && sub.status !== "expired" && (
               <button
                 onClick={() => setShowChangePlan(true)}
-                className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-xl border border-[#EDE3E8] text-sm font-medium text-[#3D3240] hover:bg-[#FFF9F5] transition-colors"
+                className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-xl border border-[var(--border)] text-sm font-medium text-[var(--label)] hover:bg-[var(--hover)] transition-colors"
               >
                 <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
@@ -307,12 +307,12 @@ export default function OrgBillingPanel({ org, onChanged }: { org: OrganizationD
             {sub && sub.status !== "cancelled" && (
               <button
                 onClick={() => setShowCancel(true)}
-                className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-xl border border-[#FEF3C7] text-sm font-medium text-[#92400E] hover:bg-[#FFFBEB] transition-colors"
+                className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-xl border border-[var(--warning-bg)] text-sm font-medium text-[var(--warning-text)] hover:bg-[var(--warning-soft)] transition-colors"
               >
                 <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                Obunani bekor qilish
+                {uz.matn.obunani_bekor_qilish}
               </button>
             )}
       </div>
@@ -337,10 +337,10 @@ export default function OrgBillingPanel({ org, onChanged }: { org: OrganizationD
             error={renewErrors.plan_id?.[0]}
             required
           >
-            <option value="">— Tanlang —</option>
+            <option value="">{uz.matn.tanlang}</option>
             {plans.map((p) => (
               <option key={p.id} value={p.id}>
-                {p.name} — {Number(p.price_monthly).toLocaleString("uz-UZ")} UZS
+                {p.name} — {Number(p.price_monthly).toLocaleString(intlLocale())} UZS
               </option>
             ))}
           </Select>
@@ -361,15 +361,15 @@ export default function OrgBillingPanel({ org, onChanged }: { org: OrganizationD
             onChange={(e) => setRenewForm({ ...renewForm, payment_status: e.target.value })}
             required
           >
-            <option value="paid">To&apos;langan</option>
-            <option value="pending">Kutilmoqda</option>
+            <option value="paid">{uz.matn.tolangan}</option>
+            <option value="pending">{uz.matn.kutilmoqda}</option>
           </Select>
 
           <Input
             label={uz.super_admin.eslatma}
             value={renewForm.notes}
             onChange={(e) => setRenewForm({ ...renewForm, notes: e.target.value })}
-            placeholder="Ixtiyoriy izoh..."
+            placeholder={uz.matn.ixtiyoriy_izoh}
           />
         </form>
       </Modal>
@@ -388,9 +388,9 @@ export default function OrgBillingPanel({ org, onChanged }: { org: OrganizationD
       >
         <form id="change-plan-form" onSubmit={handleChangePlan} className="space-y-4">
           {sub?.plan && (
-            <div className="px-4 py-3 bg-[#FAF5F8] rounded-lg">
-              <p className="text-xs text-[#B8AAB2] mb-1">{uz.super_admin.joriy_tarif}</p>
-              <p className="text-sm font-medium text-[#29232A]">{sub.plan.name}</p>
+            <div className="px-4 py-3 bg-[var(--surface-2)] rounded-lg">
+              <p className="text-xs text-[var(--text-3)] mb-1">{uz.super_admin.joriy_tarif}</p>
+              <p className="text-sm font-medium text-[var(--text)]">{sub.plan.name}</p>
             </div>
           )}
           <Select
@@ -399,14 +399,14 @@ export default function OrgBillingPanel({ org, onChanged }: { org: OrganizationD
             onChange={(e) => setChangePlanForm({ plan_id: e.target.value })}
             required
           >
-            <option value="">— Tanlang —</option>
+            <option value="">{uz.matn.tanlang}</option>
             {plans.map((p) => (
               <option key={p.id} value={p.id}>
-                {p.name} — {Number(p.price_monthly).toLocaleString("uz-UZ")} UZS
+                {p.name} — {Number(p.price_monthly).toLocaleString(intlLocale())} UZS
               </option>
             ))}
           </Select>
-          <p className="text-xs text-[#B8AAB2]">{uz.super_admin.darhol} kuchga kiradi</p>
+          <p className="text-xs text-[var(--text-3)]">{uz.super_admin.darhol} {uz.matn.kuchga_kiradi}</p>
         </form>
       </Modal>
 
@@ -414,7 +414,7 @@ export default function OrgBillingPanel({ org, onChanged }: { org: OrganizationD
       <Modal
         open={showCancel}
         onClose={() => { setShowCancel(false); setCancelForm({ reason: "" }); }}
-        title="Obunani bekor qilish"
+        title={uz.matn.obunani_bekor_qilish}
         footer={
           <>
             <Button variant="secondary" onClick={() => setShowCancel(false)}>{uz.common.bekor_qilish}</Button>
@@ -425,17 +425,17 @@ export default function OrgBillingPanel({ org, onChanged }: { org: OrganizationD
         }
       >
         <form id="cancel-form" onSubmit={handleCancel} className="space-y-4">
-          <p className="text-sm text-[#766B73]">{uz.super_admin.obuna_bekor_tasdiq}</p>
+          <p className="text-sm text-[var(--text-2)]">{uz.super_admin.obuna_bekor_tasdiq}</p>
           <div>
-            <label className="block text-sm font-medium text-[#3D3240] mb-1.5">
-              {uz.super_admin.bekor_qilish_sababi} (ixtiyoriy)
+            <label className="block text-sm font-medium text-[var(--label)] mb-1.5">
+              {uz.super_admin.bekor_qilish_sababi} {uz.matn.ixtiyoriy}
             </label>
             <textarea
               value={cancelForm.reason}
               onChange={(e) => setCancelForm({ reason: e.target.value })}
               rows={3}
-              placeholder="Sabab..."
-              className="w-full px-3.5 py-2.5 text-sm border border-[#EDE3E8] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#8E315D]/20 focus:border-[#8E315D] resize-none"
+              placeholder={uz.matn.sabab}
+              className="w-full px-3.5 py-2.5 text-sm border border-[var(--border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-[var(--primary)] resize-none"
             />
           </div>
         </form>

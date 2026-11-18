@@ -16,8 +16,9 @@ import EmptyState from "@/components/ui/EmptyState";
 import PageHeader from "@/components/ui/PageHeader";
 import { SkeletonTable } from "@/components/ui/Skeleton";
 import type { ApiResponse, Child, ParentProfile, ParentRelation } from "@/types";
-import uz from "@/i18n/uz";
+import uz from "@/i18n";
 import { useReadOnly } from "@/lib/readOnly";
+import { useLocale } from "@/contexts/PreferencesContext";
 
 interface ParentForm {
   first_name:    string;
@@ -46,6 +47,7 @@ function isActive(p: ParentProfile): boolean {
 }
 
 export default function OtaOnalarPage() {
+  useLocale(); // til almashganda holat saqlangan holda qayta render
   const readOnly = useReadOnly();
   const [parents, setParents] = useState<ParentProfile[]>([]);
   const [loading, setLoading] = useState(true);
@@ -183,7 +185,7 @@ export default function OtaOnalarPage() {
       )}
 
       {/* Tor ekranda jadval karta ichida gorizontal aylanadi — amal tugmalari kesilmasin */}
-      <div className="relative bg-white rounded-xl border border-[#EDE3E8] overflow-x-auto">
+      <div className="relative bg-white rounded-xl border border-[var(--border)] overflow-x-auto">
         {loading ? (
           <SkeletonTable rows={5} />
         ) : error ? (
@@ -198,43 +200,43 @@ export default function OtaOnalarPage() {
         ) : (
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-[#EDE3E8] bg-[#FAF5F8]">
-                <th className="text-left px-5 py-3.5 text-xs font-semibold text-[#766B73] uppercase tracking-wide">Ota-ona</th>
-                <th className="text-left px-5 py-3.5 text-xs font-semibold text-[#766B73] uppercase tracking-wide hidden sm:table-cell">{uz.ota_onalar.telefon}</th>
-                <th className="text-left px-5 py-3.5 text-xs font-semibold text-[#766B73] uppercase tracking-wide hidden md:table-cell">{uz.ota_onalar.qarindoshlik}</th>
-                <th className="text-left px-5 py-3.5 text-xs font-semibold text-[#766B73] uppercase tracking-wide">{uz.ota_onalar.bola}</th>
-                <th className="text-left px-5 py-3.5 text-xs font-semibold text-[#766B73] uppercase tracking-wide">{uz.ota_onalar.holat}</th>
+              <tr className="border-b border-[var(--border)] bg-[var(--surface-2)]">
+                <th className="text-left px-5 py-3.5 text-xs font-semibold text-[var(--text-2)] uppercase tracking-wide">{uz.matn.ota_ona}</th>
+                <th className="text-left px-5 py-3.5 text-xs font-semibold text-[var(--text-2)] uppercase tracking-wide hidden sm:table-cell">{uz.ota_onalar.telefon}</th>
+                <th className="text-left px-5 py-3.5 text-xs font-semibold text-[var(--text-2)] uppercase tracking-wide hidden md:table-cell">{uz.ota_onalar.qarindoshlik}</th>
+                <th className="text-left px-5 py-3.5 text-xs font-semibold text-[var(--text-2)] uppercase tracking-wide">{uz.ota_onalar.bola}</th>
+                <th className="text-left px-5 py-3.5 text-xs font-semibold text-[var(--text-2)] uppercase tracking-wide">{uz.ota_onalar.holat}</th>
                 <th className="px-5 py-3.5"><span className="sr-only">{uz.common.amallar}</span></th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#F2ECF0]">
+            <tbody className="divide-y divide-[var(--border-2)]">
               {parents.map((p) => (
-                <tr key={p.id} className="hover:bg-[#FAF5F8] transition-colors duration-100">
+                <tr key={p.id} className="hover:bg-[var(--surface-2)] transition-colors duration-100">
                   <td className="px-5 py-4">
                     <div className="flex items-center gap-3">
                       <Avatar name={`${p.first_name} ${p.last_name}`} size="sm" />
                       <div>
-                        <p className="font-medium text-[#29232A]">{p.last_name} {p.first_name}</p>
-                        {p.user?.username && <p className="text-xs text-[#766B73]">{uz.ota_onalar.login}: <span className="font-mono">{p.user.username}</span></p>}
-                        {p.user?.must_change_password && <p className="text-xs text-[#92400E]">{uz.akkaunt.almashtirilmagan}</p>}
-                        <p className="text-xs text-[#B8AAB2] sm:hidden">{p.phone}</p>
+                        <p className="font-medium text-[var(--text)]">{p.last_name} {p.first_name}</p>
+                        {p.user?.username && <p className="text-xs text-[var(--text-2)]">{uz.ota_onalar.login}: <span className="font-mono">{p.user.username}</span></p>}
+                        {p.user?.must_change_password && <p className="text-xs text-[var(--warning-text)]">{uz.akkaunt.almashtirilmagan}</p>}
+                        <p className="text-xs text-[var(--text-3)] sm:hidden">{p.phone}</p>
                       </div>
                     </div>
                   </td>
-                  <td className="px-5 py-4 text-[#766B73] hidden sm:table-cell">{p.phone ?? <span className="text-[#D9C9D1]">—</span>}</td>
-                  <td className="px-5 py-4 text-[#766B73] hidden md:table-cell">{RELATION_LABELS[p.relation_type] ?? p.relation_type}</td>
+                  <td className="px-5 py-4 text-[var(--text-2)] hidden sm:table-cell">{p.phone ?? <span className="text-[var(--border-strong)]">—</span>}</td>
+                  <td className="px-5 py-4 text-[var(--text-2)] hidden md:table-cell">{RELATION_LABELS[p.relation_type] ?? p.relation_type}</td>
                   <td className="px-5 py-4">
                     {p.children && p.children.length > 0 ? (
                       <div className="flex flex-wrap gap-1.5">
                         {p.children.map((c) => (
-                          <span key={c.id} className="inline-flex items-center gap-1 text-xs bg-[#F2ECF0] text-[#3D3240] px-2 py-0.5 rounded-full">
-                            <span className="h-1.5 w-1.5 rounded-full bg-[#B8AAB2]" />
+                          <span key={c.id} className="inline-flex items-center gap-1 text-xs bg-[var(--border-2)] text-[var(--label)] px-2 py-0.5 rounded-full">
+                            <span className="h-1.5 w-1.5 rounded-full bg-[var(--text-3)]" />
                             {c.last_name} {c.first_name}
                           </span>
                         ))}
                       </div>
                     ) : (
-                      <span className="text-[#D9C9D1]">—</span>
+                      <span className="text-[var(--border-strong)]">—</span>
                     )}
                   </td>
                   <td className="px-5 py-4">
@@ -273,7 +275,7 @@ export default function OtaOnalarPage() {
       >
         <form id="parent-form" onSubmit={handleSubmit} className="space-y-4">
           {IS_DEMO && (
-            <p role="note" className="rounded-lg bg-[#FFFBEB] border border-[#FDE68A] text-[#92400E] text-sm px-3 py-2">{uz.common.demo_saqlanmaydi}</p>
+            <p role="note" className="rounded-lg bg-[var(--warning-soft)] border border-[var(--warning-border)] text-[var(--warning-text)] text-sm px-3 py-2">{uz.common.demo_saqlanmaydi}</p>
           )}
           <div className="grid grid-cols-2 gap-3">
             <Input
@@ -342,9 +344,9 @@ export default function OtaOnalarPage() {
               ))}
             </Select>
           )}
-          {!editing && <p className="text-xs text-[#766B73]">{uz.ota_onalar.parol_tizim}</p>}
+          {!editing && <p className="text-xs text-[var(--text-2)]">{uz.ota_onalar.parol_tizim}</p>}
           {formError && (
-            <p role="alert" className="text-sm text-[#B91C1C]">{formError}</p>
+            <p role="alert" className="text-sm text-[var(--error-text)]">{formError}</p>
           )}
         </form>
       </Modal>

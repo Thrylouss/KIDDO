@@ -5,7 +5,7 @@ import { errorMessage } from "@/lib/apiErrors";
 import { IS_DEMO } from "@/lib/demo-data";
 import Button from "@/components/ui/Button";
 import Modal from "@/components/ui/Modal";
-import uz from "@/i18n/uz";
+import uz from "@/i18n";
 
 interface ConfirmDialogProps {
   open:         boolean;
@@ -56,10 +56,10 @@ export default function ConfirmDialog({ open, title, message, confirmLabel, dang
     >
       <div className="space-y-3">
         {IS_DEMO && (
-          <p role="note" className="rounded-lg bg-[#FFFBEB] border border-[#FDE68A] text-[#92400E] text-sm px-3 py-2">{uz.common.demo_saqlanmaydi}</p>
+          <p role="note" className="rounded-lg bg-[var(--warning-soft)] border border-[var(--warning-border)] text-[var(--warning-text)] text-sm px-3 py-2">{uz.common.demo_saqlanmaydi}</p>
         )}
-        <p className="text-sm text-[#3D3240]">{message}</p>
-        {error && <p role="alert" className="text-sm text-[#B91C1C]">{error}</p>}
+        <p className="text-sm text-[var(--label)]">{message}</p>
+        {error && <p role="alert" className="text-sm text-[var(--error-text)]">{error}</p>}
       </div>
     </Modal>
   );

@@ -11,7 +11,7 @@ import Select from "@/components/ui/Select";
 import PageHeader from "@/components/ui/PageHeader";
 import { Skeleton } from "@/components/ui/Skeleton";
 import type { SentMessage } from "@/types";
-import uz from "@/i18n/uz";
+import uz from "@/i18n";
 import { useReadOnly } from "@/lib/readOnly";
 
 type Audience = "child" | "group";
@@ -130,7 +130,7 @@ export default function MessagesManager({ messagesPath, childrenPath, descriptio
     return (
       <div className="max-w-5xl mx-auto">
         <PageHeader title={uz.xabarlar.sarlavha} description={description} />
-        <p role="note" className="rounded-lg bg-[#FFFBEB] border border-[#FDE68A] text-[#92400E] text-sm px-4 py-3">{uz.kundalik.demo}</p>
+        <p role="note" className="rounded-lg bg-[var(--warning-soft)] border border-[var(--warning-border)] text-[var(--warning-text)] text-sm px-4 py-3">{uz.kundalik.demo}</p>
       </div>
     );
   }
@@ -138,22 +138,22 @@ export default function MessagesManager({ messagesPath, childrenPath, descriptio
   return (
     <div className="max-w-5xl mx-auto space-y-5">
       <PageHeader title={uz.xabarlar.sarlavha} description={description} />
-      <p role="note" className="rounded-lg bg-[#FAF5F8] border border-[#EDE3E8] text-[#766B73] text-xs px-4 py-2.5">{uz.xabarlar.izoh}</p>
+      <p role="note" className="rounded-lg bg-[var(--surface-2)] border border-[var(--border)] text-[var(--text-2)] text-xs px-4 py-2.5">{uz.xabarlar.izoh}</p>
 
       {loading ? (
         <div className="space-y-3" aria-busy="true"><Skeleton className="h-48" /><Skeleton className="h-32" /></div>
       ) : loadErr ? (
-        <div className="bg-white rounded-xl border border-[#EDE3E8] p-8 text-center">
-          <p role="alert" className="text-sm text-[#766B73] mb-3">{loadErr}</p>
+        <div className="bg-white rounded-xl border border-[var(--border)] p-8 text-center">
+          <p role="alert" className="text-sm text-[var(--text-2)] mb-3">{loadErr}</p>
           <Button size="sm" variant="secondary" onClick={load}>{uz.common.qayta_urinish}</Button>
         </div>
       ) : groups.length === 0 ? (
-        <p className="bg-white rounded-xl border border-[#EDE3E8] p-8 text-center text-sm text-[#766B73]">{noGroupsText}</p>
+        <p className="bg-white rounded-xl border border-[var(--border)] p-8 text-center text-sm text-[var(--text-2)]">{noGroupsText}</p>
       ) : (
         <>
           {/* Ko'rish rejimida yangi xabar yozilmaydi — faqat yuborilganlar tarixi */}
-          {!readOnly && <form onSubmit={send} className="bg-white rounded-2xl border border-[#EDE3E8] p-5 space-y-4" aria-label={uz.xabarlar.yangi} noValidate>
-            <h2 className="text-sm font-semibold text-[#29232A]">{uz.xabarlar.yangi}</h2>
+          {!readOnly && <form onSubmit={send} className="bg-white rounded-2xl border border-[var(--border)] p-5 space-y-4" aria-label={uz.xabarlar.yangi} noValidate>
+            <h2 className="text-sm font-semibold text-[var(--text)]">{uz.xabarlar.yangi}</h2>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <Select id="msg-audience" label={uz.xabarlar.kimga} value={audience} onChange={(e) => { setAudience(e.target.value as Audience); setErrors({}); }}>
                 <option value="child">{uz.xabarlar.bitta_bola}</option>
@@ -175,13 +175,13 @@ export default function MessagesManager({ messagesPath, childrenPath, descriptio
             <div className="flex flex-col gap-1.5">
               <label htmlFor="msg-body" className="text-sm font-medium text-[var(--text)]">{uz.xabarlar.matn} <span className="text-[#EF4444]">*</span></label>
               <textarea id="msg-body" rows={4} maxLength={2000} value={body} onChange={(e) => setBody(e.target.value)}
-                className={`w-full rounded-lg border bg-white px-3 py-2 text-sm text-[#29232A] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/30 ${errors.body ? "border-[#EF4444]" : "border-[#EDE3E8]"}`} />
+                className={`w-full rounded-lg border bg-white px-3 py-2 text-sm text-[var(--text)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/30 ${errors.body ? "border-[#EF4444]" : "border-[var(--border)]"}`} />
               <div className="flex justify-between text-xs">
-                <span className="text-[#B91C1C]">{errors.body?.[0]}</span>
-                <span className="text-[#B8AAB2]">{body.length}/2000</span>
+                <span className="text-[var(--error-text)]">{errors.body?.[0]}</span>
+                <span className="text-[var(--text-3)]">{body.length}/2000</span>
               </div>
             </div>
-            {error && <p role="alert" className="text-sm text-[#B91C1C]">{error}</p>}
+            {error && <p role="alert" className="text-sm text-[var(--error-text)]">{error}</p>}
             {success && <p role="status" className="text-sm text-[var(--success)]">{success}</p>}
             <div className="flex justify-end">
               <Button type="submit" loading={sending}>{uz.xabarlar.yuborish}</Button>
@@ -190,36 +190,36 @@ export default function MessagesManager({ messagesPath, childrenPath, descriptio
 
           <section className="space-y-3">
             <div className="flex flex-wrap items-center justify-between gap-3">
-              <h2 className="text-sm font-semibold text-[#29232A]">{uz.xabarlar.tarix}</h2>
+              <h2 className="text-sm font-semibold text-[var(--text)]">{uz.xabarlar.tarix}</h2>
               <div className="w-full sm:w-72">
                 <Input id="msg-search" aria-label={uz.xabarlar.qidirish} placeholder={uz.xabarlar.qidirish} value={search} onChange={(e) => setSearch(e.target.value)} />
               </div>
             </div>
             {filtered.length === 0 ? (
-              <p className="bg-white rounded-xl border border-[#EDE3E8] p-8 text-center text-sm text-[#766B73]">{uz.xabarlar.tarix_yoq}</p>
+              <p className="bg-white rounded-xl border border-[var(--border)] p-8 text-center text-sm text-[var(--text-2)]">{uz.xabarlar.tarix_yoq}</p>
             ) : (
               <ul className="space-y-2" data-testid="message-history">
                 {filtered.map((m) => (
-                  <li key={m.id} className="bg-white rounded-xl border border-[#EDE3E8] p-4">
+                  <li key={m.id} className="bg-white rounded-xl border border-[var(--border)] p-4">
                     <div className="flex flex-wrap items-start justify-between gap-2">
                       <div className="min-w-0">
-                        <p className="text-sm font-semibold text-[#29232A]">
+                        <p className="text-sm font-semibold text-[var(--text)]">
                           {m.audience === "group" ? `${uz.xabarlar.guruhga}: ${m.group?.name ?? ""}` : `${m.child?.last_name} ${m.child?.first_name}`}
                         </p>
-                        <p className="text-xs text-[#B8AAB2]">{formatDateTime(m.created_at)}{m.sender ? ` · ${m.sender}` : ""}</p>
+                        <p className="text-xs text-[var(--text-3)]">{formatDateTime(m.created_at)}{m.sender ? ` · ${m.sender}` : ""}</p>
                       </div>
                       <Badge variant={m.read_count === m.recipients_count ? "success" : "neutral"}>
                         {m.read_count}/{m.recipients_count} {uz.xabarlar.oqildi}
                       </Badge>
                     </div>
-                    {m.subject && <p className="mt-2 text-sm font-medium text-[#3D3240]">{m.subject}</p>}
-                    <p className="mt-1 text-sm text-[#3D3240] whitespace-pre-line break-words">{m.body}</p>
+                    {m.subject && <p className="mt-2 text-sm font-medium text-[var(--label)]">{m.subject}</p>}
+                    <p className="mt-1 text-sm text-[var(--label)] whitespace-pre-line break-words">{m.body}</p>
                     <button type="button" className="mt-2 text-xs text-[var(--primary)] hover:underline"
                       aria-expanded={openId === m.id} onClick={() => setOpenId(openId === m.id ? null : m.id)}>
                       {uz.xabarlar.qabul_qiluvchilar} ({m.recipients_count})
                     </button>
                     {openId === m.id && (
-                      <ul className="mt-2 space-y-1 text-xs text-[#766B73]">
+                      <ul className="mt-2 space-y-1 text-xs text-[var(--text-2)]">
                         {m.recipients.map((r, i) => (
                           <li key={i} className="flex flex-wrap justify-between gap-2">
                             <span>{r.name}{r.child ? ` (${r.child})` : ""}</span>

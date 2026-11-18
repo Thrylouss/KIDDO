@@ -5,7 +5,7 @@ import { formatDate, formatUzPhone, orgAddress } from "@/lib/organizations";
 import OrgActionsMenu, { type OrgActionHandlers } from "./OrgActionsMenu";
 import { OrgStatusBadge, OrgTypeBadge } from "./OrgBadges";
 import Badge from "@/components/ui/Badge";
-import uz from "@/i18n/uz";
+import uz from "@/i18n";
 import type { OrganizationSummary } from "@/types";
 
 const t = uz.bogchalar;
@@ -21,19 +21,19 @@ export default function OrgCards({ orgs, selected, onToggle, handlers }: {
         const phone = org.phone ?? org.director_phone;
         return (
           <li key={org.id} className={`min-w-0 flex flex-col rounded-2xl border bg-white p-5 transition hover:shadow-[0_12px_30px_-18px_rgba(142,49,93,0.35)]
-            ${selected.has(org.id) ? "border-[#8E315D]" : "border-[#EDE3E8]"}`}>
+            ${selected.has(org.id) ? "border-[var(--primary)]" : "border-[var(--border)]"}`}>
             <div className="flex items-start gap-3">
               <input type="checkbox" aria-label={`${t.tanlash}: ${org.name}`} checked={selected.has(org.id)} onChange={() => onToggle(org.id)}
-                className="mt-1 h-4 w-4 accent-[#8E315D]" />
-              <div className="h-10 w-10 flex-shrink-0 rounded-xl bg-[#FDF2F6] flex items-center justify-center text-[#8E315D] font-semibold" aria-hidden="true">
+                className="mt-1 h-4 w-4 accent-[var(--primary)]" />
+              <div className="h-10 w-10 flex-shrink-0 rounded-xl bg-[var(--primary-lt)] flex items-center justify-center text-[var(--primary)] font-semibold" aria-hidden="true">
                 {org.name.charAt(0).toUpperCase()}
               </div>
               <div className="min-w-0 flex-1">
-                <Link href={`/admin/bogchalar/${org.id}`} className="block font-semibold leading-snug text-[#29232A] hover:text-[#8E315D] line-clamp-2" title={org.name}>
+                <Link href={`/admin/bogchalar/${org.id}`} className="block font-semibold leading-snug text-[var(--text)] hover:text-[var(--primary)] line-clamp-2" title={org.name}>
                   {org.name}
                 </Link>
                 {(org.number || org.official_code) && (
-                  <p className="mt-0.5 text-xs text-[#B8AAB2] truncate">
+                  <p className="mt-0.5 text-xs text-[var(--text-3)] truncate">
                     {[org.number && `${t.raqami_qisqa} ${org.number}`, org.official_code].filter(Boolean).join(" · ")}
                   </p>
                 )}
@@ -47,26 +47,26 @@ export default function OrgCards({ orgs, selected, onToggle, handlers }: {
             </div>
 
             <dl className="mt-4 space-y-1.5 text-sm">
-              <div className="flex gap-2"><dt className="w-24 flex-shrink-0 text-[#B8AAB2]">{t.col_masul}</dt>
-                <dd className="truncate text-[#3D3240]" title={org.director_name ?? ""}>{org.director_name ?? org.admin?.name ?? "—"}</dd></div>
-              <div className="flex gap-2"><dt className="w-24 flex-shrink-0 text-[#B8AAB2]">{t.col_telefon}</dt>
-                <dd>{phone ? <a href={`tel:${phone}`} className="text-[#3D3240] hover:text-[#8E315D]">{formatUzPhone(phone)}</a> : "—"}</dd></div>
-              <div className="flex gap-2"><dt className="w-24 flex-shrink-0 text-[#B8AAB2]">{t.col_manzil}</dt>
-                <dd className="line-clamp-2 text-[#766B73]" title={address}>{address || "—"}</dd></div>
+              <div className="flex gap-2"><dt className="w-24 flex-shrink-0 text-[var(--text-3)]">{t.col_masul}</dt>
+                <dd className="truncate text-[var(--label)]" title={org.director_name ?? ""}>{org.director_name ?? org.admin?.name ?? "—"}</dd></div>
+              <div className="flex gap-2"><dt className="w-24 flex-shrink-0 text-[var(--text-3)]">{t.col_telefon}</dt>
+                <dd>{phone ? <a href={`tel:${phone}`} className="text-[var(--label)] hover:text-[var(--primary)]">{formatUzPhone(phone)}</a> : "—"}</dd></div>
+              <div className="flex gap-2"><dt className="w-24 flex-shrink-0 text-[var(--text-3)]">{t.col_manzil}</dt>
+                <dd className="line-clamp-2 text-[var(--text-2)]" title={address}>{address || "—"}</dd></div>
             </dl>
 
-            <div className="mt-4 grid grid-cols-3 gap-2 rounded-xl bg-[#FAF5F8] p-2 text-center">
+            <div className="mt-4 grid grid-cols-3 gap-2 rounded-xl bg-[var(--surface-2)] p-2 text-center">
               {[[t.col_bolalar, org.children_count], [t.col_guruhlar, org.groups_count], [t.col_tarbiyachilar, org.teachers_count]].map(([label, value]) => (
                 <div key={label as string}>
-                  <p className="text-lg font-bold text-[#29232A] tabular-nums">{(value as number | null) ?? "—"}</p>
-                  <p className="text-[11px] text-[#766B73] truncate">{label as string}</p>
+                  <p className="text-lg font-bold text-[var(--text)] tabular-nums">{(value as number | null) ?? "—"}</p>
+                  <p className="text-[11px] text-[var(--text-2)] truncate">{label as string}</p>
                 </div>
               ))}
             </div>
 
             <div className="mt-4 flex items-center justify-between gap-2 pt-1">
-              <span className="text-xs text-[#B8AAB2]">{t.royxatdan_otgan}: {formatDate(org.created_at)}</span>
-              <Link href={`/admin/bogchalar/${org.id}`} className="text-sm font-semibold text-[#8E315D] hover:underline">{t.batafsil} →</Link>
+              <span className="text-xs text-[var(--text-3)]">{t.royxatdan_otgan}: {formatDate(org.created_at)}</span>
+              <Link href={`/admin/bogchalar/${org.id}`} className="text-sm font-semibold text-[var(--primary)] hover:underline">{t.batafsil} →</Link>
             </div>
           </li>
         );

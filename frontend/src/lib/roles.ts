@@ -1,12 +1,12 @@
-import uz from "@/i18n/uz";
+import uz from "@/i18n";
 import type { Role, User } from "@/types";
 
 /** Foydalanuvchiga ko'rinadigan rol nomi (xom `user.role` qiymati ko'rsatilmasin). */
 export const ROLE_LABELS: Record<Role, string> = {
-  super_admin: uz.foydalanuvchilar.rol_super_admin,
-  admin:       uz.foydalanuvchilar.rol_admin,
-  teacher:     uz.foydalanuvchilar.rol_teacher,
-  parent:      uz.foydalanuvchilar.rol_parent,
+  get super_admin() { return uz.foydalanuvchilar.rol_super_admin; },
+  get admin() { return uz.foydalanuvchilar.rol_admin; },
+  get teacher() { return uz.foydalanuvchilar.rol_teacher; },
+  get parent() { return uz.foydalanuvchilar.rol_parent; },
 };
 
 export function roleLabel(role: Role | null | undefined): string {

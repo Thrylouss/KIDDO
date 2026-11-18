@@ -63,6 +63,20 @@ class DemoRequestController extends SuperAdminController
         return response()->json(['data' => $this->service->resource($demo->load(['handler', 'organization'])), 'message' => 'Saqlandi.']);
     }
 
+    /** Arizani o'chirish — bog'langan demo tashkilot yoki faol demo bo'lsa rad etiladi (409). */
+    public function destroy(Request $request, int $id): JsonResponse
+    {
+        $demo   = DemoRequest::findOrFail($id);
+        $reason = $this->service->deletionBlocker($demo);
+        if ($reason !== null) {
+            return response()->json(['message' => $reason, 'code' => 'demo_request_linked'], 409);
+        }
+
+        $this->service->delete($demo, $request->user(), $request->ip());
+
+        return response()->json(['message' => "Ariza o'chirildi."]);
+    }
+
     public function retryTelegram(int $id): JsonResponse
     {
         $demo = DemoRequest::findOrFail($id);

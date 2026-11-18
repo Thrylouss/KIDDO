@@ -6,14 +6,15 @@ import Badge from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import Modal from "@/components/ui/Modal";
-import uz from "@/i18n/uz";
+import uz, { intlLocale, plural } from "@/i18n";
 import type { Plan, ApiResponse } from "@/types";
+import { useLocale } from "@/contexts/PreferencesContext";
 
 // ── Helpers ────────────────────────────────────────────────────────
 
 function formatMoney(amount: string | number | null): string {
   if (amount === null || amount === "" || amount === undefined) return "—";
-  return `${Number(amount).toLocaleString("uz-UZ")} UZS`;
+  return `${Number(amount).toLocaleString(intlLocale())} UZS`;
 }
 
 // ── Form type ──────────────────────────────────────────────────────
@@ -65,6 +66,7 @@ function planToForm(plan: Plan): PlanForm {
 // ── Page ───────────────────────────────────────────────────────────
 
 export default function TariflarPage() {
+  useLocale(); // til almashganda holat saqlangan holda qayta render
   const [plans,   setPlans]   = useState<Plan[]>([]);
   const [loading, setLoading] = useState(true);
   const [error,   setError]   = useState(false);
@@ -177,7 +179,7 @@ export default function TariflarPage() {
     } catch (err: unknown) {
       const e = err as { data?: { message?: string }; status?: number };
       if (e?.status === 422 || e?.data?.message) {
-        setDeactError(e?.data?.message ?? "Bu tarifda faol obunalar bor, faolsizlantirish mumkin emas.");
+        setDeactError(e?.data?.message ?? uz.matn.bu_tarifda_faol_obunalar_bor);
       } else {
         setDeactError(uz.xatolar.server_xato);
       }
@@ -194,8 +196,8 @@ export default function TariflarPage() {
       {/* Header */}
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-[#29232A]">{uz.super_admin.tariflar}</h1>
-          <p className="text-sm text-[#B8AAB2] mt-0.5">Obuna tariflarini boshqaring</p>
+          <h1 className="text-2xl font-bold text-[var(--text)]">{uz.super_admin.tariflar}</h1>
+          <p className="text-sm text-[var(--text-3)] mt-0.5">{uz.matn.obuna_tariflarini_boshqaring}</p>
         </div>
         <Button onClick={openCreate} icon={
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -208,12 +210,12 @@ export default function TariflarPage() {
 
       {/* Deactivate error banner */}
       {deactError && (
-        <div className="flex items-center gap-3 bg-[#FEF2F2] border border-[#FECACA] text-[#991B1B] rounded-xl px-5 py-3.5 text-sm">
+        <div className="flex items-center gap-3 bg-[var(--error-soft)] border border-[var(--error-border)] text-[var(--error)] rounded-xl px-5 py-3.5 text-sm">
           <svg className="h-4 w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126z" />
           </svg>
           {deactError}
-          <button onClick={() => setDeactError("")} className="ml-auto text-[#991B1B] hover:text-[#7F1D1D]">
+          <button onClick={() => setDeactError("")} className="ml-auto text-[var(--error)] hover:text-[var(--error)]">
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
             </svg>
@@ -225,11 +227,11 @@ export default function TariflarPage() {
       {loading && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 animate-pulse">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="bg-white rounded-xl border border-[#EDE3E8] p-6 space-y-4">
-              <div className="h-6 w-32 bg-[#F2ECF0] rounded" />
-              <div className="h-8 w-40 bg-[#F2ECF0] rounded" />
+            <div key={i} className="bg-white rounded-xl border border-[var(--border)] p-6 space-y-4">
+              <div className="h-6 w-32 bg-[var(--border-2)] rounded" />
+              <div className="h-8 w-40 bg-[var(--border-2)] rounded" />
               <div className="space-y-2">
-                {[1, 2, 3].map(j => <div key={j} className="h-3 w-full bg-[#F2ECF0] rounded" />)}
+                {[1, 2, 3].map(j => <div key={j} className="h-3 w-full bg-[var(--border-2)] rounded" />)}
               </div>
             </div>
           ))}
@@ -238,8 +240,8 @@ export default function TariflarPage() {
 
       {/* Error */}
       {error && !loading && (
-        <div className="bg-white rounded-xl border border-[#EDE3E8] p-12 text-center space-y-3">
-          <p className="text-[#766B73]">{uz.common.yuklash_xatosi}</p>
+        <div className="bg-white rounded-xl border border-[var(--border)] p-12 text-center space-y-3">
+          <p className="text-[var(--text-2)]">{uz.common.yuklash_xatosi}</p>
           <Button onClick={load}>{uz.common.qayta_urinish}</Button>
         </div>
       )}
@@ -248,21 +250,21 @@ export default function TariflarPage() {
       {!loading && !error && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {plans.length === 0 ? (
-            <div className="lg:col-span-3 bg-white rounded-xl border border-[#EDE3E8] p-16 text-center">
-              <svg className="h-10 w-10 text-[#D9C9D1] mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+            <div className="lg:col-span-3 bg-white rounded-xl border border-[var(--border)] p-16 text-center">
+              <svg className="h-10 w-10 text-[var(--border-strong)] mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
               </svg>
-              <p className="text-[#B8AAB2] text-sm">Hali tarif yaratilmagan</p>
+              <p className="text-[var(--text-3)] text-sm">{uz.matn.hali_tarif_yaratilmagan}</p>
             </div>
           ) : (
             plans.map((plan) => (
-              <div key={plan.id} className="bg-white rounded-xl border border-[#EDE3E8] p-6 flex flex-col gap-4">
+              <div key={plan.id} className="bg-white rounded-xl border border-[var(--border)] p-6 flex flex-col gap-4">
                 {/* Card header */}
                 <div className="flex items-start justify-between gap-2">
                   <div>
-                    <h3 className="text-lg font-bold text-[#29232A]">{plan.name}</h3>
+                    <h3 className="text-lg font-bold text-[var(--text)]">{plan.name}</h3>
                     {plan.slug && (
-                      <p className="text-xs text-[#B8AAB2] font-mono mt-0.5">{plan.slug}</p>
+                      <p className="text-xs text-[var(--text-3)] font-mono mt-0.5">{plan.slug}</p>
                     )}
                   </div>
                   <Badge variant={plan.is_active ? "success" : "neutral"}>
@@ -272,54 +274,54 @@ export default function TariflarPage() {
 
                 {/* Price */}
                 <div>
-                  <p className="text-2xl font-bold text-[#29232A]">
+                  <p className="text-2xl font-bold text-[var(--text)]">
                     {formatMoney(plan.price_monthly)}
-                    <span className="text-sm font-normal text-[#B8AAB2]">/oy</span>
+                    <span className="text-sm font-normal text-[var(--text-3)]">{uz.matn.oy}</span>
                   </p>
                   {plan.price_yearly && (
-                    <p className="text-sm text-[#766B73] mt-0.5">{formatMoney(plan.price_yearly)}/yil</p>
+                    <p className="text-sm text-[var(--text-2)] mt-0.5">{formatMoney(plan.price_yearly)}{uz.matn.yil}</p>
                   )}
                 </div>
 
                 {/* Description */}
                 {plan.description && (
-                  <p className="text-sm text-[#766B73] leading-relaxed">{plan.description}</p>
+                  <p className="text-sm text-[var(--text-2)] leading-relaxed">{plan.description}</p>
                 )}
 
                 {/* Limits */}
-                <div className="space-y-1.5 border-t border-[#F2ECF0] pt-3">
+                <div className="space-y-1.5 border-t border-[var(--border-2)] pt-3">
                   <div className="flex items-center justify-between text-sm">
-                    <span className="text-[#B8AAB2]">{uz.super_admin.max_bolalar}</span>
-                    <span className="font-medium text-[#3D3240]">
-                      {plan.max_children !== null ? plan.max_children : "Cheksiz"}
+                    <span className="text-[var(--text-3)]">{uz.super_admin.max_bolalar}</span>
+                    <span className="font-medium text-[var(--label)]">
+                      {plan.max_children !== null ? plan.max_children : uz.matn.cheksiz}
                     </span>
                   </div>
                   <div className="flex items-center justify-between text-sm">
-                    <span className="text-[#B8AAB2]">{uz.super_admin.max_guruhlar}</span>
-                    <span className="font-medium text-[#3D3240]">
-                      {plan.max_groups !== null ? plan.max_groups : "Cheksiz"}
+                    <span className="text-[var(--text-3)]">{uz.super_admin.max_guruhlar}</span>
+                    <span className="font-medium text-[var(--label)]">
+                      {plan.max_groups !== null ? plan.max_groups : uz.matn.cheksiz}
                     </span>
                   </div>
                   <div className="flex items-center justify-between text-sm">
-                    <span className="text-[#B8AAB2]">{uz.super_admin.max_tarbiyachilar}</span>
-                    <span className="font-medium text-[#3D3240]">
-                      {plan.max_teachers !== null ? plan.max_teachers : "Cheksiz"}
+                    <span className="text-[var(--text-3)]">{uz.super_admin.max_tarbiyachilar}</span>
+                    <span className="font-medium text-[var(--label)]">
+                      {plan.max_teachers !== null ? plan.max_teachers : uz.matn.cheksiz}
                     </span>
                   </div>
                   <div className="flex items-center justify-between text-sm">
-                    <span className="text-[#B8AAB2]">{uz.super_admin.sinov_kunlar}</span>
-                    <span className="font-medium text-[#3D3240]">{plan.trial_days} kun</span>
+                    <span className="text-[var(--text-3)]">{uz.super_admin.sinov_kunlar}</span>
+                    <span className="font-medium text-[var(--label)]">{plan.trial_days} {plural(plan.trial_days, uz.matn.kun)}</span>
                   </div>
                 </div>
 
                 {/* Subscriptions count */}
                 {plan.subscriptions_count !== undefined && (
-                  <div className="flex items-center gap-2 bg-[#FAF5F8] rounded-lg px-3 py-2">
-                    <svg className="h-4 w-4 text-[#8E315D]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <div className="flex items-center gap-2 bg-[var(--surface-2)] rounded-lg px-3 py-2">
+                    <svg className="h-4 w-4 text-[var(--primary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                     </svg>
-                    <span className="text-sm text-[#766B73]">
-                      <strong className="text-[#29232A]">{plan.subscriptions_count}</strong> ta faol obuna
+                    <span className="text-sm text-[var(--text-2)]">
+                      <strong className="text-[var(--text)]">{plan.subscriptions_count}</strong> {uz.matn.ta_faol_obuna}
                     </span>
                   </div>
                 )}
@@ -328,7 +330,7 @@ export default function TariflarPage() {
                 {plan.features && plan.features.length > 0 && (
                   <div className="flex flex-wrap gap-1.5 pt-1">
                     {plan.features.map((f, i) => (
-                      <span key={i} className="text-xs bg-[#FDF2F6] text-[#8E315D] px-2 py-0.5 rounded-full">
+                      <span key={i} className="text-xs bg-[var(--primary-lt)] text-[var(--primary)] px-2 py-0.5 rounded-full">
                         {f}
                       </span>
                     ))}
@@ -339,7 +341,7 @@ export default function TariflarPage() {
                 <div className="flex items-center gap-2 pt-1">
                   <button
                     onClick={() => openEdit(plan)}
-                    className="flex-1 px-4 py-2 text-sm font-medium border border-[#EDE3E8] rounded-lg text-[#3D3240] hover:bg-[#FFF9F5] transition-colors"
+                    className="flex-1 px-4 py-2 text-sm font-medium border border-[var(--border)] rounded-lg text-[var(--label)] hover:bg-[var(--hover)] transition-colors"
                   >
                     {uz.super_admin.plan_tahrirlash}
                   </button>
@@ -347,7 +349,7 @@ export default function TariflarPage() {
                     <button
                       onClick={() => handleDeactivate(plan)}
                       disabled={deactivating === plan.id}
-                      className="flex-1 px-4 py-2 text-sm font-medium border border-[#FEF3C7] rounded-lg text-[#92400E] hover:bg-[#FFFBEB] transition-colors disabled:opacity-50"
+                      className="flex-1 px-4 py-2 text-sm font-medium border border-[var(--warning-bg)] rounded-lg text-[var(--warning-text)] hover:bg-[var(--warning-soft)] transition-colors disabled:opacity-50"
                     >
                       {deactivating === plan.id ? "..." : uz.super_admin.plan_faolsizlantir}
                     </button>
@@ -355,7 +357,7 @@ export default function TariflarPage() {
                     <button
                       onClick={() => handleActivate(plan)}
                       disabled={activating === plan.id}
-                      className="flex-1 px-4 py-2 text-sm font-medium border border-[#D1FAE5] rounded-lg text-[#065F46] hover:bg-[#ECFDF5] transition-colors disabled:opacity-50"
+                      className="flex-1 px-4 py-2 text-sm font-medium border border-[#D1FAE5] rounded-lg text-[#065F46] hover:bg-[var(--success-bg)] transition-colors disabled:opacity-50"
                     >
                       {activating === plan.id ? "..." : uz.super_admin.faollashtirish}
                     </button>
@@ -382,7 +384,7 @@ export default function TariflarPage() {
       >
         <form id="plan-form" onSubmit={handleSave} className="space-y-4">
           {saveError && (
-            <div className="bg-[#FEF2F2] border border-[#FECACA] text-[#991B1B] rounded-lg px-4 py-3 text-sm">
+            <div className="bg-[var(--error-soft)] border border-[var(--error-border)] text-[var(--error)] rounded-lg px-4 py-3 text-sm">
               {saveError}
             </div>
           )}
@@ -394,10 +396,10 @@ export default function TariflarPage() {
               onChange={(e) => f("name", e.target.value)}
               error={formErrors.name?.[0]}
               required
-              placeholder="Masalan: Standart"
+              placeholder={uz.matn.masalan_standart}
             />
             <div>
-              <label className="block text-sm font-medium text-[#3D3240] mb-1.5">
+              <label className="block text-sm font-medium text-[var(--label)] mb-1.5">
                 {uz.super_admin.oylik_narx} (UZS) <span className="text-[#EF4444]">*</span>
               </label>
               <input
@@ -408,10 +410,10 @@ export default function TariflarPage() {
                 onChange={(e) => f("price_monthly", e.target.value)}
                 required
                 placeholder="599000"
-                className={`w-full rounded-lg border bg-white px-3.5 py-2.5 text-sm text-[#29232A] placeholder:text-[#B8AAB2] outline-none transition-all duration-150 ${
+                className={`w-full rounded-lg border bg-white px-3.5 py-2.5 text-sm text-[var(--text)] placeholder:text-[var(--text-3)] outline-none transition-all duration-150 ${
                   formErrors.price_monthly
                     ? "border-[#EF4444] focus:ring-2 focus:ring-[#EF4444]/20"
-                    : "border-[#EDE3E8] focus:border-[#8E315D] focus:ring-2 focus:ring-[#8E315D]/15"
+                    : "border-[var(--border)] focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--primary)]/15"
                 }`}
               />
               {formErrors.price_monthly?.[0] && (
@@ -422,7 +424,7 @@ export default function TariflarPage() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-[#3D3240] mb-1.5">
+              <label className="block text-sm font-medium text-[var(--label)] mb-1.5">
                 {uz.super_admin.yillik_narx} (UZS)
               </label>
               <input
@@ -431,8 +433,8 @@ export default function TariflarPage() {
                 step="1000"
                 value={form.price_yearly}
                 onChange={(e) => f("price_yearly", e.target.value)}
-                placeholder="Ixtiyoriy"
-                className="w-full rounded-lg border border-[#EDE3E8] bg-white px-3.5 py-2.5 text-sm text-[#29232A] placeholder:text-[#B8AAB2] outline-none focus:border-[#8E315D] focus:ring-2 focus:ring-[#8E315D]/15 transition-all"
+                placeholder={uz.matn.ixtiyoriy_2}
+                className="w-full rounded-lg border border-[var(--border)] bg-white px-3.5 py-2.5 text-sm text-[var(--text)] placeholder:text-[var(--text-3)] outline-none focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--primary)]/15 transition-all"
               />
             </div>
             <Input
@@ -446,28 +448,28 @@ export default function TariflarPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-[#3D3240] mb-1.5">
-              Tavsif
+            <label className="block text-sm font-medium text-[var(--label)] mb-1.5">
+              {uz.matn.tavsif}
             </label>
             <textarea
               value={form.description}
               onChange={(e) => f("description", e.target.value)}
               rows={2}
-              placeholder="Tarif haqida qisqacha ma'lumot..."
-              className="w-full rounded-lg border border-[#EDE3E8] bg-white px-3.5 py-2.5 text-sm text-[#29232A] placeholder:text-[#B8AAB2] outline-none focus:border-[#8E315D] focus:ring-2 focus:ring-[#8E315D]/15 transition-all resize-none"
+              placeholder={uz.matn.tarif_haqida_qisqacha_malumot}
+              className="w-full rounded-lg border border-[var(--border)] bg-white px-3.5 py-2.5 text-sm text-[var(--text)] placeholder:text-[var(--text-3)] outline-none focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--primary)]/15 transition-all resize-none"
             />
           </div>
 
           {/* Features */}
           <div>
-            <label className="block text-sm font-medium text-[#3D3240] mb-1.5">
-              Imkoniyatlar (features)
+            <label className="block text-sm font-medium text-[var(--label)] mb-1.5">
+              {uz.matn.imkoniyatlar_features}
             </label>
             <div className="flex gap-2 mb-2">
               <input
                 ref={featureInput}
                 type="text"
-                placeholder="Imkoniyat qo'shish..."
+                placeholder={uz.matn.imkoniyat_qoshish}
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
                     e.preventDefault();
@@ -478,7 +480,7 @@ export default function TariflarPage() {
                     }
                   }
                 }}
-                className="flex-1 rounded-lg border border-[#EDE3E8] bg-white px-3.5 py-2.5 text-sm text-[#29232A] placeholder:text-[#B8AAB2] outline-none focus:border-[#8E315D] focus:ring-2 focus:ring-[#8E315D]/15 transition-all"
+                className="flex-1 rounded-lg border border-[var(--border)] bg-white px-3.5 py-2.5 text-sm text-[var(--text)] placeholder:text-[var(--text-3)] outline-none focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--primary)]/15 transition-all"
               />
               <button
                 type="button"
@@ -489,9 +491,9 @@ export default function TariflarPage() {
                     if (featureInput.current) featureInput.current.value = "";
                   }
                 }}
-                className="px-4 py-2 text-sm font-medium border border-[#EDE3E8] rounded-lg text-[#3D3240] hover:bg-[#FFF9F5] transition-colors"
+                className="px-4 py-2 text-sm font-medium border border-[var(--border)] rounded-lg text-[var(--label)] hover:bg-[var(--hover)] transition-colors"
               >
-                Qo&apos;shish
+                {uz.matn.qoshish}
               </button>
             </div>
             {form.features.length > 0 && (
@@ -499,13 +501,13 @@ export default function TariflarPage() {
                 {form.features.map((feat, idx) => (
                   <span
                     key={idx}
-                    className="flex items-center gap-1 text-xs bg-[#FDF2F6] text-[#8E315D] px-2.5 py-1 rounded-full"
+                    className="flex items-center gap-1 text-xs bg-[var(--primary-lt)] text-[var(--primary)] px-2.5 py-1 rounded-full"
                   >
                     {feat}
                     <button
                       type="button"
                       onClick={() => setForm((p) => ({ ...p, features: p.features.filter((_, i) => i !== idx) }))}
-                      className="text-[#8E315D] hover:text-[#5B21B6] ml-0.5"
+                      className="text-[var(--primary)] hover:text-[#5B21B6] ml-0.5"
                     >
                       ×
                     </button>
@@ -517,7 +519,7 @@ export default function TariflarPage() {
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
-              <label className="block text-sm font-medium text-[#3D3240] mb-1.5">
+              <label className="block text-sm font-medium text-[var(--label)] mb-1.5">
                 {uz.super_admin.max_bolalar}
               </label>
               <input
@@ -525,12 +527,12 @@ export default function TariflarPage() {
                 min="1"
                 value={form.max_children}
                 onChange={(e) => f("max_children", e.target.value)}
-                placeholder="Cheksiz"
-                className="w-full rounded-lg border border-[#EDE3E8] bg-white px-3.5 py-2.5 text-sm text-[#29232A] placeholder:text-[#B8AAB2] outline-none focus:border-[#8E315D] focus:ring-2 focus:ring-[#8E315D]/15 transition-all"
+                placeholder={uz.matn.cheksiz}
+                className="w-full rounded-lg border border-[var(--border)] bg-white px-3.5 py-2.5 text-sm text-[var(--text)] placeholder:text-[var(--text-3)] outline-none focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--primary)]/15 transition-all"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-[#3D3240] mb-1.5">
+              <label className="block text-sm font-medium text-[var(--label)] mb-1.5">
                 {uz.super_admin.max_guruhlar}
               </label>
               <input
@@ -538,12 +540,12 @@ export default function TariflarPage() {
                 min="1"
                 value={form.max_groups}
                 onChange={(e) => f("max_groups", e.target.value)}
-                placeholder="Cheksiz"
-                className="w-full rounded-lg border border-[#EDE3E8] bg-white px-3.5 py-2.5 text-sm text-[#29232A] placeholder:text-[#B8AAB2] outline-none focus:border-[#8E315D] focus:ring-2 focus:ring-[#8E315D]/15 transition-all"
+                placeholder={uz.matn.cheksiz}
+                className="w-full rounded-lg border border-[var(--border)] bg-white px-3.5 py-2.5 text-sm text-[var(--text)] placeholder:text-[var(--text-3)] outline-none focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--primary)]/15 transition-all"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-[#3D3240] mb-1.5">
+              <label className="block text-sm font-medium text-[var(--label)] mb-1.5">
                 {uz.super_admin.max_tarbiyachilar}
               </label>
               <input
@@ -551,15 +553,15 @@ export default function TariflarPage() {
                 min="1"
                 value={form.max_teachers}
                 onChange={(e) => f("max_teachers", e.target.value)}
-                placeholder="Cheksiz"
-                className="w-full rounded-lg border border-[#EDE3E8] bg-white px-3.5 py-2.5 text-sm text-[#29232A] placeholder:text-[#B8AAB2] outline-none focus:border-[#8E315D] focus:ring-2 focus:ring-[#8E315D]/15 transition-all"
+                placeholder={uz.matn.cheksiz}
+                className="w-full rounded-lg border border-[var(--border)] bg-white px-3.5 py-2.5 text-sm text-[var(--text)] placeholder:text-[var(--text-3)] outline-none focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--primary)]/15 transition-all"
               />
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <Input
-              label="Tartib raqami"
+              label={uz.matn.tartib_raqami}
               type="number"
               min="0"
               value={form.sort_order}
@@ -572,9 +574,9 @@ export default function TariflarPage() {
                 id="plan-is-active"
                 checked={form.is_active}
                 onChange={(e) => f("is_active", e.target.checked)}
-                className="h-4 w-4 rounded border-[#EDE3E8] text-[#8E315D] focus:ring-[#8E315D]/20 accent-[#8E315D]"
+                className="h-4 w-4 rounded border-[var(--border)] text-[var(--primary)] focus:ring-[var(--primary)]/20 accent-[var(--primary)]"
               />
-              <label htmlFor="plan-is-active" className="text-sm font-medium text-[#3D3240] cursor-pointer">
+              <label htmlFor="plan-is-active" className="text-sm font-medium text-[var(--label)] cursor-pointer">
                 {uz.common.faol}
               </label>
             </div>

@@ -18,41 +18,43 @@ import OrgDeleteDialog from "@/components/organizations/OrgDeleteDialog";
 import OrgBillingPanel from "@/components/organizations/OrgBillingPanel";
 import { OrgStatusBadge, OrgTypeBadge } from "@/components/organizations/OrgBadges";
 import { AttendanceTab, ChildrenTab, GroupsTab, HistoryTab, TeachersTab } from "@/components/organizations/OrgDetailTabs";
-import uz from "@/i18n/uz";
+import uz from "@/i18n";
 import type { OrganizationDetail, OrgStatus } from "@/types";
+import { useLocale } from "@/contexts/PreferencesContext";
 
 const t = uz.bogchalar;
 
 type Tab = "umumiy" | "guruhlar" | "tarbiyachilar" | "bolalar" | "davomat" | "akkaunt" | "tarix";
 const TABS: { key: Tab; label: string }[] = [
-  { key: "umumiy", label: t.tab_umumiy },
-  { key: "guruhlar", label: t.tab_guruhlar },
-  { key: "tarbiyachilar", label: t.tab_tarbiyachilar },
-  { key: "bolalar", label: t.tab_bolalar },
-  { key: "davomat", label: t.tab_davomat },
-  { key: "akkaunt", label: t.tab_akkaunt },
-  { key: "tarix", label: t.tab_tarix },
+  { key: "umumiy", get label() { return t.tab_umumiy; } },
+  { key: "guruhlar", get label() { return t.tab_guruhlar; } },
+  { key: "tarbiyachilar", get label() { return t.tab_tarbiyachilar; } },
+  { key: "bolalar", get label() { return t.tab_bolalar; } },
+  { key: "davomat", get label() { return t.tab_davomat; } },
+  { key: "akkaunt", get label() { return t.tab_akkaunt; } },
+  { key: "tarix", get label() { return t.tab_tarix; } },
 ];
 
 function Kpi({ label, value, sub }: { label: string; value: number | string; sub?: string }) {
   return (
-    <div className="rounded-xl border border-[#EDE3E8] bg-white px-4 py-3.5">
-      <p className="text-2xl font-bold leading-none text-[#29232A] tabular-nums">{value}</p>
-      <p className="mt-1.5 text-xs text-[#766B73]">{label}{sub && <span className="text-[#B8AAB2]"> · {sub}</span>}</p>
+    <div className="rounded-xl border border-[var(--border)] bg-white px-4 py-3.5">
+      <p className="text-2xl font-bold leading-none text-[var(--text)] tabular-nums">{value}</p>
+      <p className="mt-1.5 text-xs text-[var(--text-2)]">{label}{sub && <span className="text-[var(--text-3)]"> · {sub}</span>}</p>
     </div>
   );
 }
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <div className="py-2.5 sm:grid sm:grid-cols-[180px_1fr] sm:gap-4 border-b border-[#F2ECF0] last:border-0">
-      <dt className="text-sm text-[#766B73]">{label}</dt>
-      <dd className="text-sm font-medium text-[#29232A] break-words">{children || <span className="font-normal text-[#D9C9D1]">—</span>}</dd>
+    <div className="py-2.5 sm:grid sm:grid-cols-[180px_1fr] sm:gap-4 border-b border-[var(--border-2)] last:border-0">
+      <dt className="text-sm text-[var(--text-2)]">{label}</dt>
+      <dd className="text-sm font-medium text-[var(--text)] break-words">{children || <span className="font-normal text-[var(--border-strong)]">—</span>}</dd>
     </div>
   );
 }
 
 export default function OrgDetailPage() {
+  useLocale(); // til almashganda holat saqlangan holda qayta render
   const params = useParams();
   const router = useRouter();
   const toast  = useToast();
@@ -137,9 +139,9 @@ export default function OrgDetailPage() {
   if (loading) {
     return (
       <div className="max-w-6xl mx-auto space-y-4 animate-pulse" aria-busy="true">
-        <div className="h-4 w-32 rounded bg-[#F2ECF0]" />
-        <div className="h-28 rounded-xl bg-white border border-[#EDE3E8]" />
-        <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">{[1, 2, 3, 4, 5].map((i) => <div key={i} className="h-20 rounded-xl bg-[#F2ECF0]" />)}</div>
+        <div className="h-4 w-32 rounded bg-[var(--border-2)]" />
+        <div className="h-28 rounded-xl bg-white border border-[var(--border)]" />
+        <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">{[1, 2, 3, 4, 5].map((i) => <div key={i} className="h-20 rounded-xl bg-[var(--border-2)]" />)}</div>
       </div>
     );
   }
@@ -147,8 +149,8 @@ export default function OrgDetailPage() {
   if (error || !org) {
     return (
       <div className="max-w-6xl mx-auto">
-        <div role="alert" className="bg-white rounded-xl border border-[#EDE3E8] p-12 text-center space-y-3">
-          <p className="text-[#766B73]">{error || uz.common.yuklash_xatosi}</p>
+        <div role="alert" className="bg-white rounded-xl border border-[var(--border)] p-12 text-center space-y-3">
+          <p className="text-[var(--text-2)]">{error || uz.common.yuklash_xatosi}</p>
           <div className="flex justify-center gap-2">
             <Button variant="secondary" onClick={() => router.push("/admin/bogchalar")}>{t.ortga}</Button>
             <Button onClick={() => { setLoading(true); load(); }}>{uz.common.qayta_urinish}</Button>
@@ -164,7 +166,7 @@ export default function OrgDetailPage() {
 
   return (
     <div className="max-w-6xl mx-auto space-y-5">
-      <Link href="/admin/bogchalar" className="inline-flex items-center gap-1.5 text-sm text-[#B8AAB2] hover:text-[#3D3240] transition-colors">
+      <Link href="/admin/bogchalar" className="inline-flex items-center gap-1.5 text-sm text-[var(--text-3)] hover:text-[var(--label)] transition-colors">
         <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
           <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
         </svg>
@@ -172,23 +174,23 @@ export default function OrgDetailPage() {
       </Link>
 
       {/* Header */}
-      <div className="rounded-xl border border-[#EDE3E8] bg-white p-5 sm:p-6">
+      <div className="rounded-xl border border-[var(--border)] bg-white p-5 sm:p-6">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div className="flex items-start gap-4 min-w-0">
-            <div className="h-14 w-14 flex-shrink-0 rounded-xl bg-[#FDF2F6] flex items-center justify-center text-[#8E315D] text-xl font-bold" aria-hidden="true">
+            <div className="h-14 w-14 flex-shrink-0 rounded-xl bg-[var(--primary-lt)] flex items-center justify-center text-[var(--primary)] text-xl font-bold" aria-hidden="true">
               {org.name.charAt(0).toUpperCase()}
             </div>
             <div className="min-w-0">
-              <h1 className="text-xl font-bold text-[#29232A] break-words">{org.name}</h1>
+              <h1 className="text-xl font-bold text-[var(--text)] break-words">{org.name}</h1>
               <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
                 <OrgTypeBadge type={org.type} />
                 <OrgStatusBadge org={org} />
                 {org.is_demo && <Badge variant="warning">{uz.super_admin.dev_belgi}</Badge>}
-                {org.official_code && <span className="text-xs text-[#766B73]">{t.f_kod}: {org.official_code}</span>}
+                {org.official_code && <span className="text-xs text-[var(--text-2)]">{t.f_kod}: {org.official_code}</span>}
               </div>
-              <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm text-[#766B73]">
+              <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm text-[var(--text-2)]">
                 {(org.phone || org.director_phone) && (
-                  <a href={`tel:${org.phone ?? org.director_phone}`} className="hover:text-[#8E315D]">{formatUzPhone(org.phone ?? org.director_phone)}</a>
+                  <a href={`tel:${org.phone ?? org.director_phone}`} className="hover:text-[var(--primary)]">{formatUzPhone(org.phone ?? org.director_phone)}</a>
                 )}
                 {address && <span className="break-words">{address}</span>}
                 <span>{t.royxatdan_otgan}: {formatDate(org.created_at)}</span>
@@ -203,12 +205,12 @@ export default function OrgDetailPage() {
             <div ref={moreRef} className="relative">
               <Button variant="secondary" aria-haspopup="menu" aria-expanded={moreOpen} aria-label={t.amallar_menyu} onClick={() => setMoreOpen((v) => !v)}>⋯</Button>
               {moreOpen && (
-                <div role="menu" className="absolute right-0 top-11 z-30 min-w-[230px] rounded-xl border border-[#EDE3E8] bg-white py-1 shadow-lg">
-                  <button role="menuitem" type="button" onClick={() => { setMoreOpen(false); setNotifyOpen(true); }} className="w-full px-3.5 py-2 text-left text-sm text-[#3D3240] hover:bg-[#F2ECF0]">{uz.bildirishnoma.yuborish}</button>
-                  <button role="menuitem" type="button" onClick={() => copy(orgClipboardText(org))} className="w-full px-3.5 py-2 text-left text-sm text-[#3D3240] hover:bg-[#F2ECF0]">{t.malumot_nusxa}</button>
-                  <button role="menuitem" type="button" onClick={() => copy(address)} className="w-full px-3.5 py-2 text-left text-sm text-[#3D3240] hover:bg-[#F2ECF0]">{t.manzil_nusxa}</button>
-                  <div className="my-1 border-t border-[#F2ECF0]" role="separator" />
-                  <button role="menuitem" type="button" onClick={() => { setMoreOpen(false); setDeleteOpen(true); }} className="w-full px-3.5 py-2 text-left text-sm text-[#991B1B] hover:bg-[#FEF2F2]">{t.ochirish}</button>
+                <div role="menu" className="absolute right-0 top-11 z-30 min-w-[230px] rounded-xl border border-[var(--border)] bg-white py-1 shadow-lg">
+                  <button role="menuitem" type="button" onClick={() => { setMoreOpen(false); setNotifyOpen(true); }} className="w-full px-3.5 py-2 text-left text-sm text-[var(--label)] hover:bg-[var(--border-2)]">{uz.bildirishnoma.yuborish}</button>
+                  <button role="menuitem" type="button" onClick={() => copy(orgClipboardText(org))} className="w-full px-3.5 py-2 text-left text-sm text-[var(--label)] hover:bg-[var(--border-2)]">{t.malumot_nusxa}</button>
+                  <button role="menuitem" type="button" onClick={() => copy(address)} className="w-full px-3.5 py-2 text-left text-sm text-[var(--label)] hover:bg-[var(--border-2)]">{t.manzil_nusxa}</button>
+                  <div className="my-1 border-t border-[var(--border-2)]" role="separator" />
+                  <button role="menuitem" type="button" onClick={() => { setMoreOpen(false); setDeleteOpen(true); }} className="w-full px-3.5 py-2 text-left text-sm text-[var(--error)] hover:bg-[var(--error-soft)]">{t.ochirish}</button>
                 </div>
               )}
             </div>
@@ -216,7 +218,7 @@ export default function OrgDetailPage() {
         </div>
 
         {status !== "active" && (
-          <div data-testid="status-banner" className={`mt-4 rounded-xl px-4 py-3 text-sm ${status === "suspended" ? "bg-[#FFFBEB] text-[#92400E]" : "bg-[#F2ECF0] text-[#3D3240]"}`}>
+          <div data-testid="status-banner" className={`mt-4 rounded-xl px-4 py-3 text-sm ${status === "suspended" ? "bg-[var(--warning-soft)] text-[var(--warning-text)]" : "bg-[var(--border-2)] text-[var(--label)]"}`}>
             <span className="font-semibold">{STATUS_LABELS[status]}</span>
             {org.status_reason && <> · {t.sababi}: {org.status_reason}</>}
             {org.status_changed_at && <> · {formatDate(org.status_changed_at)}{org.status_changed_by ? ` (${org.status_changed_by})` : ""}</>}
@@ -234,13 +236,13 @@ export default function OrgDetailPage() {
       </div>
 
       {/* Tablar */}
-      <div className="rounded-xl border border-[#EDE3E8] bg-white">
-        <div role="tablist" aria-label={org.name} className="flex gap-1 overflow-x-auto border-b border-[#EDE3E8] px-2">
+      <div className="rounded-xl border border-[var(--border)] bg-white">
+        <div role="tablist" aria-label={org.name} className="flex gap-1 overflow-x-auto border-b border-[var(--border)] px-2">
           {TABS.map((x, i) => (
             <button key={x.key} ref={(el) => { tabRefs.current[x.key] = el; }} role="tab" id={`tab-${x.key}`} aria-controls={`panel-${x.key}`}
               aria-selected={tab === x.key} tabIndex={tab === x.key ? 0 : -1} onClick={() => selectTab(x.key)} onKeyDown={(e) => onTabKey(e, i)}
-              className={`whitespace-nowrap border-b-2 px-3 py-3 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:bg-[#FDF2F6]
-                ${tab === x.key ? "border-[#8E315D] text-[#8E315D]" : "border-transparent text-[#766B73] hover:text-[#29232A]"}`}>
+              className={`whitespace-nowrap border-b-2 px-3 py-3 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:bg-[var(--primary-lt)]
+                ${tab === x.key ? "border-[var(--primary)] text-[var(--primary)]" : "border-transparent text-[var(--text-2)] hover:text-[var(--text)]"}`}>
               {x.label}
             </button>
           ))}
@@ -250,21 +252,21 @@ export default function OrgDetailPage() {
           {tab === "umumiy" && (
             <div className="grid grid-cols-1 gap-6 p-5 lg:grid-cols-[1fr_320px]">
               <section>
-                <h2 className="mb-2 text-sm font-semibold text-[#29232A]">{t.profil}</h2>
+                <h2 className="mb-2 text-sm font-semibold text-[var(--text)]">{t.profil}</h2>
                 <dl>
                   <Field label={t.f_turi}>{org.type ? (org.type === "davlat" ? t.turi_davlat : t.turi_xususiy) : t.turi_yoq}</Field>
                   <Field label={t.f_kod}>{org.official_code}</Field>
                   <Field label={t.f_raqami}>{org.number}</Field>
-                  <Field label={t.f_telefon}>{org.phone && <a href={`tel:${org.phone}`} className="hover:text-[#8E315D]">{formatUzPhone(org.phone)}</a>}</Field>
-                  <Field label={t.f_email}>{org.email && <a href={`mailto:${org.email}`} className="hover:text-[#8E315D]">{org.email}</a>}</Field>
-                  <Field label={t.f_sayt}>{org.website && <a href={org.website} target="_blank" rel="noopener noreferrer" className="hover:text-[#8E315D]">{org.website}</a>}</Field>
+                  <Field label={t.f_telefon}>{org.phone && <a href={`tel:${org.phone}`} className="hover:text-[var(--primary)]">{formatUzPhone(org.phone)}</a>}</Field>
+                  <Field label={t.f_email}>{org.email && <a href={`mailto:${org.email}`} className="hover:text-[var(--primary)]">{org.email}</a>}</Field>
+                  <Field label={t.f_sayt}>{org.website && <a href={org.website} target="_blank" rel="noopener noreferrer" className="hover:text-[var(--primary)]">{org.website}</a>}</Field>
                   <Field label={t.f_viloyat}>{org.region}</Field>
                   <Field label={t.f_tuman}>{org.district}</Field>
                   <Field label={t.f_mfy}>{org.mfy}</Field>
                   <Field label={t.f_kocha}>{org.street}</Field>
                   <Field label={t.f_manzil}>{org.address}</Field>
                   <Field label={t.f_rahbar}>{org.director_name}</Field>
-                  <Field label={t.f_rahbar_tel}>{org.director_phone && <a href={`tel:${org.director_phone}`} className="hover:text-[#8E315D]">{formatUzPhone(org.director_phone)}</a>}</Field>
+                  <Field label={t.f_rahbar_tel}>{org.director_phone && <a href={`tel:${org.director_phone}`} className="hover:text-[var(--primary)]">{formatUzPhone(org.director_phone)}</a>}</Field>
                   <Field label={t.f_rahbar_email}>{org.director_email}</Field>
                   <Field label={t.f_quvvat}>{org.capacity}</Field>
                   <Field label={t.f_izoh}>{org.notes}</Field>
@@ -272,13 +274,13 @@ export default function OrgDetailPage() {
               </section>
               <aside className="space-y-4">
                 {today && (
-                  <section data-testid="org-attendance" className="rounded-xl border border-[#EDE3E8] p-4">
-                    <h2 className="text-sm font-semibold text-[#29232A]">{uz.platforma.tafsilot_davomat} · {formatDate(today.sana)}</h2>
+                  <section data-testid="org-attendance" className="rounded-xl border border-[var(--border)] p-4">
+                    <h2 className="text-sm font-semibold text-[var(--text)]">{uz.platforma.tafsilot_davomat} · {formatDate(today.sana)}</h2>
                     <dl className="mt-3 grid grid-cols-2 gap-2 text-sm">
-                      {[[uz.davomat.jami, today.jami, "text-[#29232A]"], [uz.davomat.keldi, today.keldi, "text-[#166534]"],
-                        [uz.davomat.kelmadi, today.kelmadi, "text-[#991B1B]"], [uz.davomat.sababli, today.sababli, "text-[#92400E]"],
-                        [uz.davomat.belgilanmagan, today.belgilanmagan, "text-[#766B73]"]].map(([l, v, c]) => (
-                        <div key={l as string}><dt className="text-xs text-[#B8AAB2]">{l as string}</dt><dd className={`text-lg font-bold ${c}`}>{v as number}</dd></div>
+                      {[[uz.davomat.jami, today.jami, "text-[var(--text)]"], [uz.davomat.keldi, today.keldi, "text-[var(--success)]"],
+                        [uz.davomat.kelmadi, today.kelmadi, "text-[var(--error)]"], [uz.davomat.sababli, today.sababli, "text-[var(--warning-text)]"],
+                        [uz.davomat.belgilanmagan, today.belgilanmagan, "text-[var(--text-2)]"]].map(([l, v, c]) => (
+                        <div key={l as string}><dt className="text-xs text-[var(--text-3)]">{l as string}</dt><dd className={`text-lg font-bold ${c}`}>{v as number}</dd></div>
                       ))}
                     </dl>
                   </section>
