@@ -47,6 +47,26 @@ class Group extends Model
                     ->withPivot(['is_primary', 'assigned_at']);
     }
 
+    /**
+     * Guruh yosh oralig'i `age_category` matnidan: «3-4 yosh» → [3, 4], «6–7 yosh (tayyorlov)» → [6, 7], «5 yosh» → [5, 5].
+     * Aniqlab bo'lmasa — null (yosh bo'yicha avtomatik filtr qo'llanmaydi, faqat biriktirish hisobga olinadi).
+     *
+     * @return array{0:int,1:int}|null
+     */
+    public function ageRange(): ?array
+    {
+        $text = (string) $this->age_category;
+        if (preg_match('/(\d{1,2})\s*[-–—]\s*(\d{1,2})/u', $text, $m)) {
+            [$a, $b] = [(int) $m[1], (int) $m[2]];
+            return $a <= $b ? [$a, $b] : [$b, $a];
+        }
+        if (preg_match('/(\d{1,2})/', $text, $m)) {
+            return [(int) $m[1], (int) $m[1]];
+        }
+
+        return null;
+    }
+
     // ── Scopes ─────────────────────────────────────────────────────
 
     public function scopeForOrganization($query, int $organizationId)

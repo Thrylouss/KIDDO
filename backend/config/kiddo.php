@@ -26,6 +26,12 @@ return [
         'enabled' => (bool) env('BILLING_ENABLED', false),
     ],
 
+    // KIDDO Kids: ixtiyoriy YouTube Data API kaliti (davomiylik, embeddable, madeForKids). Bo'sh bo'lsa —
+    // bepul oEmbed ishlatiladi yoki rahbar ma'lumotni qo'lda kiritadi. Kalit faqat backend'da, frontend'ga chiqmaydi.
+    'youtube' => [
+        'api_key' => env('YOUTUBE_API_KEY'),
+    ],
+
     'telegram' => [
         'bot_token'    => env('TELEGRAM_BOT_TOKEN'),
         'chat_id'      => env('TELEGRAM_CHAT_ID'),

@@ -7,6 +7,8 @@ use App\Http\Controllers\Admin\ParentController;
 use App\Http\Controllers\Admin\TeacherController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DemoRequestController;
+use App\Http\Controllers\Admin\KidsContentController as AdminKidsController;
+use App\Http\Controllers\Teacher\KidsContentController as TeacherKidsController;
 use App\Http\Controllers\SuperAdmin\DemoRequestController as SuperDemoRequestController;
 use App\Http\Controllers\Mobile\AuthController as MobileAuthController;
 use App\Http\Controllers\Admin\AttendanceController as AdminAttendanceController;
@@ -133,6 +135,18 @@ Route::prefix('v1')->group(function () {
             Route::post('/photos', [AdminPhotoController::class, 'store'])->middleware('throttle:30,1');
             Route::get('/photos/{id}/file', [AdminPhotoController::class, 'file']);
             Route::delete('/photos/{id}', [AdminPhotoController::class, 'destroy']);
+
+            // KIDDO Kids → Kontent kutubxonasi: FAQAT bog'cha rahbari (Super Admin impersonatsiyada ham kirmaydi)
+            Route::middleware('role:admin')->prefix('kids')->group(function () {
+                Route::get('/contents',               [AdminKidsController::class, 'index']);
+                Route::post('/contents/preview',      [AdminKidsController::class, 'preview'])->middleware('throttle:30,1');
+                Route::post('/contents',              [AdminKidsController::class, 'store'])->middleware('throttle:60,1');
+                Route::get('/contents/{id}',          [AdminKidsController::class, 'show'])->whereNumber('id');
+                Route::put('/contents/{id}',          [AdminKidsController::class, 'update'])->whereNumber('id');
+                Route::patch('/contents/{id}/status', [AdminKidsController::class, 'status'])->whereNumber('id');
+                Route::delete('/contents/{id}',       [AdminKidsController::class, 'destroy'])->whereNumber('id');
+                Route::get('/usage',                  [AdminKidsController::class, 'usage']);
+            });
         });
 
         // ── Super Admin ────────────────────────────────────────────
@@ -256,6 +270,12 @@ Route::prefix('v1')->group(function () {
             Route::get('/children/{id}/photo', [TeacherChildController::class, 'photo']);
             Route::post('/children/{id}/photo', [TeacherChildController::class, 'uploadPhoto'])->middleware('throttle:20,1');
             Route::delete('/children/{id}/photo', [TeacherChildController::class, 'deletePhoto']);
+
+            // KIDDO Kids → Ta'lim va hordiq: faqat o'z guruhlari uchun ko'rish, sevimlilar va foydalanish qaydi
+            Route::get('/kids/contents',                 [TeacherKidsController::class, 'index']);
+            Route::get('/kids/contents/{id}',            [TeacherKidsController::class, 'show'])->whereNumber('id');
+            Route::put('/kids/contents/{id}/favorite',   [TeacherKidsController::class, 'favorite'])->whereNumber('id')->middleware('throttle:120,1');
+            Route::post('/kids/contents/{id}/usage',     [TeacherKidsController::class, 'logUsage'])->whereNumber('id')->middleware('throttle:60,1');
 
             Route::get('/photos', [TeacherPhotoController::class, 'index']);
             Route::post('/photos', [TeacherPhotoController::class, 'store'])->middleware('throttle:30,1');
