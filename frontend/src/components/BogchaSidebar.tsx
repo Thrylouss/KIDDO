@@ -27,6 +27,8 @@ type NavItem = ActiveItem | DisabledItem;
 interface NavSection {
   label: string;
   items: NavItem[];
+  /** Faqat bog'cha rahbari uchun (Super Admin impersonatsiyasida ko'rsatilmaydi). */
+  ownerOnly?: boolean;
 }
 
 const sections: NavSection[] = [
@@ -142,6 +144,21 @@ const sections: NavSection[] = [
     ],
   },
   {
+    get label() { return uz.kids.bolim; },
+    ownerOnly: true,
+    items: [
+      {
+        href: "/bogcha/kiddo-kids",
+        get label() { return uz.kids.kutubxona; },
+        icon: (
+          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15 10l4.55-2.28A1 1 0 0121 8.62v6.76a1 1 0 01-1.45.9L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+          </svg>
+        ),
+      },
+    ],
+  },
+  {
     get label() { return uz.sidebar.moliya; },
     items: [
       {
@@ -229,7 +246,7 @@ export default function BogchaSidebar({ onClose }: BogchaSidebarProps) {
 
       {/* Nav */}
       <nav className="flex-1 px-3 pb-3 overflow-y-auto space-y-4">
-        {sections.map((section) => (
+        {sections.filter((section) => !section.ownerOnly || user?.role !== "super_admin").map((section) => (
           <div key={section.label}>
             <p className="px-3 pb-1.5 text-[10px] font-semibold uppercase tracking-wider text-[var(--text-3)]">
               {section.label}

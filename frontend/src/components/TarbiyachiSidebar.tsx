@@ -8,7 +8,7 @@ import Avatar from "@/components/ui/Avatar";
 import uz from "@/i18n";
 
 type NavItem =
-  | { href: string; label: string; icon: React.ReactNode; disabled?: false }
+  | { href: string; label: string; icon: React.ReactNode; disabled?: false; heading?: string }
   | { label: string; icon: React.ReactNode; disabled: true };
 
 const navItems: NavItem[] = [
@@ -63,6 +63,16 @@ const navItems: NavItem[] = [
     icon: (
       <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+      </svg>
+    ),
+  },
+  {
+    href: "/tarbiyachi/kiddo-kids",
+    get label() { return uz.kids.talim_hordiq; },
+    get heading() { return uz.kids.bolim; },
+    icon: (
+      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M15 10l4.55-2.28A1 1 0 0121 8.62v6.76a1 1 0 01-1.45.9L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
       </svg>
     ),
   },
@@ -142,8 +152,11 @@ export default function TarbiyachiSidebar({ onClose }: TarbiyachiSidebarProps) {
           }
           const active = pathname === item.href || pathname.startsWith(item.href + "/");
           return (
+            <div key={item.href}>
+            {item.heading && (
+              <p className="px-3 pt-3 pb-1.5 text-[10px] font-semibold uppercase tracking-wider text-[var(--text-3)]">{item.heading}</p>
+            )}
             <Link
-              key={item.href}
               href={item.href}
               onClick={onClose}
               className={[
@@ -159,6 +172,7 @@ export default function TarbiyachiSidebar({ onClose }: TarbiyachiSidebarProps) {
               <span className="flex-1">{item.label}</span>
               {active && <span className="h-1.5 w-1.5 rounded-full bg-[var(--primary)] flex-shrink-0" />}
             </Link>
+            </div>
           );
         })}
       </nav>
