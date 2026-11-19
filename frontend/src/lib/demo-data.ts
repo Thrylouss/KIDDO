@@ -853,6 +853,13 @@ export function handleDemoRequest<T>(path: string, options: RequestOptions): Pro
       } else if (path.startsWith("/v1/super-admin/notifications")) {
         const unread = DEMO_SA_NOTIFICATIONS.filter(n => !n.is_read).length;
         resolve({ data: DEMO_SA_NOTIFICATIONS, unread_count: unread } as T);
+      } else if (path.startsWith("/v1/admin/kids/contents") || path.startsWith("/v1/teacher/kids/contents")) {
+        // KIDDO Kids demo: haqiqiy video kiritilmaydi — bo'sh kutubxona, guruhlar bilan (bo'sh holat ko'rsatiladi)
+        const groups = DEMO_GROUPS.slice(0, path.startsWith("/v1/teacher") ? 1 : DEMO_GROUPS.length).map((g) => {
+          const m = /(\d)\s*[–-]\s*(\d)/.exec(g.age_category ?? "");
+          return { id: g.id, name: g.name, age_category: g.age_category, age_range: m ? [Number(m[1]), Number(m[2])] : null };
+        });
+        resolve({ data: [], meta: { current_page: 1, last_page: 1, total: 0, counts: {} }, groups, group_id: groups[0]?.id ?? null } as T);
       } else if (path.startsWith("/v1/teacher/dashboard")) {
         resolve(DEMO_TEACHER_DASHBOARD as T);
       } else if (path.startsWith("/v1/admin/dashboard")) {

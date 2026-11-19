@@ -8,6 +8,8 @@ import DemoRequestForm from "@/components/landing/DemoRequestForm";
 import { PhoneMockup } from "@/components/landing/PhoneMockup";
 import { Icon } from "@/components/landing/icons";
 import QuickPreferences from "@/components/preferences/QuickPreferences";
+import SmartSafetyTeaser from "@/components/landing/SmartSafetyTeaser";
+import { SMART_SAFETY_DEMO } from "@/lib/smart-safety/features";
 import { SITE_CONTACT, hasContact, telegramUrl } from "@/lib/site";
 import uz from "@/i18n";
 import { useLocale } from "@/contexts/PreferencesContext";
@@ -291,6 +293,8 @@ export default function LandingContent() {
         </section>
 
         {/* ── Qanday ishlaydi ────────────────────────────────────── */}
+        {SMART_SAFETY_DEMO && <SmartSafetyTeaser />}
+
         <section id="qanday-ishlaydi" className="scroll-mt-20 py-20 sm:py-28">
           <div className="mx-auto max-w-6xl px-4 sm:px-6">
             <SectionHead eyebrow={t.qadam_eyebrow} title={t.qadam_sarlavha} />

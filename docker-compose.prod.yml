@@ -110,6 +110,8 @@ services:
         NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-https://api.kiddo-sad.uz/api}
         # Production'da demo rejim doim o'chiq
         NEXT_PUBLIC_DEMO_MODE: "false"
+        # Smart xavfsizlik DEMO (simulyatsiya, «Tez kunda» belgisi bilan). Haqiqiy hardware — backend SMART_SAFETY_ENABLED
+        NEXT_PUBLIC_SMART_SAFETY_DEMO: ${NEXT_PUBLIC_SMART_SAFETY_DEMO:-false}
         NEXT_PUBLIC_CONTACT_EMAIL: ${NEXT_PUBLIC_CONTACT_EMAIL:-}
         NEXT_PUBLIC_CONTACT_PHONE: ${NEXT_PUBLIC_CONTACT_PHONE:-}
         NEXT_PUBLIC_CONTACT_TELEGRAM: ${NEXT_PUBLIC_CONTACT_TELEGRAM:-}

@@ -41,6 +41,11 @@ const pathLabels: Record<string, string> = {
   get "/tarbiyachi/xabarlar"() { return uz.nav.xabarlar; },
   get "/tarbiyachi/foto"() { return uz.nav.foto; },
   get "/tarbiyachi/sozlamalar"() { return uz.nav.sozlamalar; },
+  get "/bogcha/kiddo-kids"() { return uz.kids.kutubxona; },
+  get "/tarbiyachi/kiddo-kids"() { return uz.kids.talim_hordiq; },
+  get "/admin/smart-safety"() { return uz.ss.nav; },
+  get "/bogcha/smart-safety"() { return uz.ss.nav; },
+  get "/tarbiyachi/smart-safety"() { return uz.ss.nav; },
 };
 
 interface TopbarProps {
@@ -57,6 +62,7 @@ export default function Topbar({ onMenuClick }: TopbarProps) {
     if (p.startsWith("/admin/tolovlar/")) return uz.ui.tolov_tafsiloti;
     if (p.startsWith("/admin/foydalanuvchilar/")) return uz.ui.foydalanuvchi;
     if (p.startsWith("/tarbiyachi/bolalar/")) return uz.guruh.profil;
+    if (/^\/(admin|bogcha|tarbiyachi)\/smart-safety\//.test(p)) return uz.ss.nav;
     return "KIDDO";
   }
   const title = getTitle(pathname);
