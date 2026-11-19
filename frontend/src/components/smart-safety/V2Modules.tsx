@@ -9,12 +9,16 @@ import { presentChildren, type Actor } from "@/lib/smart-safety/engine";
 import { Bars, Card, btn, childName, fmtTime, incidentLabel, useSafety, zoneName } from "./shared";
 
 /** V2 modul sarlavhasi: holat va kerakli uskuna aniq ko'rsatiladi. */
-function V2Card({ title, dep, desc, children }: { title: string; dep: string; desc: string; children: React.ReactNode }) {
+function V2Card({ title, dep, desc, children, simulated = true }: { title: string; dep: string; desc: string; children: React.ReactNode; simulated?: boolean }) {
   const t = uz.ss.v2;
   return (
     <Card title={<span className="flex flex-wrap items-center gap-2">{title}<Badge variant="info">{t.badge}</Badge></span>}>
       <p className="text-sm text-[var(--text-2)]">{desc}</p>
-      <p className="mt-1 mb-3 text-xs text-[var(--warning-text)]">{t.dependency}: <strong>{dep}</strong></p>
+      {simulated && <p className="mt-1 text-xs text-[var(--text-3)]">{uz.ssx.act.not_medical}</p>}
+      <details className="mt-2 mb-3 rounded-lg border border-[var(--border-2)] px-3 py-2 text-xs text-[var(--text-2)]">
+        <summary className="cursor-pointer select-none font-medium text-[var(--label)]">{uz.ssx.act.hw}</summary>
+        <p className="mt-1.5">{dep}</p>
+      </details>
       {children}
     </Card>
   );
@@ -77,7 +81,7 @@ export function SmartCctv() {
   const { state } = useSafety();
   const t = uz.ss.v2;
   return (
-    <V2Card title={uz.ss.modules.cctv} dep={t.cctv_dep} desc={t.cctv_desc}>
+    <V2Card title={uz.ss.modules.cctv} dep={t.cctv_dep} desc={t.cctv_desc} simulated={false}>
       <p className="mb-3 text-xs text-[var(--text-3)]">{t.cctv_no_video}</p>
       <ul className="grid gap-3 sm:grid-cols-2" data-testid="cctv">
         {CAMERAS.map((cam) => {
@@ -101,7 +105,7 @@ export function SmartBus({ actor }: { actor: Actor }) {
   const { state } = useSafety();
   const t = uz.ss.v2;
   return (
-    <V2Card title={uz.ss.modules.bus} dep={t.bus_dep} desc={t.bus_desc}>
+    <V2Card title={uz.ss.modules.bus} dep={t.bus_dep} desc={t.bus_desc} simulated={false}>
       <ol className="mb-3 flex flex-wrap items-center gap-2 text-sm" data-testid="bus-route">
         {BUS_STOPS.map((s, i) => (
           <li key={s} className={`rounded-full px-3 py-1 ${i === state.busStop ? "bg-[var(--primary)] text-white" : i < state.busStop ? "bg-[var(--success-bg)] text-[var(--success)]" : "bg-[var(--border-2)] text-[var(--text-2)]"}`}>{i === state.busStop ? "🚌 " : ""}{s}</li>
@@ -150,7 +154,7 @@ export function StaffTracking() {
     return s?.role === "nurse" ? zoneAt(...zoneCenter("z-hall"))?.id ?? null : "z-entrance";
   };
   return (
-    <V2Card title={uz.ss.modules.staff} dep={t.staff_dep} desc={t.staff_desc}>
+    <V2Card title={uz.ss.modules.staff} dep={t.staff_dep} desc={t.staff_desc} simulated={false}>
       <ul className="divide-y divide-[var(--border-2)] text-sm" data-testid="staff-list">
         {STAFF.map((s) => (
           <li key={s.id} className="flex items-center justify-between py-2">

@@ -5,15 +5,15 @@
  */
 import { SCENARIOS, demoStartTime, initialState, reduce, resolveAction, stateBefore, type Action, type SafetyState } from "./engine";
 
-export interface RunnerState { running: boolean; leader: string | null; scenario: number; step: number; full: boolean; }
+export interface RunnerState { running: boolean; leader: string | null; scenario: number; step: number; full: boolean; guided: number; }
 export interface Snapshot { state: SafetyState; runner: RunnerState; }
 
-const KEY = "kiddo.smartSafety.demo.v1";
+const KEY = "kiddo.smartSafety.demo.v2";
 const CHANNEL = "kiddo-smart-safety";
 export const STEP_MS = 1600;
 
 const tabId = Math.random().toString(36).slice(2);
-const SERVER: Snapshot = { state: initialState(demoStartTime(new Date(2026, 0, 1))), runner: { running: false, leader: null, scenario: 1, step: 0, full: true } };
+const SERVER: Snapshot = { state: initialState(demoStartTime(new Date(2026, 0, 1))), runner: { running: false, leader: null, scenario: 1, step: 0, full: true, guided: -1 } };
 
 let snap: Snapshot | null = null;
 let channel: BroadcastChannel | null = null;
@@ -23,12 +23,12 @@ const listeners = new Set<() => void>();
 
 function init(): Snapshot {
   if (snap) return snap;
-  snap = { state: initialState(), runner: { running: false, leader: null, scenario: 1, step: 0, full: true } };
+  snap = { state: initialState(), runner: { running: false, leader: null, scenario: 1, step: 0, full: true, guided: -1 } };
   try {
     const raw = localStorage.getItem(KEY);
     if (raw) {
       const saved = JSON.parse(raw) as Snapshot;
-      if (saved?.state?.children && saved?.runner) snap = { state: saved.state, runner: { ...saved.runner, running: false, leader: null } };
+      if (saved?.state?.children && saved?.state?.attendanceConfirmed && saved?.runner) snap = { state: saved.state, runner: { ...saved.runner, guided: saved.runner.guided ?? -1, running: false, leader: null } };
     }
   } catch { /* saqlangan holat buzilgan — yangidan */ }
   try {
@@ -98,7 +98,7 @@ export function start(scenario: number | null) {
   if (scenario === null) {
     snap = { ...s, runner: { ...s.runner, running: true, leader: tabId, full: true } };
   } else {
-    snap = { state: { ...stateBefore(scenario, resolveNote), version: s.state.version + 1 }, runner: { running: true, leader: tabId, scenario, step: 0, full: false } };
+    snap = { state: { ...stateBefore(scenario, resolveNote), version: s.state.version + 1 }, runner: { running: true, leader: tabId, scenario, step: 0, full: false, guided: -1 } };
   }
   emit();
   timer = setInterval(stepOnce, STEP_MS);
@@ -114,7 +114,15 @@ export function pause() {
 export function reset() {
   stopTimer();
   const s = init();
-  snap = { state: { ...initialState(), version: s.state.version + 1 }, runner: { running: false, leader: null, scenario: 1, step: 0, full: true } };
+  snap = { state: { ...initialState(), version: s.state.version + 1 }, runner: { running: false, leader: null, scenario: 1, step: 0, full: true, guided: -1 } };
+  emit();
+}
+
+/** Boshqariladigan taqdimot: tayyor holatni o'rnatadi (avtomatik o'ynatish to'xtaydi). */
+export function loadGuided(state: SafetyState, guided: number) {
+  stopTimer();
+  const s = init();
+  snap = { state: { ...state, version: s.state.version + 1 }, runner: { ...s.runner, running: false, leader: null, guided } };
   emit();
 }
 

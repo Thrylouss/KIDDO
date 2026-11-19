@@ -29,12 +29,12 @@ export function fmtTime(ms: number | null | undefined, withSeconds = false): str
 }
 
 /** Jurnal yozuvini joriy tilda matnga aylantiradi (ism/zona/tur parametrlari ham tarjima qilinadi). */
-export function fmtLog(e: LogEntry): string {
+export function fmtLog(e: LogEntry, anonymous = false): string {
   const tpl = (uz.ss.audit.codes as Record<string, string>)[e.code] ?? e.code;
   const p = e.params;
   const values: Record<string, string> = {
     ...Object.fromEntries(Object.entries(p).map(([k, v]) => [k, String(v)])),
-    child: childName(String(p.child ?? "")), person: personName(String(p.person ?? "")),
+    child: anonymous ? "•••" : childName(String(p.child ?? "")), person: anonymous ? "•••" : personName(String(p.person ?? "")),
     zone: zoneName(String(p.zone ?? "")), type: incidentLabel(String(p.type ?? "")),
     key: (uz.ss.features as Record<string, string>)[String(p.key ?? "")] ?? String(p.key ?? ""),
   };

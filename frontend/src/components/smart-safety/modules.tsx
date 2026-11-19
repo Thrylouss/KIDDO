@@ -268,7 +268,7 @@ export function Analytics() {
   );
 }
 
-export function AuditLog({ limit }: { limit?: number }) {
+export function AuditLog({ limit, anonymous = false }: { limit?: number; anonymous?: boolean }) {
   const { state } = useSafety();
   const t = uz.ss.audit;
   const rows = limit ? state.log.slice(0, limit) : state.log;
@@ -280,7 +280,7 @@ export function AuditLog({ limit }: { limit?: number }) {
             <li key={e.id} className="grid grid-cols-[4.5rem_6rem_1fr] gap-2">
               <span className="tabular-nums text-xs text-[var(--text-3)]">{fmtTime(e.at, true)}</span>
               <span className="truncate text-xs font-medium text-[var(--text-2)]">{t.actors[e.actor]}</span>
-              <span className="text-[var(--text)]">{fmtLog(e)}</span>
+              <span className="text-[var(--text)]">{fmtLog(e, anonymous)}</span>
             </li>
           ))}
         </ol>

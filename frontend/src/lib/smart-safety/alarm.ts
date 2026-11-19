@@ -48,3 +48,8 @@ export function setAlarm(on: boolean) {
 export function soundAvailable(): boolean {
   return ctx !== null && ctx.state === "running";
 }
+
+/** Ovoz shu tab sessiyasida allaqachon yoqilganmi (bo'limlar o'rtasida o'tganda qayta so'ralmaydi). */
+export function soundEnabled(): boolean {
+  return ctx !== null;
+}

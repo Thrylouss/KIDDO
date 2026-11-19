@@ -57,7 +57,11 @@ export type Action =
   | { type: "feature"; key: string; enabled: boolean; by: Actor }
   | { type: "meal"; childId: string; by: Actor }
   | { type: "nap"; active: boolean; by: Actor }
-  | { type: "bus"; by: Actor };
+  | { type: "bus"; by: Actor }
+  /** Tarbiyachi qurilma aniqlagan kelishni tasdiqlaydi (rasmiy davomat emas — demo ichida). */
+  | { type: "confirm_attendance"; childId: string; by: Actor }
+  /** Sanashda qurilma aniqlamagan bolani xodim o'z ko'zi bilan ko'rib tasdiqlaydi. */
+  | { type: "verify_child"; childId: string; by: Actor; note: string };
 
 export interface SafetyState {
   version: number;
@@ -73,7 +77,8 @@ export interface SafetyState {
   buffer: DeviceEvent[];
   processedKeys: string[];
   evacuation: { active: boolean; startedAt: number | null; endedAt: number | null };
-  headcount: { at: number; expected: string[]; accounted: string[]; missing: string[] } | null;
+  headcount: { at: number; expected: string[]; accounted: string[]; missing: string[]; verified: string[] } | null;
+  attendanceConfirmed: Record<string, number>;
   restrictedOverrides: Record<string, boolean>;
   features: Record<string, boolean>;
   meals: Record<string, number>;
@@ -88,7 +93,7 @@ export const BATTERY_LOW = 15;
 export const FEATURE_KEYS = ["live_map", "smart_attendance", "geofence", "sos", "pickup", "evacuation", "analytics", "v2_modules"] as const;
 
 const SEVERITY: Record<IncidentType, Severity> = {
-  restricted_zone: "critical", sos: "critical", missing: "critical", device_removed: "high", device_offline: "warning", battery_low: "warning",
+  restricted_zone: "critical", sos: "critical", missing: "high", device_removed: "high", device_offline: "warning", battery_low: "warning",
 };
 
 /** Bugungi kun 08:00 (mahalliy) — simulyatsiya soati boshlanishi. */
@@ -116,7 +121,7 @@ export function initialState(now = demoStartTime()): SafetyState {
     gatewayOnline: true, buffer: [], processedKeys: [],
     evacuation: { active: false, startedAt: null, endedAt: null }, headcount: null,
     restrictedOverrides: {}, features: Object.fromEntries(FEATURE_KEYS.map((k) => [k, true])),
-    meals: {}, nap: { active: false, startedAt: null }, busStop: 0, distance: {},
+    meals: {}, nap: { active: false, startedAt: null }, busStop: 0, distance: {}, attendanceConfirmed: {},
   };
 }
 
@@ -150,6 +155,15 @@ export function reduce(prev: SafetyState, action: Action): SafetyState {
     }
     case "tick": {
       s.now += action.ms;
+      // Davriy signal (heartbeat): ishlayotgan bilaguzuk joyida turgan bolaning joylashuvini tasdiqlab turadi.
+      // Aloqa uzilgan, yechilgan qurilma yoki internetsiz gateway — signal yo'q, joylashuv eskiradi.
+      if (s.gatewayOnline) {
+        CHILDREN.forEach((c) => {
+          const st = s.children[c.id];
+          const d = s.devices[c.deviceId];
+          if (st.updatedAt && !st.departedAt && d?.status === "online" && d.childId === c.id) { st.updatedAt = s.now; d.lastSeen = s.now; }
+        });
+      }
       s.incidents.forEach((i) => {
         if (i.status === "open" && !i.escalatedAt && s.now - i.openedAt >= ESCALATION_MS) {
           i.escalatedAt = s.now;
@@ -195,9 +209,10 @@ export function reduce(prev: SafetyState, action: Action): SafetyState {
     }
     case "headcount": {
       const expected = presentChildren(s).map((c) => c.id);
-      const accounted = expected.filter((id) => s.children[id].zoneId === "z-assembly" && !isStale(s, id));
+      // Evakuatsiyada — faqat yig'ilish nuqtasidagilar; oddiy sanashda — qurilmasi jonli aniqlanganlar
+      const accounted = expected.filter((id) => !isStale(s, id) && (!s.evacuation.active || s.children[id].zoneId === "z-assembly"));
       const missing = expected.filter((id) => !accounted.includes(id));
-      s.headcount = { at: s.now, expected, accounted, missing };
+      s.headcount = { at: s.now, expected, accounted, missing, verified: [] };
       log(s, action.by, "headcount", { expected: expected.length, accounted: accounted.length, missing: missing.length });
       missing.forEach((id) => openIncident(s, "missing", id, deviceOf(id), s.children[id].zoneId));
       // Topilgan bolalarning ochiq «missing» insidenti avtomatik yopilmaydi — xodim tasdiqlaydi
@@ -230,6 +245,29 @@ export function reduce(prev: SafetyState, action: Action): SafetyState {
     case "nap": {
       s.nap = { active: action.active, startedAt: action.active ? s.now : s.nap.startedAt };
       log(s, action.by, action.active ? "nap_started" : "nap_ended", {});
+      return s;
+    }
+    case "confirm_attendance": {
+      const st = s.children[action.childId];
+      if (!st?.arrivedAt || s.attendanceConfirmed[action.childId]) return prev;
+      s.attendanceConfirmed[action.childId] = s.now;
+      log(s, action.by, "attendance_confirmed", { child: action.childId });
+      return s;
+    }
+    case "verify_child": {
+      // Faqat «tekshirish kerak» ro'yxatidagi bola; insident avtomatik yopilmaydi (alohida yechiladi)
+      if (!s.headcount || !s.headcount.missing.includes(action.childId) || s.headcount.verified.includes(action.childId)) return prev;
+      if (action.note.trim().length < 3) return prev;
+      s.headcount.verified.push(action.childId);
+      log(s, action.by, "child_verified", { child: action.childId });
+      // Xodimning shaxsan tasdiqlashi — aniq tekshiruv bosqichi: «tekshirish kerak» hodisasi izoh bilan yopiladi
+      s.incidents.forEach((i) => {
+        if (i.type === "missing" && i.childId === action.childId && i.status !== "resolved") {
+          if (!i.ackAt) { i.ackAt = s.now; i.ackBy = action.by; }
+          i.status = "resolved"; i.resolvedAt = s.now; i.resolvedBy = action.by; i.note = action.note.trim();
+          log(s, action.by, "resolved", { incident: i.id, type: i.type });
+        }
+      });
       return s;
     }
     case "bus": {

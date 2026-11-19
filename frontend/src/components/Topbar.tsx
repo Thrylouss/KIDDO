@@ -62,6 +62,7 @@ export default function Topbar({ onMenuClick }: TopbarProps) {
     if (p.startsWith("/admin/tolovlar/")) return uz.ui.tolov_tafsiloti;
     if (p.startsWith("/admin/foydalanuvchilar/")) return uz.ui.foydalanuvchi;
     if (p.startsWith("/tarbiyachi/bolalar/")) return uz.guruh.profil;
+    if (/^\/(admin|bogcha|tarbiyachi)\/smart-safety\//.test(p)) return uz.ss.nav;
     return "KIDDO";
   }
   const title = getTitle(pathname);

@@ -33,7 +33,7 @@ export const ZONES: Zone[] = [
   { id: "z-playground", kind: "playground", restricted: false, rect: [0, 34, 42, 26] },
   { id: "z-hall", kind: "hall", restricted: false, rect: [58, 34, 42, 26] },
   { id: "z-entrance", kind: "entrance", restricted: false, rect: [44, 46, 12, 14] },
-  { id: "z-exit", kind: "exit", restricted: false, rect: [94, 26, 6, 6] },
+  { id: "z-exit", kind: "exit", restricted: false, rect: [90, 25, 10, 8] },
   { id: "z-assembly", kind: "assembly", restricted: false, rect: [2, 50, 14, 9] },
 ];
 

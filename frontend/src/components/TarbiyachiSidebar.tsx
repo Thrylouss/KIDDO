@@ -7,6 +7,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import Avatar from "@/components/ui/Avatar";
 import uz from "@/i18n";
 import { SMART_SAFETY_DEMO } from "@/lib/smart-safety/features";
+import { SmartNavGroup } from "@/components/smart-safety/SmartNav";
 
 type NavItem =
   | { href: string; label: string; icon: React.ReactNode; disabled?: false; heading?: string }
@@ -160,6 +161,8 @@ export default function TarbiyachiSidebar({ onClose }: TarbiyachiSidebarProps) {
               </div>
             );
           }
+          // Smart xavfsizlik — yig'iladigan guruh (faqat shu rol bo'limlari)
+          if (item.href === "/tarbiyachi/smart-safety") return <SmartNavGroup key={item.href} role="teacher" base="/tarbiyachi/smart-safety" onNavigate={onClose} />;
           const active = pathname === item.href || pathname.startsWith(item.href + "/");
           return (
             <div key={item.href}>

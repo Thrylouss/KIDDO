@@ -9,6 +9,7 @@ import { roleLabel } from "@/lib/roles";
 import Avatar from "@/components/ui/Avatar";
 import uz from "@/i18n";
 import { SMART_SAFETY_DEMO } from "@/lib/smart-safety/features";
+import { SmartNavGroup } from "@/components/smart-safety/SmartNav";
 
 interface ActiveItem {
   href: string;
@@ -278,6 +279,8 @@ export default function BogchaSidebar({ onClose }: BogchaSidebarProps) {
                   );
                 }
 
+                // Smart xavfsizlik — yig'iladigan guruh (faqat shu rol bo'limlari)
+                if (item.href === "/bogcha/smart-safety") return <SmartNavGroup key={item.href} role="director" base="/bogcha/smart-safety" onNavigate={onClose} />;
                 const active = pathname === item.href || pathname.startsWith(item.href + "/");
                 return (
                   <Link

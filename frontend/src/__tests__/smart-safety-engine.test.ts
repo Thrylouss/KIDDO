@@ -70,7 +70,11 @@ describe("Smart Safety simulyatori — 17 ssenariy", () => {
     const s11 = after(11);
     expect(inc(s11, "device_offline")!.childId).toBe("demo-c-5");
     expect(isStale(s11, "demo-c-5")).toBe(true);
-    expect(isStale(s11, "demo-c-4")).toBe(true);    // 2 daqiqadan eski joylashuv ham eskirgan deb belgilanadi
+    expect(isStale(s11, "demo-c-4")).toBe(false);   // ishlayotgan bilaguzuk davriy signal beradi — joylashuv tasdiqlangan
+    // Signal kelmasa (masalan, qurilma vaqti eskirgan) — 2 daqiqadan eski joylashuv eskirgan deb belgilanadi
+    const old = structuredClone(s11);
+    old.children["demo-c-4"].updatedAt = old.now - 130_000;
+    expect(isStale(old, "demo-c-4")).toBe(true);
     expect(inc(after(12), "device_removed")).toMatchObject({ severity: "high", childId: "demo-c-6" });
   });
 
@@ -139,5 +143,41 @@ describe("Smart Safety simulyatori — 17 ssenariy", () => {
     const a = runSteps(initialState(T0), SCENARIOS[0].steps, NOTE);
     const b = runSteps(initialState(T0), SCENARIOS[0].steps, NOTE);
     expect(a).toEqual(b);
+  });
+});
+
+describe("Smart Safety 2.0 — yangi amallar", () => {
+  const arrived = () => runSteps(initialState(T0), [...SCENARIOS[0].steps, ...SCENARIOS[1].steps], NOTE);
+
+  it("davomatni tasdiqlash: faqat kelgan bola, bir marta; rasmiy davomatga emas — demo holatiga", () => {
+    const s0 = initialState(T0);
+    expect(reduce(s0, { type: "confirm_attendance", childId: "demo-c-1", by: "teacher" })).toBe(s0);
+    const s1 = reduce(arrived(), { type: "confirm_attendance", childId: "demo-c-1", by: "teacher" });
+    expect(s1.attendanceConfirmed["demo-c-1"]).toBe(s1.now);
+    expect(reduce(s1, { type: "confirm_attendance", childId: "demo-c-1", by: "teacher" })).toBe(s1);
+    expect(s1.log[0].code).toBe("attendance_confirmed");
+  });
+
+  it("oddiy sanash (evakuatsiyasiz): jonli aniqlangan bolalar hisoblanadi, aloqasi yo'q — tekshirish kerak (high)", () => {
+    let s = arrived();
+    s = reduce(s, { type: "device", event: { kind: "offline", deviceId: "demo-WB-105" } });
+    s = reduce(s, { type: "headcount", by: "teacher" });
+    expect(s.headcount!.missing).toEqual(["demo-c-5"]);
+    expect(s.headcount!.accounted).toHaveLength(9);
+    expect(s.incidents.find((i) => i.type === "missing")!.severity).toBe("high");
+  });
+
+  it("xodim tasdiqlashi izoh talab qiladi va «tekshirish kerak» hodisasini audit bilan yopadi", () => {
+    let s = arrived();
+    s = reduce(s, { type: "device", event: { kind: "offline", deviceId: "demo-WB-105" } });
+    s = reduce(s, { type: "headcount", by: "teacher" });
+    expect(reduce(s, { type: "verify_child", childId: "demo-c-5", by: "teacher", note: "" })).toBe(s);
+    expect(reduce(s, { type: "verify_child", childId: "demo-c-1", by: "teacher", note: "ko'rdim" })).toBe(s);   // ro'yxatda yo'q
+    const v = reduce(s, { type: "verify_child", childId: "demo-c-5", by: "teacher", note: "Ko'rdim, joyida" });
+    expect(v.headcount!.verified).toEqual(["demo-c-5"]);
+    expect(v.incidents.find((i) => i.type === "missing")).toMatchObject({ status: "resolved", resolvedBy: "teacher", note: "Ko'rdim, joyida" });
+    expect(v.log.map((l) => l.code)).toEqual(expect.arrayContaining(["child_verified", "resolved"]));
+    // aloqa uzilgani haqidagi alohida hodisa avtomatik yopilmaydi
+    expect(v.incidents.find((i) => i.type === "device_offline")!.status).toBe("open");
   });
 });

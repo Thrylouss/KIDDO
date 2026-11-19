@@ -4,6 +4,7 @@ import PresentationPage from "@/app/smart-safety/page";
 import uz from "@/i18n/uz";
 
 vi.mock("@/lib/smart-safety/features", () => ({ SMART_SAFETY_DEMO: false }));
+vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }), usePathname: () => "/", useParams: () => ({}) }));
 
 describe("Smart Safety feature flag o'chiq", () => {
   it("taqdimot sahifasi faqat «yoqilmagan» xabarini ko'rsatadi", () => {
