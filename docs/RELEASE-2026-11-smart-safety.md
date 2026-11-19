@@ -3,6 +3,15 @@
 Holat: **taqdimot uchun to'liq ishlaydigan simulyatsiya + uskunaga tayyor backend qatlami**. Haqiqiy uskuna ulanmagan.
 Ikkala qism ham feature flag bilan **standart o'chiq** — deploy qilinganda hech narsa ko'rinmaydi va hech qanday endpoint ochilmaydi.
 
+## 2.0 — sodda va tushunarli UI (2026-11-19)
+
+- Gorizontal tablar o'rniga sidebar ichida yig'iladigan «Smart xavfsizlik» guruhi; har bo'lim alohida sahifa
+  (`/admin|bogcha|tarbiyachi/smart-safety/<bo'lim>`), breadcrumb, mobil menyu.
+- Rollar: Super Admin (5 bo'lim), rahbar (8), tarbiyachi (7) — tafsilot: [`SMART-SAFETY-V2-USABILITY.md`](SMART-SAFETY-V2-USABILITY.md).
+- Taqdimot: `/smart-safety` → `/smart-safety/<rahbar|tarbiyachi|ota-ona|admin>/<bo'lim>`; taqdimotchi paneli (9 qadamli
+  boshqariladigan taqdimot, 17 ssenariy, rol almashtirish) **faqat shu marshrutlarda**, panel sahifalarida yo'q.
+- Backend, migratsiyalar va endpointlar o'zgarmadi. Skrinshotlar: `docs/screenshots/smart-safety-v2/`.
+
 ## Feature flaglar
 
 | Flag | Joyi | Standart | Ta'siri |
