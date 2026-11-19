@@ -26,6 +26,23 @@ return [
         'enabled' => (bool) env('BILLING_ENABLED', false),
     ],
 
+    // KIDDO Smart Safety & IoT (Tez kunda). Standart — O'CHIQ: barcha endpointlar 404 qaytaradi.
+    // Vendor adapterlari rasmiy API hujjati va kalitlar bo'lmaguncha ishlamaydi (faqat interfeys).
+    'smart_safety' => [
+        'enabled'                => (bool) env('SMART_SAFETY_ENABLED', false),
+        'dedup_window_seconds'   => (int) env('SMART_SAFETY_DEDUP_SECONDS', 30),
+        'escalation_minutes'     => (int) env('SMART_SAFETY_ESCALATION_MINUTES', 3),
+        'offline_after_minutes'  => (int) env('SMART_SAFETY_OFFLINE_MINUTES', 5),
+        'battery_low_percent'    => (int) env('SMART_SAFETY_BATTERY_LOW', 15),
+        'providers' => [
+            'demo'      => ['enabled' => (bool) env('SMART_SAFETY_DEMO_PROVIDER', true)],
+            // Quyidagilar uchun endpoint/protokol taxmin qilinmaydi: rasmiy hujjat va kalitlar kelgach adapter yoziladi.
+            'blueiot'   => ['enabled' => false],
+            'mokosmart' => ['enabled' => false],
+            'minew'     => ['enabled' => false],
+        ],
+    ],
+
     // KIDDO Kids: ixtiyoriy YouTube Data API kaliti (davomiylik, embeddable, madeForKids). Bo'sh bo'lsa —
     // bepul oEmbed ishlatiladi yoki rahbar ma'lumotni qo'lda kiritadi. Kalit faqat backend'da, frontend'ga chiqmaydi.
     'youtube' => [

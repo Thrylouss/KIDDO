@@ -7,6 +7,11 @@ use App\Http\Controllers\Admin\ParentController;
 use App\Http\Controllers\Admin\TeacherController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DemoRequestController;
+use App\Http\Controllers\SmartSafety\DirectorController as SafetyDirector;
+use App\Http\Controllers\SmartSafety\IngestController as SafetyIngest;
+use App\Http\Controllers\SmartSafety\StatusController as SafetyStatus;
+use App\Http\Controllers\SmartSafety\SuperAdminController as SafetySuperAdmin;
+use App\Http\Controllers\SmartSafety\TeacherController as SafetyTeacher;
 use App\Http\Controllers\Admin\KidsContentController as AdminKidsController;
 use App\Http\Controllers\Teacher\KidsContentController as TeacherKidsController;
 use App\Http\Controllers\SuperAdmin\DemoRequestController as SuperDemoRequestController;
@@ -54,6 +59,9 @@ Route::prefix('v1')->group(function () {
 
     // Landing: «14 kunlik bepul DEMO» arizasi — autentifikatsiyasiz
     Route::post('/demo-requests', [DemoRequestController::class, 'store'])->middleware('throttle:demo-requests');
+
+    // KIDDO Smart Safety: gateway → KIDDO (Bearer gateway token, foydalanuvchi sessiyasiz). Feature flag o'chiq — 404.
+    Route::post('/iot/ingest', SafetyIngest::class)->middleware(['smart_safety', 'throttle:120,1']);
 
     // ── Mobil ilova (faqat ota-ona) ────────────────────────────────
     // Login web bilan bir xil 'login' limiter hisoblagichlarini ishlatadi
@@ -147,6 +155,36 @@ Route::prefix('v1')->group(function () {
                 Route::delete('/contents/{id}',       [AdminKidsController::class, 'destroy'])->whereNumber('id');
                 Route::get('/usage',                  [AdminKidsController::class, 'usage']);
             });
+        });
+
+        // ── KIDDO Smart Safety & IoT (feature flag: SMART_SAFETY_ENABLED; o'chiq bo'lsa hammasi 404) ──
+        Route::middleware('smart_safety')->prefix('smart-safety')->group(function () {
+            Route::get('/status', SafetyStatus::class)->middleware('role:admin,teacher,super_admin');
+
+            Route::middleware('role:admin')->prefix('director')->group(function () {
+                Route::get('/devices',                    [SafetyDirector::class, 'devices']);
+                Route::post('/devices',                   [SafetyDirector::class, 'storeDevice'])->middleware('throttle:60,1');
+                Route::delete('/devices/{id}',            [SafetyDirector::class, 'destroyDevice'])->whereNumber('id');
+                Route::put('/devices/{id}/assignment',    [SafetyDirector::class, 'assign'])->whereNumber('id');
+                Route::delete('/devices/{id}/assignment', [SafetyDirector::class, 'unassign'])->whereNumber('id');
+                Route::post('/devices/{id}/token',        [SafetyDirector::class, 'issueToken'])->whereNumber('id')->middleware('throttle:10,1');
+                Route::get('/zones',                      [SafetyDirector::class, 'zones']);
+                Route::post('/zones',                     [SafetyDirector::class, 'storeZone']);
+                Route::put('/zones/{id}',                 [SafetyDirector::class, 'updateZone'])->whereNumber('id');
+                Route::delete('/zones/{id}',              [SafetyDirector::class, 'destroyZone'])->whereNumber('id');
+                Route::get('/incidents',                  [SafetyDirector::class, 'incidents']);
+                Route::patch('/incidents/{id}/acknowledge', [SafetyDirector::class, 'acknowledge'])->whereNumber('id');
+                Route::patch('/incidents/{id}/resolve',   [SafetyDirector::class, 'resolve'])->whereNumber('id');
+                Route::get('/events',                     [SafetyDirector::class, 'events']);
+            });
+
+            Route::middleware('role:teacher')->prefix('teacher')->group(function () {
+                Route::get('/incidents',                    [SafetyTeacher::class, 'index']);
+                Route::patch('/incidents/{id}/acknowledge', [SafetyTeacher::class, 'acknowledge'])->whereNumber('id');
+                Route::patch('/incidents/{id}/resolve',     [SafetyTeacher::class, 'resolve'])->whereNumber('id');
+            });
+
+            Route::middleware('role:super_admin')->get('/super-admin/overview', [SafetySuperAdmin::class, 'overview']);
         });
 
         // ── Super Admin ────────────────────────────────────────────

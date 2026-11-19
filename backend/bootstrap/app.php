@@ -26,6 +26,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'password.changed'      => \App\Http\Middleware\EnsurePasswordChangedMiddleware::class,
             'abilities' => CheckAbilities::class,
             'billing'   => \App\Http\Middleware\EnsureBillingEnabled::class,
+            'smart_safety' => \App\Http\Middleware\EnsureSmartSafetyEnabled::class,
         ]);
 
         // Faqat API: mehmonni route('login') ga yo'naltirish yo'q (bunday route yo'q edi —
@@ -73,6 +74,10 @@ return Application::configure(basePath: dirname(__DIR__))
         // Vaqtincha to'xtatish muddati tugagan bog'chalar avtomatik faollashadi
         $schedule->command('kiddo:organizations:resume-suspended')->everyFifteenMinutes()->withoutOverlapping()->onOneServer();
         $schedule->command('kiddo:demo-requests:retry-telegram')->everyFifteenMinutes()->withoutOverlapping()->onOneServer();
+        // Smart Safety: qabul qilinmagan insidentlar eskalatsiyasi (faqat feature flag yoqilganda)
+        $schedule->call(fn () => app(\App\Services\SmartSafety\IncidentService::class)->escalateOverdue())
+            ->name('smart-safety:escalate')->everyMinute()
+            ->when(fn () => (bool) config('kiddo.smart_safety.enabled'))->withoutOverlapping()->onOneServer();
     })
     ->withExceptions(function (Exceptions $exceptions) {
         // Only report to Sentry in non-debug mode (production/staging).

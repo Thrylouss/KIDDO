@@ -28,6 +28,11 @@ class AppServiceProvider extends ServiceProvider
 
     public function register(): void
     {
+        // Smart Safety: standart bildirishnoma — faqat server jurnali (tashqi kanal ulanmagan)
+        $this->app->bind(\App\Iot\Notifications\NotificationDispatcher::class, \App\Iot\Notifications\LogNotificationDispatcher::class);
+        $this->app->singleton(\App\Iot\ProviderRegistry::class);
+        $this->app->bind(\App\Iot\Engine\EventDeduplicator::class, fn () => new \App\Iot\Engine\EventDeduplicator((int) config('kiddo.smart_safety.dedup_window_seconds', 30)));
+
         //
     }
 
