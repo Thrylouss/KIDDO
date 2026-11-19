@@ -1,0 +1,52 @@
+# KIDDO — avtomatik deploy: main'ga push bo'lganda server (95.182.118.228, /opt/kiddo) scripts/update.sh ni bajaradi.
+# Kerakli secret (GitHub → Settings → Secrets and variables → Actions):
+#   SSH_PASSWORD — serverdagi `ubuntu` foydalanuvchisi paroli   (yoki SSH_KEY — shaxsiy SSH kalit)
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - "docs/**"
+      - "**.md"
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - name: Secret tekshiruvi
+        env:
+          PW: ${{ secrets.SSH_PASSWORD }}
+          KEY: ${{ secrets.SSH_KEY }}
+        run: |
+          if [ -z "$PW" ] && [ -z "$KEY" ]; then
+            echo "::error::SSH_PASSWORD (yoki SSH_KEY) secret qo'shilmagan — deploy o'tkazib yuborildi."
+            exit 1
+          fi
+
+      - name: Serverni yangilash
+        uses: appleboy/ssh-action@v1.2.0
+        env:
+          SUDO_PW: ${{ secrets.SSH_PASSWORD }}
+        with:
+          host: 95.182.118.228
+          username: ubuntu
+          password: ${{ secrets.SSH_PASSWORD }}
+          key: ${{ secrets.SSH_KEY }}
+          port: 22
+          command_timeout: 35m
+          envs: SUDO_PW
+          script: |
+            set -e
+            CMD='cd /opt/kiddo && git pull --ff-only && bash scripts/update.sh'
+            if sudo -n true 2>/dev/null; then
+              sudo -n bash -c "$CMD"
+            else
+              printf '%s\n' "$SUDO_PW" | sudo -S -p '' bash -c "$CMD"
+            fi
