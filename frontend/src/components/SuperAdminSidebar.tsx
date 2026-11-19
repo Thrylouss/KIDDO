@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import Avatar from "@/components/ui/Avatar";
 import uz from "@/i18n";
+import { SMART_SAFETY_DEMO } from "@/lib/smart-safety/features";
 import { BILLING_ENABLED } from "@/lib/features";
 
 interface ActiveItem {
@@ -158,6 +159,15 @@ const sections: NavSection[] = [
   {
     get label() { return uz.sa_nav.tizim; },
     items: [
+      ...(SMART_SAFETY_DEMO ? [{
+        href: "/admin/smart-safety",
+        get label() { return uz.ss.nav; },
+        icon: (
+          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6l7-3z" />
+          </svg>
+        ),
+      }] : []),
       {
         href: "/admin/faollik",
         get label() { return uz.sa_nav.faollik; },

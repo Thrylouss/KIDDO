@@ -43,6 +43,9 @@ const pathLabels: Record<string, string> = {
   get "/tarbiyachi/sozlamalar"() { return uz.nav.sozlamalar; },
   get "/bogcha/kiddo-kids"() { return uz.kids.kutubxona; },
   get "/tarbiyachi/kiddo-kids"() { return uz.kids.talim_hordiq; },
+  get "/admin/smart-safety"() { return uz.ss.nav; },
+  get "/bogcha/smart-safety"() { return uz.ss.nav; },
+  get "/tarbiyachi/smart-safety"() { return uz.ss.nav; },
 };
 
 interface TopbarProps {

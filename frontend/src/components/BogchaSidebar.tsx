@@ -8,6 +8,7 @@ import { impersonation } from "@/lib/api";
 import { roleLabel } from "@/lib/roles";
 import Avatar from "@/components/ui/Avatar";
 import uz from "@/i18n";
+import { SMART_SAFETY_DEMO } from "@/lib/smart-safety/features";
 
 interface ActiveItem {
   href: string;
@@ -156,6 +157,15 @@ const sections: NavSection[] = [
           </svg>
         ),
       },
+      ...(SMART_SAFETY_DEMO ? [{
+        href: "/bogcha/smart-safety",
+        get label() { return uz.ss.nav; },
+        icon: (
+          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6l7-3z" />
+          </svg>
+        ),
+      }] : []),
     ],
   },
   {
